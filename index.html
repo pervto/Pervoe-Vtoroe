@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Доставка еды</title>
-  <link rel="stylesheet" href="style.css?v=13" />
+  <link rel="stylesheet" href="style.css?v=14" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -26,7 +26,10 @@
 
   <main class="container">
     <section id="menu-grid" class="menu-grid">
-      <p class="status">Загружаем меню...</p>
+      <div class="ios-loader-wrap" aria-label="Загрузка меню">
+        <div class="ios-loader"></div>
+        <p class="status">Загружаем меню...</p>
+      </div>
     </section>
   </main>
 
@@ -79,6 +82,7 @@
         <input id="user-name" type="text" placeholder="Ваше имя" required />
         <input id="user-phone" type="tel" placeholder="Ваш телефон" required />
         <input id="user-address" type="text" placeholder="Адрес доставки" required />
+        <textarea id="order-comment" placeholder="Комментарий к заказу (необязательно)"></textarea>
         <button class="btn-order" type="submit">Оформить в WhatsApp</button>
       </form>
     </div>
@@ -92,8 +96,8 @@
     </div>
   </div>
 
-  <script src="config.js?v=13"></script>
-  <script src="script.js?v=14"></script>
+  <script src="config.js?v=14"></script>
+  <script src="script.js?v=15"></script>
 </body>
 </html>
 

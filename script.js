@@ -325,11 +325,12 @@ function renderCart() {
   updateCartButton();
 }
 
-function createWhatsAppMessage(userName, userPhone, userAddress) {
+function createWhatsAppMessage(userName, userPhone, userAddress, orderComment) {
   const { finalTotal } = updateTotals();
   const orderLines = cart.map((item) => `- ${item.name} x${item.qty} \"${money(item.price * item.qty)}\"`).join("\n");
   const promoText = promo.code ? `\nПромокод: ${promo.code}` : "";
-  return `Здравствуйте!\nХочу оформить заказ.\nИмя: ${userName}\nТелефон: ${userPhone}\nАдрес: ${userAddress}${promoText}\nЗаказ:\n${orderLines}\n\nИтого: ${money(finalTotal)}`;
+  const commentText = orderComment ? `\nКомментарий: ${orderComment}` : "";
+  return `Здравствуйте!\nХочу оформить заказ.\nИмя: ${userName}\nТелефон: ${userPhone}\nАдрес: ${userAddress}${commentText}${promoText}\nЗаказ:\n${orderLines}\n\nИтого: ${money(finalTotal)}`;
 }
 
 function cleanPhone(phone) {
@@ -345,6 +346,7 @@ function applyHeaderScrollState() {
 
 async function loadMenu() {
   const grid = document.getElementById("menu-grid");
+  grid.innerHTML = '<div class="ios-loader-wrap"><div class="ios-loader"></div><p class="status">Загружаем меню...</p></div>';
   try {
     const response = await fetch(CONFIG.csvUrl, { redirect: "follow" });
     if (!response.ok) throw new Error(`Не удалось загрузить CSV (код ${response.status})`);
@@ -435,9 +437,10 @@ document.getElementById("order-form").addEventListener("submit", (e) => {
   const userName = document.getElementById("user-name").value.trim();
   const userPhone = document.getElementById("user-phone").value.trim();
   const userAddress = document.getElementById("user-address").value.trim();
+  const orderComment = document.getElementById("order-comment").value.trim();
   if (!userName || !userPhone || !userAddress) return alert("Заполните имя, телефон и адрес.");
 
-  const message = createWhatsAppMessage(userName, userPhone, userAddress);
+  const message = createWhatsAppMessage(userName, userPhone, userAddress, orderComment);
   const encoded = encodeURIComponent(message);
   const whatsappNumber = cleanPhone(CONFIG.whatsappNumber);
   window.open(`https://wa.me/${whatsappNumber}?text=${encoded}`, "_blank");
