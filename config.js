@@ -1,6 +1,6 @@
 ﻿const CONFIG = {
   // Номер WhatsApp без символа +
-  whatsappNumber: "77064069814",
+  whatsappNumber: "77785574506",
 
   // Публичная CSV-ссылка из Google Sheets
   // Пример:
