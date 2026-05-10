@@ -467,3 +467,6 @@ if (promo.code) {
   document.getElementById("promo-hint").textContent = "Промокод применен";
 }
 applyHeaderScrollState();
+
+
+
