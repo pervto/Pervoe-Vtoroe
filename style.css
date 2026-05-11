@@ -63,10 +63,10 @@ main.container {
   padding: 16px;
   border-radius: 16px;
   color: #fff;
-  max-height: 280px;
+  max-height: 320px;
   overflow: hidden;
   transform-origin: top;
-  transition: opacity .22s ease, transform .22s ease;
+  transition: max-height .28s ease, margin .28s ease, padding .28s ease, opacity .22s ease, transform .22s ease, border-color .22s ease;
   background: linear-gradient(130deg, rgba(14,14,14,.95) 0%, rgba(30,30,30,.92) 55%, rgba(18,18,18,.95) 100%);
   border: 1px solid rgba(255,255,255,.08);
   position: relative;
@@ -523,6 +523,11 @@ main.container {
 @keyframes iosSpin { to { transform:rotate(360deg); } }
 
 .header.scrolled .hero {
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-color: transparent;
   opacity: 0;
   transform: translateY(-10px);
   pointer-events: none;
