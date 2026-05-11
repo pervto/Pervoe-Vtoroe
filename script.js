@@ -337,16 +337,7 @@ function cleanPhone(phone) {
 }
 
 function applyHeaderScrollState() {
-  const header = document.getElementById("site-header");
-  if (!header) return;
-  const hasSearch = searchQuery.trim().length > 0;
-  header.classList.toggle("search-active", hasSearch);
-  if (hasSearch) return;
-  const wasScrolled = header.classList.contains("scrolled");
-  const enterAt = 160;
-  const leaveAt = 8;
-  if (!wasScrolled && window.scrollY > enterAt) header.classList.add("scrolled");
-  if (wasScrolled && window.scrollY < leaveAt) header.classList.remove("scrolled");
+  // Верхняя плашка всегда статична: без скрытий и анимаций скролла.
 }
 
 async function loadMenu() {
@@ -456,13 +447,6 @@ window.addEventListener("scroll", () => {
   const topBtn = document.getElementById("to-top");
   if (window.scrollY > 380) topBtn.classList.add("show");
   else topBtn.classList.remove("show");
-  if (!window.__headerRaf) {
-    window.__headerRaf = true;
-    requestAnimationFrame(() => {
-      applyHeaderScrollState();
-      window.__headerRaf = false;
-    });
-  }
 }, { passive: true });
 
 document.getElementById("order-form").addEventListener("submit", (e) => {
