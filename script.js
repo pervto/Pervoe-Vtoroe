@@ -339,9 +339,11 @@ function cleanPhone(phone) {
 function applyHeaderScrollState() {
   const header = document.getElementById("site-header");
   if (!header) return;
-  const collapseDistance = 220;
-  const progress = Math.max(0, Math.min(window.scrollY / collapseDistance, 1));
-  header.style.setProperty("--hero-collapse", progress.toFixed(3));
+  const wasScrolled = header.classList.contains("scrolled");
+  const enterAt = 120;
+  const leaveAt = 70;
+  if (!wasScrolled && window.scrollY > enterAt) header.classList.add("scrolled");
+  if (wasScrolled && window.scrollY < leaveAt) header.classList.remove("scrolled");
 }
 
 async function loadMenu() {
@@ -445,13 +447,7 @@ window.addEventListener("scroll", () => {
   const topBtn = document.getElementById("to-top");
   if (window.scrollY > 380) topBtn.classList.add("show");
   else topBtn.classList.remove("show");
-  if (!window.__heroTicking) {
-    window.__heroTicking = true;
-    window.requestAnimationFrame(() => {
-      applyHeaderScrollState();
-      window.__heroTicking = false;
-    });
-  }
+  applyHeaderScrollState();
 }, { passive: true });
 
 document.getElementById("order-form").addEventListener("submit", (e) => {

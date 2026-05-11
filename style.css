@@ -4,7 +4,6 @@
   --white: #ffffff;
   --soft: #f6f6f6;
   --line: #e8e8e8;
-  --hero-collapse: 0;
 }
 
 * { box-sizing: border-box; }
@@ -60,22 +59,21 @@ main.container {
 }
 
 .hero {
-  margin-top: calc(10px * (1 - var(--hero-collapse)));
-  padding: calc(16px * (1 - var(--hero-collapse)));
+  margin-top: 10px;
+  padding: 16px;
   border-radius: 16px;
   color: #fff;
-  max-height: calc(280px * (1 - var(--hero-collapse)));
+  max-height: 280px;
   overflow: hidden;
   transform-origin: top;
-  transition: none;
+  transition: max-height .26s ease, opacity .26s ease, transform .26s ease, margin .26s ease, padding .26s ease;
   background: linear-gradient(130deg, rgba(14,14,14,.95) 0%, rgba(30,30,30,.92) 55%, rgba(18,18,18,.95) 100%);
   border: 1px solid rgba(255,255,255,.08);
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  opacity: calc(1 - var(--hero-collapse));
-  transform: translateY(calc(-8px * var(--hero-collapse))) scale(calc(1 - (0.04 * var(--hero-collapse))));
-  will-change: max-height, opacity, transform, margin, padding;
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 .hero::after {
   content: "";
@@ -364,15 +362,15 @@ main.container {
   border-radius: 999px;
   background: var(--red);
   color: #fff;
-  padding: 10px 12px 10px 34px;
-  font-size: 22px;
+  padding: 8px 8px 8px 18px;
+  font-size: 18px;
   font-weight: 800;
   display: inline-flex;
   align-items: center;
-  gap: 16px;
-  box-shadow: none;
-  min-width: 560px;
-  min-height: 150px;
+  gap: 12px;
+  box-shadow: 0 10px 24px rgba(227, 27, 35, .28);
+  min-width: 210px;
+  min-height: 62px;
   justify-content: space-between;
   opacity: 0;
   visibility: hidden;
@@ -401,19 +399,20 @@ main.container {
 .toast.show { opacity:1; transform:translate(-50%,0); }
 
 .cart-count {
-  width: 340px;
-  height: 128px;
-  border-radius: 64px;
+  min-width: 42px;
+  height: 42px;
+  border-radius: 999px;
   background: var(--black);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 78px;
+  font-size: 20px;
   font-weight: 900;
   line-height: 1;
   padding: 0;
   flex: 0 0 auto;
+  padding: 0 12px;
 }
 
 .modal { display:none; position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.45); padding:12px; overscroll-behavior:contain; min-height:100dvh; }
@@ -499,17 +498,17 @@ main.container {
   .food-title { font-size: 24px; }
   .food-price { font-size: 33px; }
   .cart-button {
-    min-width: 260px;
-    min-height: 72px;
-    padding: 6px 8px 6px 18px;
-    gap: 10px;
-    font-size: 20px;
+    min-width: 188px;
+    min-height: 56px;
+    padding: 7px 7px 7px 14px;
+    gap: 8px;
+    font-size: 16px;
   }
   .cart-count {
-    width: 120px;
-    height: 60px;
-    border-radius: 30px;
-    font-size: 44px;
+    min-width: 36px;
+    height: 36px;
+    font-size: 16px;
+    padding: 0 10px;
   }
   .modal { padding:0; display:none; }
   .modal.show { display:flex; align-items:flex-end; }
@@ -522,6 +521,15 @@ main.container {
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 @keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 @keyframes iosSpin { to { transform:rotate(360deg); } }
+
+.header.scrolled .hero {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-8px);
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
 
 
 
