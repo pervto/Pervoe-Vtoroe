@@ -1,9 +1,10 @@
-﻿:root {
+:root {
   --red: #e31b23;
   --black: #111111;
   --white: #ffffff;
   --soft: #f6f6f6;
   --line: #e8e8e8;
+  --hero-collapse: 0;
 }
 
 * { box-sizing: border-box; }
@@ -59,21 +60,23 @@ main.container {
 }
 
 .hero {
-  margin-top: 10px;
-  padding: 16px;
+  margin-top: calc(10px * (1 - var(--hero-collapse)));
+  padding: calc(16px * (1 - var(--hero-collapse)));
   border-radius: 16px;
   color: #fff;
-  max-height: 280px;
+  max-height: calc(280px * (1 - var(--hero-collapse)));
   overflow: hidden;
   transform-origin: top;
-  transition: max-height .48s ease, opacity .35s ease, padding .35s ease, margin .35s ease, transform .35s ease;
+  transition: none;
   background: linear-gradient(130deg, rgba(14,14,14,.95) 0%, rgba(30,30,30,.92) 55%, rgba(18,18,18,.95) 100%);
   border: 1px solid rgba(255,255,255,.08);
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  opacity: calc(1 - var(--hero-collapse));
+  transform: translateY(calc(-8px * var(--hero-collapse))) scale(calc(1 - (0.04 * var(--hero-collapse))));
+  will-change: max-height, opacity, transform, margin, padding;
 }
-
 .hero::after {
   content: "";
   position: absolute;
@@ -331,12 +334,14 @@ main.container {
   text-decoration: none;
   border-bottom: 1px dashed rgba(255,255,255,.35);
   padding-bottom: 2px;
-  font-size: 30px;
+  font-size: 18px;
+  line-height: 1.35;
 }
 
 .review-link {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   color: #fff;
   text-decoration: none;
@@ -344,9 +349,10 @@ main.container {
   background: var(--red);
   padding: 11px 16px;
   border-radius: 12px;
+  text-align: center;
 }
 
-.logo-2gis { width: 24px; height: 24px; border-radius: 6px; flex: 0 0 auto; object-fit: cover; }
+.logo-2gis { width: 48px; height: 48px; border-radius: 8px; flex: 0 0 auto; object-fit: cover; }
 
 .cart-button {
   position: fixed;
@@ -358,14 +364,15 @@ main.container {
   border-radius: 999px;
   background: var(--red);
   color: #fff;
-  padding: 10px 10px 10px 26px;
-  font-size: 18px;
+  padding: 10px 12px 10px 34px;
+  font-size: 22px;
   font-weight: 800;
   display: inline-flex;
   align-items: center;
   gap: 16px;
   box-shadow: none;
-  min-width: 240px;
+  min-width: 560px;
+  min-height: 150px;
   justify-content: space-between;
   opacity: 0;
   visibility: hidden;
@@ -394,17 +401,19 @@ main.container {
 .toast.show { opacity:1; transform:translate(-50%,0); }
 
 .cart-count {
-  min-width: 86px;
-  min-height: 64px;
-  border-radius: 999px;
+  width: 340px;
+  height: 128px;
+  border-radius: 64px;
   background: var(--black);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 56px;
+  text-align: center;
+  font-size: 78px;
   font-weight: 900;
   line-height: 1;
-  padding: 0 16px;
+  padding: 0;
+  flex: 0 0 auto;
 }
 
 .modal { display:none; position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.45); padding:12px; overscroll-behavior:contain; min-height:100dvh; }
@@ -490,16 +499,17 @@ main.container {
   .food-title { font-size: 24px; }
   .food-price { font-size: 33px; }
   .cart-button {
-    min-width: 142px;
-    padding: 8px 8px 8px 16px;
+    min-width: 260px;
+    min-height: 72px;
+    padding: 6px 8px 6px 18px;
     gap: 10px;
-    font-size: 15px;
+    font-size: 20px;
   }
   .cart-count {
-    min-width: 44px;
-    min-height: 44px;
-    font-size: 24px;
-    padding: 0 10px;
+    width: 120px;
+    height: 60px;
+    border-radius: 30px;
+    font-size: 44px;
   }
   .modal { padding:0; display:none; }
   .modal.show { display:flex; align-items:flex-end; }
@@ -513,5 +523,8 @@ main.container {
 @keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 @keyframes iosSpin { to { transform:rotate(360deg); } }
 
-.header.scrolled .hero { max-height:0; opacity:0; padding-top:0; padding-bottom:0; margin-top:0; transform:translateY(-6px); }
-.header.scrolled .brand-logo { transform:scale(.95); }
+
+
+
+
+

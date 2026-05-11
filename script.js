@@ -339,8 +339,9 @@ function cleanPhone(phone) {
 function applyHeaderScrollState() {
   const header = document.getElementById("site-header");
   if (!header) return;
-  if (window.scrollY > 120) header.classList.add("scrolled");
-  else header.classList.remove("scrolled");
+  const collapseDistance = 220;
+  const progress = Math.max(0, Math.min(window.scrollY / collapseDistance, 1));
+  header.style.setProperty("--hero-collapse", progress.toFixed(3));
 }
 
 async function loadMenu() {
@@ -444,8 +445,14 @@ window.addEventListener("scroll", () => {
   const topBtn = document.getElementById("to-top");
   if (window.scrollY > 380) topBtn.classList.add("show");
   else topBtn.classList.remove("show");
-  applyHeaderScrollState();
-});
+  if (!window.__heroTicking) {
+    window.__heroTicking = true;
+    window.requestAnimationFrame(() => {
+      applyHeaderScrollState();
+      window.__heroTicking = false;
+    });
+  }
+}, { passive: true });
 
 document.getElementById("order-form").addEventListener("submit", (e) => {
   e.preventDefault();
