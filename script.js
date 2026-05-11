@@ -339,6 +339,9 @@ function cleanPhone(phone) {
 function applyHeaderScrollState() {
   const header = document.getElementById("site-header");
   if (!header) return;
+  const hasSearch = searchQuery.trim().length > 0;
+  header.classList.toggle("search-active", hasSearch);
+  if (hasSearch) return;
   const wasScrolled = header.classList.contains("scrolled");
   const enterAt = 160;
   const leaveAt = 8;
@@ -435,6 +438,7 @@ if (searchInput && searchClear) {
   searchInput.addEventListener("input", () => {
     searchQuery = searchInput.value.trim();
     updateSearchClearVisibility();
+    applyHeaderScrollState();
     renderMenu();
   });
 
@@ -442,6 +446,7 @@ if (searchInput && searchClear) {
     searchInput.value = "";
     searchQuery = "";
     updateSearchClearVisibility();
+    applyHeaderScrollState();
     renderMenu();
     searchInput.focus();
   });

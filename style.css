@@ -66,7 +66,7 @@ main.container {
   max-height: 320px;
   overflow: hidden;
   transform-origin: top;
-  transition: max-height .28s ease, margin .28s ease, padding .28s ease, opacity .22s ease, transform .22s ease, border-color .22s ease;
+  transition: max-height .42s cubic-bezier(.22, .61, .36, 1), margin .42s cubic-bezier(.22, .61, .36, 1), padding .42s cubic-bezier(.22, .61, .36, 1), opacity .3s ease, transform .3s ease, border-color .24s ease;
   background: linear-gradient(130deg, rgba(14,14,14,.95) 0%, rgba(30,30,30,.92) 55%, rgba(18,18,18,.95) 100%);
   border: 1px solid rgba(255,255,255,.08);
   position: relative;
@@ -255,7 +255,7 @@ main.container {
 .food-meta { margin:6px 0 0; color:#5e5e5e; font-size: 15px; }
 
 .food-footer { margin-top:14px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
-.food-price { font-size: 35px; font-weight: 900; line-height: 1; }
+.food-price { font-size: 32px; font-weight: 900; line-height: 1; }
 
 .btn-add {
   border: none;
@@ -391,7 +391,7 @@ main.container {
 }
 .cart-label { line-height: 1; }
 
-.to-top { position:fixed; right:14px; bottom:78px; z-index:39; width:48px; height:48px; border:none; border-radius:999px; background:#fff; color:#111; font-size:24px; font-weight:900; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,.15); opacity:0; pointer-events:none; transform:translateY(8px); transition:.2s ease; display:flex; align-items:center; justify-content:center; }
+.to-top { position:fixed; right:14px; bottom:calc(18px + env(safe-area-inset-bottom)); z-index:39; width:62px; height:62px; border:none; border-radius:999px; background:#fff; color:#111; font-size:24px; font-weight:900; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,.15); opacity:0; pointer-events:none; transform:translateY(8px); transition:.2s ease; display:flex; align-items:center; justify-content:center; }
 .to-top.show { opacity:1; pointer-events:auto; transform:translateY(0); }
 .to-top .material-symbols-outlined { font-size:28px; line-height:1; display:block; }
 
@@ -496,7 +496,7 @@ main.container {
   .hero-subtitle { font-size: 15px; }
   .search-wrap { margin-top: 10px; }
   .food-title { font-size: 24px; }
-  .food-price { font-size: 33px; }
+  .food-price { font-size: 30px; }
   .cart-button {
     min-width: 156px;
     min-height: 56px;
@@ -509,6 +509,10 @@ main.container {
     height: 36px;
     font-size: 16px;
     padding: 0 10px;
+  }
+  .to-top {
+    width: 56px;
+    height: 56px;
   }
   .modal { padding:0; display:none; }
   .modal.show { display:flex; align-items:flex-end; }
@@ -523,6 +527,17 @@ main.container {
 @keyframes iosSpin { to { transform:rotate(360deg); } }
 
 .header.scrolled .hero {
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-color: transparent;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+.header.search-active .hero {
   max-height: 0;
   margin-top: 0;
   padding-top: 0;
