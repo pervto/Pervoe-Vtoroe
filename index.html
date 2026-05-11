@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Manrope:wght@700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=17" />
+  <link rel="stylesheet" href="style.css?v=18" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -63,7 +63,7 @@
   </button>
 
   <button id="cart-button" class="cart-button" type="button">
-    <span>Корзина</span>
+    <span class="cart-label">Корзина</span>
     <span id="cart-count" class="cart-count">0</span>
   </button>
 
@@ -97,7 +97,14 @@
         <input id="user-phone" type="tel" placeholder="Ваш телефон" required />
         <input id="user-address" type="text" placeholder="Адрес доставки" required />
         <textarea id="order-comment" placeholder="Комментарий к заказу (необязательно)"></textarea>
-        <button class="btn-order" type="submit">Оформить в WhatsApp</button>
+        <button class="btn-order" type="submit">
+          <span class="wa-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img" focusable="false">
+              <path fill="currentColor" d="M12 2a10 10 0 0 0-8.64 15.03L2 22l5.09-1.33A10 10 0 1 0 12 2Zm0 18.18a8.15 8.15 0 0 1-4.15-1.14l-.3-.18-3.02.79.8-2.94-.2-.3A8.17 8.17 0 1 1 12 20.18Zm4.48-5.82c-.24-.12-1.42-.7-1.64-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1-.37-1.91-1.18-.7-.63-1.17-1.41-1.31-1.65-.14-.24-.01-.36.1-.48.1-.1.24-.26.36-.39.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.29-.74-1.77-.2-.48-.4-.4-.54-.41h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.31.98 2.47c.12.16 1.7 2.6 4.12 3.65.58.25 1.03.4 1.38.51.58.18 1.11.16 1.53.1.47-.07 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28Z"/>
+            </svg>
+          </span>
+          <span>Оформить в WhatsApp</span>
+        </button>
       </form>
     </div>
   </div>
@@ -110,8 +117,8 @@
     </div>
   </div>
 
-  <script src="config.js?v=17"></script>
-  <script src="script.js?v=17"></script>
+  <script src="config.js?v=18"></script>
+  <script src="script.js?v=18"></script>
 </body>
 </html>
 

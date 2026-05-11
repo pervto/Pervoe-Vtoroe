@@ -7,8 +7,6 @@ let promo = { code: "", discount: 0 };
 
 const CART_KEY = "pervoe-vtoroe-cart";
 const PROMO_KEY = "pervoe-vtoroe-promo";
-const placeholderImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500'%3E%3Crect width='100%25' height='100%25' fill='%23f2f2f2'/%3E%3Ctext x='50%25' y='50%25' fill='%23888888' font-size='30' text-anchor='middle' dominant-baseline='middle'%3EНет фото%3C/text%3E%3C/svg%3E";
-
 function parseCsvLine(line) {
   const result = [];
   let current = "";
@@ -129,11 +127,13 @@ function getCartQty(name) {
 function openCart() {
   document.getElementById("cart-modal").classList.add("show");
   document.body.classList.add("no-scroll");
+  document.getElementById("cart-button").classList.add("is-hidden");
 }
 
 function closeCart() {
   document.getElementById("cart-modal").classList.remove("show");
   document.body.classList.remove("no-scroll");
+  document.getElementById("cart-button").classList.remove("is-hidden");
 }
 
 function showThanksModal() {
@@ -151,7 +151,8 @@ function updateCartButton() {
   const btn = document.getElementById("cart-button");
   const countEl = document.getElementById("cart-count");
   countEl.textContent = count;
-  btn.style.display = count > 0 ? "inline-flex" : "none";
+  if (count > 0) btn.classList.add("visible");
+  else btn.classList.remove("visible");
 }
 
 function updateTotals() {
@@ -279,8 +280,12 @@ function renderMenu() {
       if (item.weight) metaParts.push(item.weight);
       if (item.calories) metaParts.push(`${item.calories} ккал`);
       const metaHtml = metaParts.length ? `<p class="food-meta">${metaParts.join(" • ")}</p>` : "";
+      const photoUrl = normalizePhotoUrl(item.photo);
+      const imageHtml = photoUrl
+        ? `<img class="food-image" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend','<div class=&quot;food-image-placeholder&quot;>Фотография блюда скоро появится</div>');" />`
+        : `<div class="food-image-placeholder">Фотография блюда скоро появится</div>`;
 
-      return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" style="animation-delay:${index * 0.06}s"><img class="food-image" src="${escapeHtml(normalizePhotoUrl(item.photo) || placeholderImage)}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.src='${placeholderImage}'" /><div><h3 class="food-title">${item.name}</h3>${categoryHtml}${metaHtml}</div><div class="food-footer"><div class="food-price">${money(item.price)}</div><div class="item-controls">${buildControlsHtml(item.name)}</div></div></article>`;
+      return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" style="animation-delay:${index * 0.06}s">${imageHtml}<div><h3 class="food-title">${item.name}</h3>${categoryHtml}${metaHtml}</div><div class="food-footer"><div class="food-price">${money(item.price)}</div><div class="item-controls">${buildControlsHtml(item.name)}</div></div></article>`;
     })
     .join("");
 
