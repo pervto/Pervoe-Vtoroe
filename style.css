@@ -199,8 +199,8 @@ main.container {
 }
 
 .category-btn {
-  border: 1px solid rgba(255,255,255,.24);
-  background: rgba(0, 0, 0, .78);
+  border: 1px solid rgba(255,255,255,.20);
+  background: rgba(0, 0, 0, .92);
   color: #f5f5f5;
   padding: 9px 14px;
   border-radius: 999px;
@@ -213,11 +213,11 @@ main.container {
   -webkit-backdrop-filter: blur(8px);
 }
 
-.category-btn:hover { transform: translateY(-1px); background: rgba(0, 0, 0, .88); }
+.category-btn:hover { transform: translateY(-1px); background: rgba(0, 0, 0, .96); }
 .category-btn.active {
-  background: rgba(120, 120, 120, .72);
+  background: rgba(34, 34, 34, .92);
   color: #ffffff;
-  border-color: rgba(255,255,255,.38);
+  border-color: rgba(255,255,255,.26);
 }
 
 .menu-grid { display: grid; grid-template-columns: 1fr; gap: 14px; padding-bottom: 98px; }
