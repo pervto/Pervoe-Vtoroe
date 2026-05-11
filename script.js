@@ -4,6 +4,7 @@ let activeCategory = "Все";
 let searchQuery = "";
 let toastTimer = null;
 let promo = { code: "", discount: 0 };
+let heroSettleTimer = null;
 
 const CART_KEY = "pervoe-vtoroe-cart";
 const PROMO_KEY = "pervoe-vtoroe-promo";
@@ -352,6 +353,17 @@ function applyHeaderScrollState() {
   header.style.setProperty("--hero-progress", progress.toFixed(3));
 }
 
+function settleHeaderState() {
+  const header = document.getElementById("site-header");
+  if (!header) return;
+  if (searchQuery.trim().length > 0) {
+    header.style.setProperty("--hero-progress", "1");
+    return;
+  }
+  const current = Number.parseFloat(getComputedStyle(header).getPropertyValue("--hero-progress")) || 0;
+  header.style.setProperty("--hero-progress", current >= 0.5 ? "1" : "0");
+}
+
 async function loadMenu() {
   const grid = document.getElementById("menu-grid");
   document.body.classList.add("menu-loading");
@@ -466,6 +478,8 @@ window.addEventListener("scroll", () => {
       window.__heroTicking = false;
     });
   }
+  if (heroSettleTimer) clearTimeout(heroSettleTimer);
+  heroSettleTimer = setTimeout(settleHeaderState, 90);
 }, { passive: true });
 
 document.getElementById("order-form").addEventListener("submit", (e) => {
