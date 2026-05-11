@@ -337,7 +337,19 @@ function cleanPhone(phone) {
 }
 
 function applyHeaderScrollState() {
-  // Верхняя плашка всегда статична: без скрытий и анимаций скролла.
+  const header = document.getElementById("site-header");
+  const hero = document.getElementById("hero");
+  if (!header || !hero) return;
+
+  const searchActive = searchQuery.trim().length > 0;
+  if (searchActive) {
+    header.style.setProperty("--hero-progress", "1");
+    return;
+  }
+
+  const range = Math.max(hero.offsetHeight + 24, 220);
+  const progress = Math.max(0, Math.min(window.scrollY / range, 1));
+  header.style.setProperty("--hero-progress", progress.toFixed(3));
 }
 
 async function loadMenu() {
@@ -447,6 +459,13 @@ window.addEventListener("scroll", () => {
   const topBtn = document.getElementById("to-top");
   if (window.scrollY > 380) topBtn.classList.add("show");
   else topBtn.classList.remove("show");
+  if (!window.__heroTicking) {
+    window.__heroTicking = true;
+    requestAnimationFrame(() => {
+      applyHeaderScrollState();
+      window.__heroTicking = false;
+    });
+  }
 }, { passive: true });
 
 document.getElementById("order-form").addEventListener("submit", (e) => {
