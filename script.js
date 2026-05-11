@@ -1,6 +1,7 @@
 ﻿let menuData = [];
 let cart = [];
 let activeCategory = "Все";
+let searchQuery = "";
 let toastTimer = null;
 let promo = { code: "", discount: 0 };
 
@@ -69,35 +70,24 @@ function showToast(text) {
   toastTimer = setTimeout(() => toast.classList.remove("show"), 1400);
 }
 
-function saveCart() {
-  localStorage.setItem(CART_KEY, JSON.stringify(cart));
-}
-
+function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
 function loadCart() {
   try {
     const raw = localStorage.getItem(CART_KEY);
     if (!raw) return;
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      cart = parsed.filter((item) => item && item.name && Number(item.qty) > 0);
-    }
+    if (Array.isArray(parsed)) cart = parsed.filter((item) => item && item.name && Number(item.qty) > 0);
   } catch {
     cart = [];
   }
 }
-
-function savePromo() {
-  localStorage.setItem(PROMO_KEY, JSON.stringify(promo));
-}
-
+function savePromo() { localStorage.setItem(PROMO_KEY, JSON.stringify(promo)); }
 function loadPromo() {
   try {
     const raw = localStorage.getItem(PROMO_KEY);
     if (!raw) return;
     const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed.discount === "number") {
-      promo = parsed;
-    }
+    if (parsed && typeof parsed.discount === "number") promo = parsed;
   } catch {
     promo = { code: "", discount: 0 };
   }
@@ -167,19 +157,22 @@ function updateCartButton() {
 function updateTotals() {
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
   let discountAmount = 0;
-  if (promo.discount > 0 && promo.discount < 100) {
-    discountAmount = Math.round(subtotal * promo.discount / 100);
-  } else {
-    discountAmount = promo.discount;
-  }
+  if (promo.discount > 0 && promo.discount < 100) discountAmount = Math.round(subtotal * promo.discount / 100);
+  else discountAmount = promo.discount;
   discountAmount = Math.min(discountAmount, subtotal);
   const finalTotal = subtotal - discountAmount;
 
   document.getElementById("subtotal-amount").textContent = money(subtotal);
   document.getElementById("discount-amount").textContent = money(discountAmount);
   document.getElementById("total-amount").textContent = Number(finalTotal).toLocaleString("ru-RU");
-
   return { finalTotal };
+}
+
+function updateSearchClearVisibility() {
+  const clearBtn = document.getElementById("search-clear");
+  if (!clearBtn) return;
+  if (searchQuery.trim()) clearBtn.classList.add("show");
+  else clearBtn.classList.remove("show");
 }
 
 function updateMenuControls() {
@@ -271,10 +264,11 @@ function bindMenuControlEvents() {
 
 function renderMenu() {
   const grid = document.getElementById("menu-grid");
-  const filtered = activeCategory === "Все" ? menuData : menuData.filter((item) => item.category === activeCategory);
+  const byCategory = activeCategory === "Все" ? menuData : menuData.filter((item) => item.category === activeCategory);
+  const filtered = byCategory.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   if (filtered.length === 0) {
-    grid.innerHTML = '<p class="status">В этой категории пока нет блюд.</p>';
+    grid.innerHTML = '<p class="status">Ничего не найдено. Попробуйте другое название.</p>';
     return;
   }
 
@@ -423,6 +417,24 @@ document.getElementById("promo-code").addEventListener("keydown", (e) => {
   }
 });
 
+const searchInput = document.getElementById("menu-search");
+const searchClear = document.getElementById("search-clear");
+if (searchInput && searchClear) {
+  searchInput.addEventListener("input", () => {
+    searchQuery = searchInput.value.trim();
+    updateSearchClearVisibility();
+    renderMenu();
+  });
+
+  searchClear.addEventListener("click", () => {
+    searchInput.value = "";
+    searchQuery = "";
+    updateSearchClearVisibility();
+    renderMenu();
+    searchInput.focus();
+  });
+}
+
 window.addEventListener("scroll", () => {
   const topBtn = document.getElementById("to-top");
   if (window.scrollY > 380) topBtn.classList.add("show");
@@ -462,11 +474,9 @@ loadCart();
 loadPromo();
 loadMenu();
 renderCart();
+updateSearchClearVisibility();
 if (promo.code) {
   document.getElementById("promo-code").value = promo.code;
   document.getElementById("promo-hint").textContent = "Промокод применен";
 }
 applyHeaderScrollState();
-
-
-
