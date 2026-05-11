@@ -340,14 +340,15 @@ function applyHeaderScrollState() {
   const header = document.getElementById("site-header");
   if (!header) return;
   const wasScrolled = header.classList.contains("scrolled");
-  const enterAt = 120;
-  const leaveAt = 70;
+  const enterAt = 240;
+  const leaveAt = 40;
   if (!wasScrolled && window.scrollY > enterAt) header.classList.add("scrolled");
   if (wasScrolled && window.scrollY < leaveAt) header.classList.remove("scrolled");
 }
 
 async function loadMenu() {
   const grid = document.getElementById("menu-grid");
+  document.body.classList.add("menu-loading");
   grid.innerHTML = '<div class="ios-loader-wrap"><div class="ios-loader"></div><p class="status">Загружаем меню...</p></div>';
   try {
     const response = await fetch(CONFIG.csvUrl, { redirect: "follow" });
@@ -407,6 +408,9 @@ async function loadMenu() {
     renderMenu();
   } catch (error) {
     grid.innerHTML = `<p class="status">Ошибка загрузки меню: ${error.message}</p>`;
+  } finally {
+    document.body.classList.remove("menu-loading");
+    updateCartButton();
   }
 }
 

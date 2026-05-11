@@ -66,7 +66,7 @@ main.container {
   max-height: 280px;
   overflow: hidden;
   transform-origin: top;
-  transition: max-height .26s ease, opacity .26s ease, transform .26s ease, margin .26s ease, padding .26s ease;
+  transition: opacity .22s ease, transform .22s ease;
   background: linear-gradient(130deg, rgba(14,14,14,.95) 0%, rgba(30,30,30,.92) 55%, rgba(18,18,18,.95) 100%);
   border: 1px solid rgba(255,255,255,.08);
   position: relative;
@@ -523,12 +523,21 @@ main.container {
 @keyframes iosSpin { to { transform:rotate(360deg); } }
 
 .header.scrolled .hero {
-  max-height: 0;
   opacity: 0;
-  transform: translateY(-8px);
-  margin-top: 0;
-  padding-top: 0;
-  padding-bottom: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+body.menu-loading .site-footer {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+body.menu-loading .cart-button {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 
