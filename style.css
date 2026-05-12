@@ -49,24 +49,10 @@ main.container {
   top: 0;
   z-index: 30;
   --hero-progress: 0;
-  background: rgba(14, 18, 31, 0.94);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(244, 247, 255, 0.62);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(14px) saturate(1.2);
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  position: sticky;
-  overflow: hidden;
-}
-
-.header::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url("pattern.svg");
-  background-size: 220px;
-  background-repeat: repeat;
-  background-position: center;
-  opacity: 0.18;
-  pointer-events: none;
 }
 
 .brand-row {
@@ -97,6 +83,19 @@ main.container {
   opacity: calc(1 - var(--hero-progress));
   transform: translateY(calc(-10px * var(--hero-progress)));
   transition: max-height .1s linear, margin .1s linear, padding .1s linear, opacity .14s linear, transform .14s linear;
+  position: relative;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("pattern.svg");
+  background-size: 220px;
+  background-repeat: repeat;
+  background-position: center;
+  opacity: 0.16;
+  pointer-events: none;
 }
 
 .hero-title {
@@ -318,7 +317,7 @@ main.container {
   background-size: 220px;
   background-repeat: repeat;
   background-position: center;
-  opacity: 0.16;
+  opacity: 0.18;
   pointer-events: none;
 }
 
@@ -471,14 +470,14 @@ main.container {
   margin:0 auto;
   max-height:calc(100dvh - 24px);
   overflow:auto;
-  background: #ffffff;
-  border: 1px solid #e8ecf6;
+  background: var(--glass-strong);
+  border: 1px solid rgba(255,255,255,.72);
   border-radius:18px;
   padding:14px;
   padding-bottom:calc(14px + env(safe-area-inset-bottom));
   animation:slideUp .25s ease;
   -webkit-overflow-scrolling:touch;
-  backdrop-filter: none;
+  backdrop-filter: blur(12px);
 }
 
 .modal-header { display:flex; align-items:center; justify-content:space-between; }
@@ -506,9 +505,9 @@ main.container {
 .totals-box {
   margin-top:12px;
   padding:12px;
-  border:1px solid #e8ecf6;
+  border:1px solid rgba(255,255,255,.7);
   border-radius:12px;
-  background: #f7f9ff;
+  background: rgba(255,255,255,.55);
 }
 
 .promo-block label { font-size:14px; color:#4d5774; font-weight:600; }
@@ -530,26 +529,43 @@ main.container {
   border-radius:10px;
   font-size:16px;
   font-family:inherit;
-  background: #ffffff;
+  background: rgba(255,255,255,.78);
 }
 
 .order-form textarea { min-height:90px; resize:vertical; }
 
 .btn-order {
-  border: 1px solid rgba(255,255,255,.24);
+  border: 1px solid rgba(255,255,255,.28);
   border-radius: 999px;
-  background: linear-gradient(135deg, #2cbb42, #24a339);
+  background: rgba(44, 187, 66, .78);
   color: #fff;
   padding: 10px 14px;
   min-height: 50px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 10px 24px rgba(27, 136, 53, .28);
+  box-shadow: 0 10px 22px rgba(27, 136, 53, .26);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  width: fit-content;
+  justify-self: start;
+}
+
+.payment-note {
+  border: 1px solid rgba(198, 88, 104, .24);
+  background: linear-gradient(135deg, rgba(70, 72, 81, .82), rgba(136, 58, 69, .76));
+  color: #f6f6f8;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.35;
+  box-shadow: 0 8px 20px rgba(38, 20, 24, .24);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .wa-icon { width:20px; height:20px; display:inline-flex; }
