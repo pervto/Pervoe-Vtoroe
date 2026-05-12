@@ -73,11 +73,11 @@ main.container {
   padding: calc(16px * (1 - var(--hero-progress)));
   max-height: calc(330px * (1 - var(--hero-progress)));
   border-radius: 20px;
-  border: 1px solid rgba(255,255,255,.2);
+  border: 1px solid rgba(255,255,255,.16);
   background:
-    linear-gradient(135deg, rgba(23, 30, 51, .88), rgba(18, 24, 40, .82));
+    linear-gradient(135deg, rgba(13, 17, 29, .94), rgba(10, 14, 24, .9));
   box-shadow:
-    0 18px 40px rgba(7, 10, 18, 0.35),
+    0 18px 40px rgba(7, 10, 18, 0.44),
     inset 0 1px 0 rgba(255,255,255,0.08);
   overflow: hidden;
   opacity: calc(1 - var(--hero-progress));
@@ -91,10 +91,21 @@ main.container {
   position: absolute;
   inset: 0;
   background-image: url("pattern.svg");
-  background-size: 220px;
+  background-size: 210px;
   background-repeat: repeat;
   background-position: center;
-  opacity: 0.16;
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(rgba(255,255,255,.055) 0.7px, transparent 0.7px);
+  background-size: 3px 3px;
+  opacity: .33;
   pointer-events: none;
 }
 
@@ -301,7 +312,7 @@ main.container {
 .site-footer {
   margin-top: auto;
   border-top: 1px solid rgba(255,255,255,.55);
-  background: rgba(11,16,30,.78);
+  background: rgba(8, 12, 22, .93);
   color: #fff;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -314,10 +325,21 @@ main.container {
   position: absolute;
   inset: 0;
   background-image: url("pattern.svg");
-  background-size: 220px;
+  background-size: 210px;
   background-repeat: repeat;
   background-position: center;
-  opacity: 0.18;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.site-footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(rgba(255,255,255,.05) 0.7px, transparent 0.7px);
+  background-size: 3px 3px;
+  opacity: .3;
   pointer-events: none;
 }
 
@@ -351,6 +373,8 @@ main.container {
   border: 1px solid rgba(255,255,255,.34);
   padding: 10px 14px;
   border-radius: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .logo-2gis { width: 36px; height: 36px; border-radius: 8px; flex: 0 0 auto; object-fit: cover; }
@@ -552,7 +576,7 @@ main.container {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   width: fit-content;
-  justify-self: start;
+  justify-self: center;
 }
 
 .payment-note {
