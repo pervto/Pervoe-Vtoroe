@@ -234,6 +234,13 @@ function renderCategories() {
       activeCategory = btn.dataset.category;
       renderCategories();
       renderMenu();
+      const menuGrid = document.getElementById("menu-grid");
+      const header = document.getElementById("site-header");
+      if (menuGrid) {
+        const headerHeight = header ? header.offsetHeight : 0;
+        const top = menuGrid.getBoundingClientRect().top + window.scrollY - headerHeight - 8;
+        window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+      }
     });
   });
 }
