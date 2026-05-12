@@ -5,6 +5,7 @@ let searchQuery = "";
 let toastTimer = null;
 let promo = { code: "", discount: 0 };
 let heroSettleTimer = null;
+let categoryOrderList = [];
 
 const CART_KEY = "pervoe-vtoroe-cart";
 const PROMO_KEY = "pervoe-vtoroe-promo";
@@ -223,7 +224,10 @@ function removeFromCart(name) {
 
 function renderCategories() {
   const categoriesEl = document.getElementById("categories");
-  const categories = ["Все", ...new Set(menuData.map((item) => item.category))];
+  const uniqueCategories = [...new Set(menuData.map((item) => item.category).filter(Boolean))];
+  const orderedFromSheet = categoryOrderList.filter((cat) => uniqueCategories.includes(cat));
+  const notInSheetOrder = uniqueCategories.filter((cat) => !orderedFromSheet.includes(cat));
+  const categories = ["Все", ...orderedFromSheet, ...notInSheetOrder];
 
   categoriesEl.innerHTML = categories
     .map((cat) => `<button class="category-btn ${cat === activeCategory ? "active" : ""}" data-category="${cat}">${cat}</button>`)
@@ -393,7 +397,8 @@ async function loadMenu() {
       available: ["available", "наличие (да/нет)", "наличие"],
       photo: ["photo", "фото", "image", "картинка"],
       weight: ["weight", "граммовка", "вес", "граммы"],
-      calories: ["calories", "калории", "ккал"]
+      calories: ["calories", "калории", "ккал"],
+      categoryOrder: ["category order", "category_order", "порядок категорий", "порядок категории"]
     };
 
     const findIndexByAliases = (key) => cleanHeaders.findIndex((header) => aliases[key].includes(header));
@@ -405,9 +410,23 @@ async function loadMenu() {
     const iPhoto = findIndexByAliases("photo");
     const iWeight = findIndexByAliases("weight");
     const iCalories = findIndexByAliases("calories");
+    const iCategoryOrder = findIndexByAliases("categoryOrder");
 
     if ([iName, iPrice, iCategory, iAvailable].some((i) => i === -1)) {
       throw new Error("В CSV нужны колонки: name/Наименование, price/Цена, category/Категория, available/Наличие (Да/Нет)");
+    }
+
+    // Порядок категорий берется из отдельного столбца.
+    // Если категория не указана в этом столбце — она идет в конец.
+    if (iCategoryOrder >= 0) {
+      categoryOrderList = rows
+        .slice(1)
+        .map((line) => parseCsvLine(line))
+        .map((cols) => String(cols[iCategoryOrder] || "").trim())
+        .filter(Boolean)
+        .filter((value, index, arr) => arr.indexOf(value) === index);
+    } else {
+      categoryOrderList = [];
     }
 
     menuData = rows
