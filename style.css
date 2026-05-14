@@ -322,11 +322,11 @@ main.container {
 .btn-add {
   width: 100%;
   min-height: 44px;
-  border: none;
-  background: rgba(17, 24, 39, 0.06);
-  color: #1a2240;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
   border-radius: 999px;
-  padding: 4px 4px 4px 14px;
+  padding: 4px 4px 4px 16px;
   cursor: pointer;
   font-weight: 800;
   font-size: 15px;
@@ -345,16 +345,16 @@ main.container {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: rgba(255, 255, 255, 0.18);
   color: #fff;
   font-size: 24px;
   line-height: 1;
-  box-shadow: 0 8px 16px rgba(224, 54, 59, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .btn-add:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 22px rgba(224, 54, 59, 0.24);
 }
 
 .btn-add-label {
