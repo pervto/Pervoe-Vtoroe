@@ -238,6 +238,19 @@ main.container {
   gap: 8px;
   overflow-x: auto;
   padding: 12px 0 3px;
+  min-height: 48px;
+  align-items: center;
+}
+
+.category-skeleton {
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 38px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.68) 50%, rgba(255,255,255,0.32) 100%);
+  background-size: 220% 100%;
+  border: 1px solid rgba(255,255,255,0.26);
+  animation: skeletonPulse 1.35s ease-in-out infinite;
 }
 
 .category-btn {
@@ -264,7 +277,7 @@ main.container {
 
 .menu-grid { display: grid; grid-template-columns: 1fr; gap: 14px; padding-bottom: 100px; }
 
-.ios-loader-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:220px; gap:12px; }
+.ios-loader-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:220px; gap:12px; width: 100%; }
 .ios-loader { width:30px; height:30px; border:3px solid #d8ddee; border-top-color:#24304f; border-radius:50%; animation:iosSpin .8s linear infinite; }
 
 .food-card {
@@ -336,14 +349,14 @@ main.container {
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
   border-radius: 999px;
-  padding: 4px 4px 4px 16px;
+  padding: 4px 4px 4px 14px;
   cursor: pointer;
   font-weight: 800;
   font-size: 15px;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 6px;
   transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
 }
 
@@ -466,28 +479,42 @@ main.container {
 .footer-link {
   color: #f2f5ff;
   text-decoration: none;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.35;
-  border-bottom: 1px dashed rgba(255,255,255,.35);
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.08);
+  padding: 11px 16px;
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .review-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   color: #fff;
   text-decoration: none;
   font-weight: 800;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   border: 1px solid rgba(255,255,255,.34);
-  padding: 10px 14px;
-  border-radius: 12px;
+  padding: 8px 16px 8px 8px;
+  border-radius: 999px;
   position: relative;
   z-index: 1;
+  box-shadow: 0 14px 28px rgba(224, 54, 59, 0.22);
 }
 
-.logo-2gis { width: 36px; height: 36px; border-radius: 8px; flex: 0 0 auto; object-fit: cover; }
+.logo-2gis {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  object-fit: cover;
+  background: rgba(255,255,255,.16);
+  padding: 6px;
+}
 
 .cart-button {
   position: fixed;
@@ -828,6 +855,11 @@ main.container {
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 @keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 @keyframes iosSpin { to { transform:rotate(360deg); } }
+@keyframes skeletonPulse {
+  0% { background-position: 100% 50%; opacity: .72; }
+  50% { opacity: 1; }
+  100% { background-position: 0% 50%; opacity: .72; }
+}
 @keyframes controlsMorphIn {
   from {
     opacity: 0;
@@ -839,6 +871,11 @@ main.container {
     transform: scale(1);
     filter: blur(0);
   }
+}
+
+body.menu-loading .menu-grid {
+  min-height: 46vh;
+  align-content: center;
 }
 
 body.menu-loading .site-footer,

@@ -253,6 +253,15 @@ function renderCategories() {
   });
 }
 
+function renderCategoriesSkeleton() {
+  const categoriesEl = document.getElementById("categories");
+  if (!categoriesEl) return;
+  const skeletonItems = [88, 126, 114, 98, 108, 92];
+  categoriesEl.innerHTML = skeletonItems
+    .map((width) => `<span class="category-skeleton" style="width:${width}px" aria-hidden="true"></span>`)
+    .join("");
+}
+
 function buildControlsHtml(name, options = {}) {
   const qty = getCartQty(name);
   const state = options.state || (qty > 0 ? "qty" : "add");
@@ -394,6 +403,7 @@ function applyHeaderScrollState() {
 async function loadMenu() {
   const grid = document.getElementById("menu-grid");
   document.body.classList.add("menu-loading");
+  renderCategoriesSkeleton();
   grid.innerHTML = '<div class="ios-loader-wrap"><div class="ios-loader"></div><p class="status">Загружаем меню...</p></div>';
   try {
     const response = await fetch(CONFIG.csvUrl, { redirect: "follow" });
