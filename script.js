@@ -163,10 +163,17 @@ function updateTotals() {
   else discountAmount = promo.discount;
   discountAmount = Math.min(discountAmount, subtotal);
   const finalTotal = subtotal - discountAmount;
+  const hasDiscount = discountAmount > 0;
+  const subtotalRow = document.getElementById("subtotal-row");
+  const discountRow = document.getElementById("discount-row");
+  const totalLabel = document.getElementById("total-label");
 
   document.getElementById("subtotal-amount").textContent = money(subtotal);
   document.getElementById("discount-amount").textContent = money(discountAmount);
   document.getElementById("total-amount").textContent = Number(finalTotal).toLocaleString("ru-RU");
+  if (subtotalRow) subtotalRow.classList.toggle("is-hidden", !hasDiscount);
+  if (discountRow) discountRow.classList.toggle("is-hidden", !hasDiscount);
+  if (totalLabel) totalLabel.textContent = hasDiscount ? "Итого" : "Общая сумма";
   return { finalTotal };
 }
 
