@@ -5,7 +5,6 @@ let searchQuery = "";
 let toastTimer = null;
 let promo = { code: "", discount: 0 };
 let categoryOrderList = [];
-let heroBaseHeight = 0;
 
 const CART_KEY = "pervoe-vtoroe-cart";
 const PROMO_KEY = "pervoe-vtoroe-promo";
@@ -243,9 +242,9 @@ function renderCategories() {
       renderCategories();
       renderMenu();
       const menuGrid = document.getElementById("menu-grid");
-      const header = document.getElementById("site-header");
+      const menuDock = document.getElementById("menu-dock");
       if (menuGrid) {
-        const headerHeight = header ? header.offsetHeight : 0;
+        const headerHeight = menuDock ? menuDock.offsetHeight : 0;
         const top = menuGrid.getBoundingClientRect().top + window.scrollY - headerHeight - 8;
         window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
       }
@@ -364,40 +363,15 @@ function cleanPhone(phone) {
   return String(phone).replace(/\D/g, "");
 }
 
-function setHeroMode(mode) {
+function updateHeroSearchState() {
   const header = document.getElementById("site-header");
-  if (!header) return;
-  header.dataset.heroMode = mode;
-}
-
-function syncHeroMetrics() {
-  const header = document.getElementById("site-header");
-  const hero = document.getElementById("hero");
-  const heroInner = hero ? hero.querySelector(".hero-inner") : null;
-  if (!header || !hero || !heroInner) return;
-
-  heroBaseHeight = Math.max(Math.ceil(heroInner.scrollHeight + 2), 1);
-  header.style.setProperty("--hero-full-height", `${heroBaseHeight}px`);
-}
-
-function applyHeaderScrollState() {
-  const header = document.getElementById("site-header");
-  const hero = document.getElementById("hero");
-  if (!header || !hero) return;
-
-  if (!heroBaseHeight) syncHeroMetrics();
-
-  const searchActive = searchQuery.trim().length > 0;
-  if (searchActive) {
-    setHeroMode("search");
-    header.style.setProperty("--hero-progress", "1");
-    return;
-  }
-
-  setHeroMode("scroll");
-  const range = Math.max(heroBaseHeight, 1);
-  const progress = Math.max(0, Math.min(window.scrollY / range, 1));
-  header.style.setProperty("--hero-progress", progress.toFixed(4));
+  const searchInput = document.getElementById("menu-search");
+  if (!header || !searchInput) return;
+  const headerRect = header.getBoundingClientRect();
+  const headerCanBeSeen = headerRect.bottom > 0;
+  const searchActive = document.activeElement === searchInput || searchQuery.trim().length > 0;
+  const shouldHide = searchActive && headerCanBeSeen;
+  header.classList.toggle("hero-search-hidden", shouldHide);
 }
 
 async function loadMenu() {
@@ -505,10 +479,13 @@ document.getElementById("promo-code").addEventListener("keydown", (e) => {
 const searchInput = document.getElementById("menu-search");
 const searchClear = document.getElementById("search-clear");
 if (searchInput && searchClear) {
+  searchInput.addEventListener("focus", updateHeroSearchState);
+  searchInput.addEventListener("blur", updateHeroSearchState);
+
   searchInput.addEventListener("input", () => {
     searchQuery = searchInput.value.trim();
     updateSearchClearVisibility();
-    applyHeaderScrollState();
+    updateHeroSearchState();
     renderMenu();
   });
 
@@ -516,7 +493,7 @@ if (searchInput && searchClear) {
     searchInput.value = "";
     searchQuery = "";
     updateSearchClearVisibility();
-    applyHeaderScrollState();
+    updateHeroSearchState();
     renderMenu();
     searchInput.focus();
   });
@@ -526,30 +503,14 @@ window.addEventListener("scroll", () => {
   const topBtn = document.getElementById("to-top");
   if (window.scrollY > 380) topBtn.classList.add("show");
   else topBtn.classList.remove("show");
-  if (!window.__heroTicking) {
-    window.__heroTicking = true;
+  if (!window.__heroSearchTicking) {
+    window.__heroSearchTicking = true;
     requestAnimationFrame(() => {
-      applyHeaderScrollState();
-      window.__heroTicking = false;
+      updateHeroSearchState();
+      window.__heroSearchTicking = false;
     });
   }
 }, { passive: true });
-
-window.addEventListener("resize", () => {
-  if (!window.__heroResizeTicking) {
-    window.__heroResizeTicking = true;
-    requestAnimationFrame(() => {
-      syncHeroMetrics();
-      applyHeaderScrollState();
-      window.__heroResizeTicking = false;
-    });
-  }
-}, { passive: true });
-
-window.addEventListener("load", () => {
-  syncHeroMetrics();
-  applyHeaderScrollState();
-});
 
 document.getElementById("order-form").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -584,16 +545,8 @@ loadPromo();
 loadMenu();
 renderCart();
 updateSearchClearVisibility();
-syncHeroMetrics();
+updateHeroSearchState();
 if (promo.code) {
   document.getElementById("promo-code").value = promo.code;
   document.getElementById("promo-hint").textContent = "Промокод применен";
-}
-applyHeaderScrollState();
-
-if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(() => {
-    syncHeroMetrics();
-    applyHeaderScrollState();
-  });
 }
