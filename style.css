@@ -8,8 +8,8 @@
   --line-soft: rgba(18, 24, 38, 0.08);
   --text: #0f172a;
   --muted: #5b6475;
-  --accent: #f70a12;
-  --accent-2: #d90a11;
+  --accent: #e0363b;
+  --accent-2: #c92b31;
   --radius: 18px;
   --panel: #e6e8ec;
   --panel-strong: #d9dde3;
@@ -258,6 +258,8 @@ main.container {
 .ios-loader { width:30px; height:30px; border:3px solid #d8ddee; border-top-color:#24304f; border-radius:50%; animation:iosSpin .8s linear infinite; }
 
 .food-card {
+  display: flex;
+  flex-direction: column;
   border: 1px solid rgba(17, 24, 39, 0.07);
   border-radius: var(--radius);
   padding: 14px;
@@ -293,34 +295,87 @@ main.container {
 }
 
 .food-title { font-size: 34px; font-weight: 800; margin: 0 0 4px; color:#0f172d; }
-.food-category { margin:0; color:#5f6884; font-size: 15px; }
-.food-meta { margin:6px 0 0; color:#56607a; font-size: 15px; }
+.food-copy {
+  display: grid;
+  align-content: start;
+  gap: 0;
+  flex: 1 1 auto;
+}
+.food-category { margin:0; color:#5f6884; font-size: 15px; min-height: 22px; }
+.food-meta { margin:6px 0 0; color:#56607a; font-size: 15px; min-height: 22px; }
 .food-description {
   margin: 10px 0 0;
   color: #4b5563;
   font-size: 14px;
   line-height: 1.45;
+  min-height: 40px;
+}
+.food-category.is-empty,
+.food-meta.is-empty,
+.food-description.is-empty {
+  visibility: hidden;
 }
 
 .food-footer { margin-top:14px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
 .food-price { font-size: 31px; font-weight: 900; line-height: 1; color:#10182d; }
 
 .btn-add {
-  border: 1px solid rgba(255,255,255,.35);
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  color: #fff;
-  border-radius: 12px;
-  padding: 10px 16px;
+  width: 100%;
+  min-height: 44px;
+  border: none;
+  background: rgba(17, 24, 39, 0.06);
+  color: #1a2240;
+  border-radius: 999px;
+  padding: 4px 4px 4px 14px;
   cursor: pointer;
   font-weight: 800;
-  font-size: 16px;
-}
-
-.item-controls { min-width: 138px; display: flex; justify-content: flex-end; }
-
-.qty-inline {
+  font-size: 15px;
   display: inline-flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.btn-add::after {
+  content: "+";
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  box-shadow: 0 8px 16px rgba(224, 54, 59, 0.22);
+}
+
+.btn-add:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+}
+
+.btn-add-label {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.item-controls {
+  min-width: 154px;
+  min-height: 44px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.qty-inline {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
   padding: 4px;
   border-radius: 999px;
@@ -333,7 +388,7 @@ main.container {
   border: none;
   border-radius: 50%;
   background: #ffffff;
-  color: #1d2640;
+  color: var(--accent);
   cursor: pointer;
   font-size: 20px;
   box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
@@ -345,6 +400,11 @@ main.container {
   color:#1a2240;
   font-weight:800;
   font-size:16px;
+}
+
+.btn-add.is-entering,
+.qty-inline.is-entering {
+  animation: controlsMorphIn .24s cubic-bezier(.22, 1, .36, 1);
 }
 
 .status { color: #5b657f; font-size: 16px; }
@@ -606,9 +666,9 @@ main.container {
 }
 
 .remove-btn {
-  border: 1px solid rgba(247, 10, 18, .20);
+  border: 1px solid rgba(224, 54, 59, .20);
   background: rgba(255, 255, 255, 0.72);
-  color: #b11419;
+  color: #b12a2f;
   font-size: 14px;
   font-weight: 700;
   border-radius: 999px;
@@ -683,14 +743,14 @@ main.container {
 }
 
 .payment-note {
-  border: 1px solid rgba(247, 10, 18, .14);
-  background: linear-gradient(135deg, rgba(255, 246, 246, 0.98), rgba(245, 238, 238, 0.98));
-  color: #6b1d20;
+  border: 1px solid rgba(224, 54, 59, .14);
+  background: linear-gradient(135deg, rgba(255, 245, 245, 0.98), rgba(245, 236, 237, 0.98));
+  color: #6a2327;
   border-radius: 16px;
   padding: 12px 14px;
   font-size: 14px;
   line-height: 1.35;
-  box-shadow: 0 8px 18px rgba(247, 10, 18, .05);
+  box-shadow: 0 8px 18px rgba(224, 54, 59, .05);
 }
 
 .wa-icon { width:26px; height:26px; display:inline-flex; flex: 0 0 26px; }
@@ -758,6 +818,18 @@ main.container {
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 @keyframes slideUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 @keyframes iosSpin { to { transform:rotate(360deg); } }
+@keyframes controlsMorphIn {
+  from {
+    opacity: 0;
+    transform: scale(.92);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
 
 body.menu-loading .site-footer,
 body.menu-loading .cart-button,

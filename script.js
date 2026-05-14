@@ -184,10 +184,14 @@ function updateMenuControls() {
     const controls = card.querySelector(".item-controls");
     if (!controls) return;
     const qty = getCartQty(name);
+    const previousState = controls.dataset.state || "add";
+    const nextState = qty > 0 ? "qty" : "add";
 
-    controls.innerHTML = qty > 0
-      ? `<div class="qty-inline"><button class="card-minus" data-name="${escapeHtml(name)}">-</button><span>${qty}</span><button class="card-plus" data-name="${escapeHtml(name)}">+</button></div>`
-      : `<button class="btn-add" data-name="${escapeHtml(name)}">Добавить</button>`;
+    controls.dataset.state = nextState;
+    controls.innerHTML = buildControlsHtml(name, {
+      animate: previousState !== nextState,
+      state: nextState
+    });
   });
 
   bindMenuControlEvents();
@@ -249,11 +253,13 @@ function renderCategories() {
   });
 }
 
-function buildControlsHtml(name) {
+function buildControlsHtml(name, options = {}) {
   const qty = getCartQty(name);
+  const state = options.state || (qty > 0 ? "qty" : "add");
+  const animationClass = options.animate ? " is-entering" : "";
   return qty > 0
-    ? `<div class="qty-inline"><button class="card-minus" data-name="${escapeHtml(name)}">-</button><span>${qty}</span><button class="card-plus" data-name="${escapeHtml(name)}">+</button></div>`
-    : `<button class="btn-add" data-name="${escapeHtml(name)}">Добавить</button>`;
+    ? `<div class="qty-inline${animationClass}" data-state="${state}"><button class="card-minus" data-name="${escapeHtml(name)}">-</button><span>${qty}</span><button class="card-plus" data-name="${escapeHtml(name)}">+</button></div>`
+    : `<button class="btn-add${animationClass}" data-state="${state}" data-name="${escapeHtml(name)}"><span class="btn-add-label">Добавить</span></button>`;
 }
 
 function bindMenuControlEvents() {
@@ -287,18 +293,18 @@ function renderMenu() {
 
   grid.innerHTML = filtered
     .map((item, index) => {
-      const categoryHtml = item.category ? `<p class="food-category">${escapeHtml(item.category)}</p>` : "";
       const metaParts = [];
       if (item.weight) metaParts.push(item.weight);
       if (item.calories) metaParts.push(`${item.calories} ккал`);
-      const metaHtml = metaParts.length ? `<p class="food-meta">${metaParts.join(" • ")}</p>` : "";
-      const descriptionHtml = item.description ? `<p class="food-description">${escapeHtml(item.description)}</p>` : "";
+      const categoryHtml = `<p class="food-category${item.category ? "" : " is-empty"}">${item.category ? escapeHtml(item.category) : "&nbsp;"}</p>`;
+      const metaHtml = `<p class="food-meta${metaParts.length ? "" : " is-empty"}">${metaParts.length ? escapeHtml(metaParts.join(" • ")) : "&nbsp;"}</p>`;
+      const descriptionHtml = `<p class="food-description${item.description ? "" : " is-empty"}">${item.description ? escapeHtml(item.description) : "&nbsp;"}</p>`;
       const photoUrl = normalizePhotoUrl(item.photo);
       const imageHtml = photoUrl
         ? `<img class="food-image" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend','<div class=&quot;food-image-placeholder&quot;>Фотография блюда скоро появится</div>');" />`
         : `<div class="food-image-placeholder">Фотография блюда скоро появится</div>`;
 
-      return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" style="animation-delay:${index * 0.06}s">${imageHtml}<div><h3 class="food-title">${escapeHtml(item.name)}</h3>${categoryHtml}${metaHtml}${descriptionHtml}</div><div class="food-footer"><div class="food-price">${money(item.price)}</div><div class="item-controls">${buildControlsHtml(item.name)}</div></div></article>`;
+      return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" style="animation-delay:${index * 0.06}s">${imageHtml}<div class="food-copy"><h3 class="food-title">${escapeHtml(item.name)}</h3>${categoryHtml}${metaHtml}${descriptionHtml}</div><div class="food-footer"><div class="food-price">${money(item.price)}</div><div class="item-controls" data-state="${getCartQty(item.name) > 0 ? "qty" : "add"}">${buildControlsHtml(item.name)}</div></div></article>`;
     })
     .join("");
 
