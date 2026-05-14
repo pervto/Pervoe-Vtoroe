@@ -8,8 +8,8 @@
   --line-soft: rgba(18, 24, 38, 0.08);
   --text: #0f172a;
   --muted: #5b6475;
-  --accent: #ff2d55;
-  --accent-2: #ff4d6d;
+  --accent: #f70a12;
+  --accent-2: #d90a11;
   --radius: 18px;
   --panel: #e6e8ec;
   --panel-strong: #d9dde3;
@@ -92,7 +92,6 @@ main.container {
 
 .hero {
   margin-top: calc(10px * (1 - var(--hero-progress)));
-  padding: calc(16px * (1 - var(--hero-progress)));
   max-height: calc(330px * (1 - var(--hero-progress)));
   border-radius: 20px;
   border: 1px solid rgba(255,255,255,.16);
@@ -102,10 +101,19 @@ main.container {
     0 18px 40px rgba(7, 10, 18, 0.44),
     inset 0 1px 0 rgba(255,255,255,0.08);
   overflow: hidden;
-  opacity: calc(1 - var(--hero-progress));
-  transform: translateY(calc(-10px * var(--hero-progress)));
-  transition: max-height .1s linear, margin .1s linear, padding .1s linear, opacity .14s linear, transform .14s linear;
+  transition: max-height .18s ease, margin .18s ease, opacity .18s ease, transform .18s ease;
   position: relative;
+}
+
+.hero-inner {
+  padding: 16px;
+  opacity: calc(1 - var(--hero-progress));
+  transform:
+    translateY(calc(-6px * var(--hero-progress)))
+    scale(calc(1 - (var(--hero-progress) * 0.035)));
+  transform-origin: top center;
+  transition: opacity .18s ease, transform .18s ease;
+  will-change: transform, opacity;
 }
 
 .hero::after {
@@ -592,9 +600,9 @@ main.container {
 }
 
 .remove-btn {
-  border: 1px solid rgba(255, 99, 126, .20);
+  border: 1px solid rgba(247, 10, 18, .20);
   background: rgba(255, 255, 255, 0.72);
-  color: #b5183b;
+  color: #b11419;
   font-size: 14px;
   font-weight: 700;
   border-radius: 999px;
@@ -669,14 +677,14 @@ main.container {
 }
 
 .payment-note {
-  border: 1px solid rgba(198, 88, 104, .18);
-  background: linear-gradient(135deg, rgba(245, 246, 249, 0.98), rgba(232, 235, 241, 0.98));
-  color: #4b5563;
+  border: 1px solid rgba(247, 10, 18, .14);
+  background: linear-gradient(135deg, rgba(255, 246, 246, 0.98), rgba(245, 238, 238, 0.98));
+  color: #6b1d20;
   border-radius: 16px;
   padding: 12px 14px;
   font-size: 14px;
   line-height: 1.35;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, .06);
+  box-shadow: 0 8px 18px rgba(247, 10, 18, .05);
 }
 
 .wa-icon { width:26px; height:26px; display:inline-flex; flex: 0 0 26px; }
