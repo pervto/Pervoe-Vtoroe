@@ -242,11 +242,13 @@ function renderCategories() {
       renderCategories();
       renderMenu();
       const menuGrid = document.getElementById("menu-grid");
+      const header = document.getElementById("site-header");
       const menuDock = document.getElementById("menu-dock");
       if (menuGrid) {
-        const headerHeight = menuDock ? menuDock.offsetHeight : 0;
+        const headerHeight = header ? header.offsetHeight : 0;
+        const dockHeight = menuDock ? menuDock.offsetHeight : 0;
         const top = menuGrid.getBoundingClientRect().top + window.scrollY - headerHeight - 8;
-        window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+        window.scrollTo({ top: Math.max(top - dockHeight, 0), behavior: "smooth" });
       }
     });
   });
@@ -363,15 +365,18 @@ function cleanPhone(phone) {
   return String(phone).replace(/\D/g, "");
 }
 
-function updateHeroSearchState() {
+function syncStickyOffsets() {
   const header = document.getElementById("site-header");
+  if (!header) return;
+  document.documentElement.style.setProperty("--logo-bar-height", `${Math.ceil(header.offsetHeight)}px`);
+}
+
+function updateHeroSearchState() {
+  const heroBand = document.getElementById("hero-band");
   const searchInput = document.getElementById("menu-search");
-  if (!header || !searchInput) return;
-  const headerRect = header.getBoundingClientRect();
-  const headerCanBeSeen = headerRect.bottom > 0;
-  const searchActive = document.activeElement === searchInput || searchQuery.trim().length > 0;
-  const shouldHide = searchActive && headerCanBeSeen;
-  header.classList.toggle("hero-search-hidden", shouldHide);
+  if (!heroBand || !searchInput) return;
+  const shouldHide = document.activeElement === searchInput || searchQuery.trim().length > 0;
+  heroBand.classList.toggle("is-hidden", shouldHide);
 }
 
 async function loadMenu() {
@@ -503,14 +508,19 @@ window.addEventListener("scroll", () => {
   const topBtn = document.getElementById("to-top");
   if (window.scrollY > 380) topBtn.classList.add("show");
   else topBtn.classList.remove("show");
-  if (!window.__heroSearchTicking) {
-    window.__heroSearchTicking = true;
+}, { passive: true });
+
+window.addEventListener("resize", () => {
+  if (!window.__stickyMetricsTicking) {
+    window.__stickyMetricsTicking = true;
     requestAnimationFrame(() => {
-      updateHeroSearchState();
-      window.__heroSearchTicking = false;
+      syncStickyOffsets();
+      window.__stickyMetricsTicking = false;
     });
   }
 }, { passive: true });
+
+window.addEventListener("load", syncStickyOffsets);
 
 document.getElementById("order-form").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -545,8 +555,13 @@ loadPromo();
 loadMenu();
 renderCart();
 updateSearchClearVisibility();
+syncStickyOffsets();
 updateHeroSearchState();
 if (promo.code) {
   document.getElementById("promo-code").value = promo.code;
   document.getElementById("promo-hint").textContent = "Промокод применен";
+}
+
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(syncStickyOffsets);
 }
