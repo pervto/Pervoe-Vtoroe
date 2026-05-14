@@ -287,17 +287,18 @@ function renderMenu() {
 
   grid.innerHTML = filtered
     .map((item, index) => {
-      const categoryHtml = item.category ? `<p class="food-category">${item.category}</p>` : "";
+      const categoryHtml = item.category ? `<p class="food-category">${escapeHtml(item.category)}</p>` : "";
       const metaParts = [];
       if (item.weight) metaParts.push(item.weight);
       if (item.calories) metaParts.push(`${item.calories} ккал`);
       const metaHtml = metaParts.length ? `<p class="food-meta">${metaParts.join(" • ")}</p>` : "";
+      const descriptionHtml = item.description ? `<p class="food-description">${escapeHtml(item.description)}</p>` : "";
       const photoUrl = normalizePhotoUrl(item.photo);
       const imageHtml = photoUrl
         ? `<img class="food-image" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend','<div class=&quot;food-image-placeholder&quot;>Фотография блюда скоро появится</div>');" />`
         : `<div class="food-image-placeholder">Фотография блюда скоро появится</div>`;
 
-      return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" style="animation-delay:${index * 0.06}s">${imageHtml}<div><h3 class="food-title">${item.name}</h3>${categoryHtml}${metaHtml}</div><div class="food-footer"><div class="food-price">${money(item.price)}</div><div class="item-controls">${buildControlsHtml(item.name)}</div></div></article>`;
+      return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" style="animation-delay:${index * 0.06}s">${imageHtml}<div><h3 class="food-title">${escapeHtml(item.name)}</h3>${categoryHtml}${metaHtml}${descriptionHtml}</div><div class="food-footer"><div class="food-price">${money(item.price)}</div><div class="item-controls">${buildControlsHtml(item.name)}</div></div></article>`;
     })
     .join("");
 
@@ -395,7 +396,8 @@ async function loadMenu() {
       price: ["price", "цена"],
       category: ["category", "категория"],
       available: ["available", "наличие (да/нет)", "наличие"],
-      photo: ["photo", "фото", "image", "картинка"],
+      photo: ["photo", "фото", "фото 1", "image", "картинка"],
+      description: ["description", "описание"],
       weight: ["weight", "граммовка", "вес", "граммы"],
       calories: ["calories", "калории", "ккал"],
       categoryOrder: ["category order", "category_order", "порядок категорий", "порядок категории"]
@@ -408,6 +410,7 @@ async function loadMenu() {
     const iCategory = findIndexByAliases("category");
     const iAvailable = findIndexByAliases("available");
     const iPhoto = findIndexByAliases("photo");
+    const iDescription = findIndexByAliases("description");
     const iWeight = findIndexByAliases("weight");
     const iCalories = findIndexByAliases("calories");
     const iCategoryOrder = findIndexByAliases("categoryOrder");
@@ -438,6 +441,7 @@ async function loadMenu() {
         category: cols[iCategory] || "",
         available: ["true", "да", "yes", "1"].includes(String(cols[iAvailable] || "").trim().toLowerCase()),
         photo: iPhoto >= 0 ? cols[iPhoto] : "",
+        description: iDescription >= 0 ? cols[iDescription] : "",
         weight: iWeight >= 0 ? cols[iWeight] : "",
         calories: iCalories >= 0 ? cols[iCalories] : ""
       }))

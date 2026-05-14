@@ -295,6 +295,12 @@ main.container {
 .food-title { font-size: 34px; font-weight: 800; margin: 0 0 4px; color:#0f172d; }
 .food-category { margin:0; color:#5f6884; font-size: 15px; }
 .food-meta { margin:6px 0 0; color:#56607a; font-size: 15px; }
+.food-description {
+  margin: 10px 0 0;
+  color: #4b5563;
+  font-size: 14px;
+  line-height: 1.45;
+}
 
 .food-footer { margin-top:14px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
 .food-price { font-size: 31px; font-weight: 900; line-height: 1; color:#10182d; }
