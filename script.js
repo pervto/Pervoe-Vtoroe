@@ -4,8 +4,8 @@ let activeCategory = "Все";
 let searchQuery = "";
 let toastTimer = null;
 let promo = { code: "", discount: 0 };
-let heroSettleTimer = null;
 let categoryOrderList = [];
+let heroBaseHeight = 0;
 
 const CART_KEY = "pervoe-vtoroe-cart";
 const PROMO_KEY = "pervoe-vtoroe-promo";
@@ -355,31 +355,40 @@ function cleanPhone(phone) {
   return String(phone).replace(/\D/g, "");
 }
 
+function setHeroMode(mode) {
+  const header = document.getElementById("site-header");
+  if (!header) return;
+  header.dataset.heroMode = mode;
+}
+
+function syncHeroMetrics() {
+  const header = document.getElementById("site-header");
+  const hero = document.getElementById("hero");
+  const heroInner = hero ? hero.querySelector(".hero-inner") : null;
+  if (!header || !hero || !heroInner) return;
+
+  heroBaseHeight = Math.max(Math.ceil(heroInner.scrollHeight + 2), 1);
+  header.style.setProperty("--hero-full-height", `${heroBaseHeight}px`);
+}
+
 function applyHeaderScrollState() {
   const header = document.getElementById("site-header");
   const hero = document.getElementById("hero");
   if (!header || !hero) return;
 
+  if (!heroBaseHeight) syncHeroMetrics();
+
   const searchActive = searchQuery.trim().length > 0;
   if (searchActive) {
+    setHeroMode("search");
     header.style.setProperty("--hero-progress", "1");
     return;
   }
 
-  const range = Math.max(hero.offsetHeight + 24, 220);
+  setHeroMode("scroll");
+  const range = Math.max(heroBaseHeight, 1);
   const progress = Math.max(0, Math.min(window.scrollY / range, 1));
-  header.style.setProperty("--hero-progress", progress.toFixed(3));
-}
-
-function settleHeaderState() {
-  const header = document.getElementById("site-header");
-  if (!header) return;
-  if (searchQuery.trim().length > 0) {
-    header.style.setProperty("--hero-progress", "1");
-    return;
-  }
-  const current = Number.parseFloat(getComputedStyle(header).getPropertyValue("--hero-progress")) || 0;
-  header.style.setProperty("--hero-progress", current >= 0.5 ? "1" : "0");
+  header.style.setProperty("--hero-progress", progress.toFixed(4));
 }
 
 async function loadMenu() {
@@ -514,9 +523,23 @@ window.addEventListener("scroll", () => {
       window.__heroTicking = false;
     });
   }
-  if (heroSettleTimer) clearTimeout(heroSettleTimer);
-  heroSettleTimer = setTimeout(settleHeaderState, 90);
 }, { passive: true });
+
+window.addEventListener("resize", () => {
+  if (!window.__heroResizeTicking) {
+    window.__heroResizeTicking = true;
+    requestAnimationFrame(() => {
+      syncHeroMetrics();
+      applyHeaderScrollState();
+      window.__heroResizeTicking = false;
+    });
+  }
+}, { passive: true });
+
+window.addEventListener("load", () => {
+  syncHeroMetrics();
+  applyHeaderScrollState();
+});
 
 document.getElementById("order-form").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -551,8 +574,16 @@ loadPromo();
 loadMenu();
 renderCart();
 updateSearchClearVisibility();
+syncHeroMetrics();
 if (promo.code) {
   document.getElementById("promo-code").value = promo.code;
   document.getElementById("promo-hint").textContent = "Промокод применен";
 }
 applyHeaderScrollState();
+
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => {
+    syncHeroMetrics();
+    applyHeaderScrollState();
+  });
+}

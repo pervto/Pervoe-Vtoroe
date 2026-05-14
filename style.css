@@ -50,6 +50,7 @@ main.container {
   top: 0;
   z-index: 30;
   --hero-progress: 0;
+  --hero-full-height: 0px;
   background: rgba(221, 225, 231, 0.94);
   border-bottom: 1px solid rgba(17, 24, 39, 0.08);
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
@@ -92,7 +93,7 @@ main.container {
 
 .hero {
   margin-top: calc(10px * (1 - var(--hero-progress)));
-  max-height: calc(330px * (1 - var(--hero-progress)));
+  height: calc(var(--hero-full-height) * (1 - var(--hero-progress)));
   border-radius: 20px;
   border: 1px solid rgba(255,255,255,.16);
   background:
@@ -101,19 +102,28 @@ main.container {
     0 18px 40px rgba(7, 10, 18, 0.44),
     inset 0 1px 0 rgba(255,255,255,0.08);
   overflow: hidden;
-  transition: max-height .18s ease, margin .18s ease, opacity .18s ease, transform .18s ease;
+  opacity: calc(1 - var(--hero-progress));
+  transition: none;
   position: relative;
+  transform: translateZ(0);
+  will-change: height, opacity, margin-top;
 }
 
 .hero-inner {
   padding: 16px;
   opacity: calc(1 - var(--hero-progress));
-  transform:
-    translateY(calc(-6px * var(--hero-progress)))
-    scale(calc(1 - (var(--hero-progress) * 0.035)));
+  transform: translateY(calc(-8px * var(--hero-progress)));
   transform-origin: top center;
-  transition: opacity .18s ease, transform .18s ease;
+  transition: none;
   will-change: transform, opacity;
+}
+
+.header[data-hero-mode="search"] .hero {
+  transition: height .16s ease, opacity .16s ease, margin-top .16s ease;
+}
+
+.header[data-hero-mode="search"] .hero-inner {
+  transition: opacity .16s ease, transform .16s ease;
 }
 
 .hero::after {
