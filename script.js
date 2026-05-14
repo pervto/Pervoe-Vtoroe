@@ -167,6 +167,7 @@ function updateTotals() {
   const subtotalRow = document.getElementById("subtotal-row");
   const discountRow = document.getElementById("discount-row");
   const totalLabel = document.getElementById("total-label");
+  const totalsBox = document.querySelector(".totals-box");
 
   document.getElementById("subtotal-amount").textContent = money(subtotal);
   document.getElementById("discount-amount").textContent = money(discountAmount);
@@ -174,6 +175,7 @@ function updateTotals() {
   if (subtotalRow) subtotalRow.classList.toggle("is-hidden", !hasDiscount);
   if (discountRow) discountRow.classList.toggle("is-hidden", !hasDiscount);
   if (totalLabel) totalLabel.textContent = hasDiscount ? "Итого" : "Общая сумма";
+  if (totalsBox) totalsBox.classList.toggle("is-compact", !hasDiscount);
   return { finalTotal };
 }
 

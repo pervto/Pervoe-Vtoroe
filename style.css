@@ -808,6 +808,11 @@ main.container {
 }
 .cart-total-label { font-size:15px; font-weight:800; text-transform:uppercase; letter-spacing:0.04em; color:#4b5563; }
 .cart-total-value { font-size:32px; line-height:1; font-weight:900; color:#0f172d; }
+.totals-box.is-compact .cart-total-row {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
 
 .order-form { margin-top:14px; display:grid; gap:12px; }
 .order-form h3 { margin:6px 0 0; font-size:26px; line-height:1.1; color:#111a2d; }
