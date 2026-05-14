@@ -15,7 +15,12 @@
   <header id="site-header" class="header">
     <div class="container">
       <div class="brand-row">
-        <img class="brand-logo" src="Logo.svg" onerror="this.src='logo.svg'" alt="Первое-Второе" />
+        <img
+          class="brand-logo"
+          src="logo.svg?v=20260514"
+          data-logo-src="logo.svg"
+          alt="Первое-Второе"
+        />
       </div>
       <section id="hero" class="hero">
         <p class="hero-title">Выберите блюда, добавьте в корзину и отправьте заказ в WhatsApp за 1 минуту.</p>
@@ -90,7 +95,10 @@
       <div class="totals-box">
         <div class="totals-row"><span>Сумма</span><strong id="subtotal-amount">0 ₸</strong></div>
         <div class="totals-row"><span>Скидка</span><strong id="discount-amount">0 ₸</strong></div>
-        <div class="cart-total">Итого: <span id="total-amount">0</span> ₸</div>
+        <div class="cart-total-row">
+          <span class="cart-total-label">Итого</span>
+          <strong class="cart-total-value"><span id="total-amount">0</span> ₸</strong>
+        </div>
       </div>
 
       <form id="order-form" class="order-form">
@@ -122,6 +130,12 @@
 
   <script src="config.js?v=30"></script>
   <script src="script.js?v=30"></script>
+  <script>
+    const siteLogo = document.querySelector("[data-logo-src]");
+    if (siteLogo) {
+      siteLogo.src = `${siteLogo.dataset.logoSrc}?v=${Date.now()}`;
+    }
+  </script>
 </body>
 </html>
 
