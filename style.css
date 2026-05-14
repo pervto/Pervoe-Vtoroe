@@ -11,8 +11,8 @@
   --accent: #ff2d55;
   --accent-2: #ff4d6d;
   --radius: 18px;
-  --panel: #f2f1ed;
-  --panel-strong: #ebe9e3;
+  --panel: #e6e8ec;
+  --panel-strong: #d9dde3;
   --panel-border: rgba(17, 24, 39, 0.08);
   --panel-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
 }
@@ -50,9 +50,9 @@ main.container {
   top: 0;
   z-index: 30;
   --hero-progress: 0;
-  background: rgba(242, 241, 237, 0.94);
+  background: rgba(221, 225, 231, 0.94);
   border-bottom: 1px solid rgba(17, 24, 39, 0.08);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
   backdrop-filter: blur(14px) saturate(1.05);
   -webkit-backdrop-filter: blur(14px) saturate(1.05);
   overflow: hidden;
@@ -274,7 +274,7 @@ main.container {
 .food-image { object-fit: cover; display:block; }
 
 .food-image-placeholder {
-  background: linear-gradient(135deg, #f7f7f5 0%, #eceae5 100%);
+  background: linear-gradient(135deg, #f3f4f6 0%, #e3e7ed 100%);
   border: 1px solid rgba(17, 24, 39, 0.05);
   color: #6c748e;
   display:flex;
@@ -307,25 +307,31 @@ main.container {
 .qty-inline {
   display: inline-flex;
   align-items: center;
-  background: var(--glass-dark);
-  border: 1px solid rgba(255,255,255,.24);
-  border-radius: 12px;
-  overflow: hidden;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  gap: 8px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.06);
 }
 
 .qty-inline button {
+  width: 36px;
+  height: 36px;
   border: none;
-  background: transparent;
-  color: #fff;
-  width: 38px;
-  height: 40px;
-  font-size: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #1d2640;
   cursor: pointer;
+  font-size: 20px;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
 }
 
-.qty-inline span { min-width: 34px; text-align:center; color:#fff; font-weight:700; font-size:17px; }
+.qty-inline span {
+  min-width: 28px;
+  text-align:center;
+  color:#1a2240;
+  font-weight:800;
+  font-size:16px;
+}
 
 .status { color: #5b657f; font-size: 16px; }
 
@@ -520,7 +526,7 @@ main.container {
   margin:0 auto;
   max-height:calc(100dvh - 24px);
   overflow:auto;
-  background: linear-gradient(180deg, #fcfcfa 0%, #f6f4ef 100%);
+  background: linear-gradient(180deg, #f8f9fb 0%, #eceff4 100%);
   border: 1px solid rgba(17, 24, 39, 0.08);
   border-radius:24px;
   padding:20px;
@@ -664,16 +670,16 @@ main.container {
 
 .payment-note {
   border: 1px solid rgba(198, 88, 104, .18);
-  background: linear-gradient(135deg, rgba(255, 247, 248, 0.98), rgba(247, 239, 240, 0.98));
-  color: #5c3138;
+  background: linear-gradient(135deg, rgba(245, 246, 249, 0.98), rgba(232, 235, 241, 0.98));
+  color: #4b5563;
   border-radius: 16px;
   padding: 12px 14px;
   font-size: 14px;
   line-height: 1.35;
-  box-shadow: 0 8px 18px rgba(38, 20, 24, .06);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, .06);
 }
 
-.wa-icon { width:20px; height:20px; display:inline-flex; }
+.wa-icon { width:26px; height:26px; display:inline-flex; flex: 0 0 26px; }
 .wa-icon svg { width:100%; height:100%; display:block; }
 
 .thanks-modal { display:none; position:fixed; inset:0; z-index:70; background:rgba(8,12,24,.4); padding:16px; }
