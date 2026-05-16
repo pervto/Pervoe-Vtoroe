@@ -443,6 +443,7 @@ main.container {
   border-radius: 999px;
   padding: 4px 4px 4px 14px;
   cursor: pointer;
+  font-family: inherit;
   font-weight: 800;
   font-size: 15px;
   display: inline-flex;
@@ -476,6 +477,7 @@ main.container {
   display: inline-flex;
   align-items: center;
   min-width: 0;
+  font-family: inherit;
   font-weight: 750;
 }
 
@@ -970,7 +972,7 @@ main.container {
     overflow: hidden;
   }
   .food-topline {
-    margin-bottom: 7px;
+    margin-bottom: 5px;
     gap: 8px;
   }
   .food-category,
@@ -979,8 +981,8 @@ main.container {
     line-height: 1.28;
   }
   .food-weight {
-    font-size: 10px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 650;
   }
   .food-meta { margin-top: 1px; }
   .food-description {
@@ -998,8 +1000,8 @@ main.container {
     display: block;
   }
   .food-price {
-    font-size: 18px;
-    font-weight: 650;
+    font-size: 16px;
+    font-weight: 600;
     margin: 0;
   }
   .item-controls {
@@ -1026,6 +1028,8 @@ main.container {
     font-size: 12px;
     line-height: 1;
     opacity: 1;
+    font-family: inherit;
+    font-weight: 750;
     letter-spacing: -0.01em;
   }
   .btn-add::after,
