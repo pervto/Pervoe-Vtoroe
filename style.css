@@ -951,7 +951,12 @@ main.container {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 0;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: rgba(15, 22, 36, 0.28);
+  border: 1px solid rgba(255,255,255,.14);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.22));
 }
 
@@ -1534,14 +1539,12 @@ main.container {
     height: 42px;
   }
   .dish-modal-nav {
-    width: 42px;
-    height: 42px;
+    display: none;
   }
-  .dish-modal-nav-prev { left: 14px; }
-  .dish-modal-nav-next { right: 14px; }
   .dish-modal-dots {
     bottom: 14px;
     gap: 9px;
+    padding: 6px 10px;
   }
   .dish-modal-body {
     padding: 18px 16px calc(20px + env(safe-area-inset-bottom));
