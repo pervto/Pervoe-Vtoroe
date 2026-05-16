@@ -291,8 +291,8 @@ function renderDishModal(item) {
 
   title.textContent = item.name;
   price.textContent = money(item.price);
-  weight.textContent = item.weight || "";
-  weight.classList.toggle("is-empty", !item.weight);
+  weight.textContent = "";
+  weight.classList.add("is-empty");
   category.textContent = item.category || "Без категории";
   category.classList.toggle("is-empty", !item.category);
   tagWeight.textContent = item.weight || "";
