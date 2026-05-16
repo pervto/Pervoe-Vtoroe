@@ -21,10 +21,19 @@
 
 * { box-sizing: border-box; }
 
+html {
+  font-family: "Sora", "Segoe UI", Arial, sans-serif;
+}
+
+body :where(:not(.material-symbols-outlined)) {
+  font-family: inherit;
+}
+
 button,
 input,
 textarea,
-select {
+select,
+option {
   font: inherit;
 }
 
@@ -33,7 +42,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 body {
   margin: 0;
   color: var(--text);
-  font-family: "Sora", "Segoe UI", Arial, sans-serif;
+  font-family: inherit;
   font-size: 16px;
   min-height: 100vh;
   display: flex;
@@ -257,6 +266,17 @@ main.container {
 .search-wrap:focus-within { transform: translateY(-1px); box-shadow: 0 14px 30px rgba(21,34,76,.12); }
 
 .material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
   font-variation-settings: "FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24;
 }
 
@@ -406,10 +426,11 @@ main.container {
   color:#0f172d;
 }
 .food-copy {
-  display: grid;
-  align-content: start;
-  gap: 0;
+  display: flex;
   flex: 1 1 auto;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
 }
 .food-weight {
   color: #6a738d;
@@ -427,6 +448,12 @@ main.container {
   font-size: 14px;
   line-height: 1.32;
 }
+.food-details {
+  margin-top: 4px;
+  display: grid;
+  align-content: start;
+  gap: 2px;
+}
 .food-category.is-empty,
 .food-weight.is-empty,
 .food-meta.is-empty,
@@ -434,7 +461,13 @@ main.container {
   display: none;
 }
 
-.food-footer { margin-top:8px; display:flex; align-items:center; gap:10px; }
+.food-footer {
+  margin-top: auto;
+  padding-top: 10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
 .food-price {
   font-size: 24px;
   font-weight: 650;
@@ -1010,8 +1043,12 @@ main.container {
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+  .food-details {
+    margin-top: 3px;
+    gap: 1px;
+  }
   .food-footer {
-    margin-top: 10px;
+    padding-top: 8px;
     display: block;
   }
   .food-price {
