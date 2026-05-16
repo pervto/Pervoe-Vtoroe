@@ -438,6 +438,16 @@ main.container {
   min-width: 0;
 }
 
+.btn-add-main {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.btn-add-price {
+  display: none;
+}
+
 .item-controls {
   min-width: 154px;
   min-height: 44px;
@@ -927,6 +937,12 @@ main.container {
     align-items: stretch;
     gap: 8px;
   }
+  .food-card[data-cart-state="add"] .food-price {
+    display: none;
+  }
+  .food-card[data-cart-state="add"] .food-footer {
+    margin-top: 12px;
+  }
   .food-price {
     font-size: 20px;
     align-self: flex-start;
@@ -941,9 +957,27 @@ main.container {
     min-height: 40px;
   }
   .btn-add {
-    padding: 4px 4px 4px 12px;
+    padding: 4px 4px 4px 10px;
     font-size: 13px;
-    gap: 4px;
+    gap: 6px;
+  }
+  .btn-add-main {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+    justify-items: start;
+  }
+  .btn-add-price {
+    display: block;
+    font-size: 13px;
+    line-height: 1;
+    font-weight: 900;
+    color: #fff;
+  }
+  .btn-add-label {
+    font-size: 10px;
+    line-height: 1.1;
+    opacity: .92;
   }
   .btn-add::after,
   .qty-inline button {
