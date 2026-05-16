@@ -7,6 +7,7 @@ let promo = { code: "", discount: 0 };
 let categoryOrderList = [];
 let activeDishName = "";
 let activeDishSlide = 0;
+let activeDishPhotoKey = "";
 let activeDishPointerId = null;
 let activeDishDragStartX = 0;
 let activeDishDragOffsetX = 0;
@@ -100,6 +101,47 @@ function syncDishModalTrack(options = {}) {
 
   track.style.transition = withTransition ? DISH_CAROUSEL_TRANSITION : "none";
   track.style.transform = `translateX(${(-activeDishSlide * width) + offsetX}px)`;
+}
+
+function renderDishModalSlides(item) {
+  const track = document.getElementById("dish-modal-track");
+  if (!track || !item) return 1;
+
+  const photos = getItemPhotos(item);
+  const totalSlides = getDishSlideCount(item);
+  const photoKey = photos.length ? photos.join("|") : "__empty__";
+
+  if (track.dataset.photoKey !== photoKey) {
+    track.innerHTML = photos.length
+      ? photos.map((photoUrl, index) => (
+        `<div class="dish-modal-slide">
+          <img class="dish-modal-image" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(`${item.name} ${index + 1}`)}" loading="eager" decoding="async" draggable="false" />
+        </div>`
+      )).join("")
+      : `<div class="dish-modal-slide"><div class="dish-modal-image-placeholder">Фотография блюда скоро появится</div></div>`;
+
+    track.dataset.photoKey = photoKey;
+  }
+
+  activeDishPhotoKey = photoKey;
+  return totalSlides;
+}
+
+function renderDishModalDots(totalSlides) {
+  const dots = document.getElementById("dish-modal-dots");
+  if (!dots) return;
+
+  dots.innerHTML = Array.from({ length: totalSlides }, (_, index) => (
+    `<button class="dish-modal-dot${index === activeDishSlide ? " is-active" : ""}" type="button" data-slide-index="${index}" aria-label="Перейти к фото ${index + 1}" aria-current="${index === activeDishSlide ? "true" : "false"}"></button>`
+  )).join("");
+}
+
+function preloadDishPhotos(item) {
+  getItemPhotos(item).forEach((photoUrl) => {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = photoUrl;
+  });
 }
 
 function showToast(text) {
@@ -209,35 +251,15 @@ function updateDishModalCarousel(item) {
   const nextBtn = document.getElementById("dish-modal-next");
   if (!modal || !track || !dots || !prevBtn || !nextBtn || !item) return;
 
-  const photos = getItemPhotos(item);
-  const slides = photos.length
-    ? photos.map((photoUrl, index) => (
-      `<div class="dish-modal-slide">
-        <img class="dish-modal-image" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(`${item.name} ${index + 1}`)}" loading="lazy" />
-      </div>`
-    )).join("")
-    : `<div class="dish-modal-slide"><div class="dish-modal-image-placeholder">Фотография блюда скоро появится</div></div>`;
-
-  const totalSlides = getDishSlideCount(item);
+  const totalSlides = renderDishModalSlides(item);
   activeDishSlide = Math.min(Math.max(activeDishSlide, 0), totalSlides - 1);
-  track.innerHTML = slides;
   syncDishModalTrack({ withTransition: !activeDishIsDragging, offsetX: activeDishIsDragging ? activeDishDragOffsetX : 0 });
-
-  dots.innerHTML = Array.from({ length: totalSlides }, (_, index) => (
-    `<button class="dish-modal-dot${index === activeDishSlide ? " is-active" : ""}" type="button" data-slide-index="${index}" aria-label="Перейти к фото ${index + 1}"></button>`
-  )).join("");
+  renderDishModalDots(totalSlides);
 
   const multipleSlides = totalSlides > 1;
   prevBtn.classList.toggle("is-hidden", !multipleSlides);
   nextBtn.classList.toggle("is-hidden", !multipleSlides);
   dots.classList.toggle("is-hidden", !multipleSlides);
-
-  dots.querySelectorAll("[data-slide-index]").forEach((button) => {
-    button.addEventListener("click", () => {
-      activeDishSlide = Number(button.dataset.slideIndex) || 0;
-      updateDishModalCarousel(item);
-    });
-  });
 }
 
 function updateDishModalControls() {
@@ -277,6 +299,7 @@ function renderDishModal(item) {
   description.textContent = item.description || "Подробное описание скоро появится.";
   description.classList.toggle("is-empty", !item.description);
 
+  preloadDishPhotos(item);
   updateDishModalCarousel(item);
   updateDishModalControls();
 }
@@ -751,6 +774,14 @@ document.getElementById("dish-modal-next").addEventListener("click", (e) => {
   if (!item) return;
   const totalSlides = Math.max(getItemPhotos(item).length, 1);
   activeDishSlide = (activeDishSlide + 1) % totalSlides;
+  updateDishModalCarousel(item);
+});
+document.getElementById("dish-modal-dots").addEventListener("click", (e) => {
+  const button = e.target.closest("[data-slide-index]");
+  if (!button) return;
+  const item = getItemByName(activeDishName);
+  if (!item) return;
+  activeDishSlide = Number(button.dataset.slideIndex) || 0;
   updateDishModalCarousel(item);
 });
 bindDishModalSwipeEvents();
