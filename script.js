@@ -282,6 +282,7 @@ function renderDishModal(item) {
   const price = document.getElementById("dish-modal-price");
   const weight = document.getElementById("dish-modal-weight");
   const category = document.getElementById("dish-modal-category");
+  const tagWeight = document.getElementById("dish-modal-tag-weight");
   const meta = document.getElementById("dish-modal-meta");
   const description = document.getElementById("dish-modal-description");
 
@@ -294,6 +295,8 @@ function renderDishModal(item) {
   weight.classList.toggle("is-empty", !item.weight);
   category.textContent = item.category || "Без категории";
   category.classList.toggle("is-empty", !item.category);
+  tagWeight.textContent = item.weight || "";
+  tagWeight.classList.toggle("is-empty", !item.weight);
   meta.textContent = metaParts.join(" • ");
   meta.classList.toggle("is-empty", !metaParts.length);
   description.textContent = item.description || "Подробное описание скоро появится.";
@@ -576,15 +579,11 @@ function renderMenu() {
 
   grid.innerHTML = filtered
     .map((item, index) => {
-      const metaParts = [];
-      if (item.calories) metaParts.push(`${item.calories} ккал`);
       const categoryHtml = `<p class="food-category${item.category ? "" : " is-empty"}">${item.category ? escapeHtml(item.category) : "&nbsp;"}</p>`;
-      const metaHtml = `<p class="food-meta${metaParts.length ? "" : " is-empty"}">${metaParts.length ? escapeHtml(metaParts.join(" • ")) : "&nbsp;"}</p>`;
-      const descriptionHtml = `<p class="food-description${item.description ? "" : " is-empty"}">${item.description ? escapeHtml(item.description) : "&nbsp;"}</p>`;
       const weightHtml = `<span class="food-weight${item.weight ? "" : " is-empty"}">${item.weight ? escapeHtml(item.weight) : "&nbsp;"}</span>`;
       const imageHtml = buildDishPhotoHtml(item);
 
-      return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" data-cart-state="${getCartQty(item.name) > 0 ? "qty" : "add"}" tabindex="0" role="button" aria-label="Открыть ${escapeHtml(item.name)}" style="animation-delay:${index * 0.06}s">${imageHtml}<div class="food-copy"><div class="food-topline"><div class="food-price">${money(item.price)}</div>${weightHtml}</div><h3 class="food-title">${escapeHtml(item.name)}</h3><div class="food-details">${categoryHtml}${metaHtml}${descriptionHtml}</div></div><div class="food-footer"><div class="item-controls" data-state="${getCartQty(item.name) > 0 ? "qty" : "add"}">${buildControlsHtml(item.name)}</div></div></article>`;
+      return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" data-cart-state="${getCartQty(item.name) > 0 ? "qty" : "add"}" tabindex="0" role="button" aria-label="Открыть ${escapeHtml(item.name)}" style="animation-delay:${index * 0.06}s">${imageHtml}<div class="food-copy"><div class="food-topline"><div class="food-price">${money(item.price)}</div>${weightHtml}</div><h3 class="food-title">${escapeHtml(item.name)}</h3><div class="food-details">${categoryHtml}</div></div><div class="food-footer"><div class="item-controls" data-state="${getCartQty(item.name) > 0 ? "qty" : "add"}">${buildControlsHtml(item.name)}</div></div></article>`;
     })
     .join("");
 

@@ -1039,13 +1039,14 @@ main.container {
   font-weight: 700;
 }
 
-.dish-modal-tag-muted {
-  color: #5a6480;
-}
-
 .dish-modal-weight.is-empty,
 .dish-modal-tag.is-empty {
   display: none;
+}
+
+.food-meta,
+.food-description {
+  display: none !important;
 }
 
 .dish-modal-copy {
