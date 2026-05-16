@@ -5,6 +5,8 @@ let searchQuery = "";
 let toastTimer = null;
 let promo = { code: "", discount: 0 };
 let categoryOrderList = [];
+let activeDishName = "";
+let activeDishSlide = 0;
 
 const CART_KEY = "pervoe-vtoroe-cart";
 const PROMO_KEY = "pervoe-vtoroe-promo";
@@ -58,6 +60,24 @@ function normalizePhotoUrl(rawUrl) {
     return `https://drive.google.com/thumbnail?id=${driveIdMatch[1]}&sz=w1200`;
   }
   return url;
+}
+
+function getItemByName(name) {
+  return menuData.find((item) => item.name === name) || null;
+}
+
+function getItemPhotos(item) {
+  if (!item) return [];
+  const rawPhotos = Array.isArray(item.photos) && item.photos.length ? item.photos : [item.photo];
+  return [...new Set(rawPhotos.map(normalizePhotoUrl).filter(Boolean))];
+}
+
+function buildDishPhotoHtml(item, className = "food-image") {
+  const [photoUrl] = getItemPhotos(item);
+  if (photoUrl) {
+    return `<img class="${className}" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(item.name)}" loading="lazy" />`;
+  }
+  return `<div class="food-image-placeholder">Фотография блюда скоро появится</div>`;
 }
 
 function showToast(text) {
@@ -125,16 +145,28 @@ function getCartQty(name) {
   return found ? found.qty : 0;
 }
 
+function syncOverlayState() {
+  const cartModal = document.getElementById("cart-modal");
+  const dishModal = document.getElementById("dish-modal");
+  const hasOverlayOpen = Boolean(
+    (cartModal && cartModal.classList.contains("show")) ||
+    (dishModal && dishModal.classList.contains("show"))
+  );
+
+  document.body.classList.toggle("no-scroll", hasOverlayOpen);
+
+  const cartButton = document.getElementById("cart-button");
+  if (cartButton) cartButton.classList.toggle("is-hidden", hasOverlayOpen);
+}
+
 function openCart() {
   document.getElementById("cart-modal").classList.add("show");
-  document.body.classList.add("no-scroll");
-  document.getElementById("cart-button").classList.add("is-hidden");
+  syncOverlayState();
 }
 
 function closeCart() {
   document.getElementById("cart-modal").classList.remove("show");
-  document.body.classList.remove("no-scroll");
-  document.getElementById("cart-button").classList.remove("is-hidden");
+  syncOverlayState();
 }
 
 function showThanksModal() {
@@ -145,6 +177,108 @@ function showThanksModal() {
 function hideThanksModal() {
   const el = document.getElementById("thanks-modal");
   if (el) el.classList.remove("show");
+}
+
+function updateDishModalCarousel(item) {
+  const modal = document.getElementById("dish-modal");
+  const track = document.getElementById("dish-modal-track");
+  const dots = document.getElementById("dish-modal-dots");
+  const prevBtn = document.getElementById("dish-modal-prev");
+  const nextBtn = document.getElementById("dish-modal-next");
+  if (!modal || !track || !dots || !prevBtn || !nextBtn || !item) return;
+
+  const photos = getItemPhotos(item);
+  const slides = photos.length
+    ? photos.map((photoUrl, index) => (
+      `<div class="dish-modal-slide">
+        <img class="dish-modal-image" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(`${item.name} ${index + 1}`)}" loading="lazy" />
+      </div>`
+    )).join("")
+    : `<div class="dish-modal-slide"><div class="dish-modal-image-placeholder">Фотография блюда скоро появится</div></div>`;
+
+  const totalSlides = Math.max(photos.length, 1);
+  activeDishSlide = Math.min(Math.max(activeDishSlide, 0), totalSlides - 1);
+  track.innerHTML = slides;
+  track.style.transform = `translateX(-${activeDishSlide * 100}%)`;
+
+  dots.innerHTML = Array.from({ length: totalSlides }, (_, index) => (
+    `<button class="dish-modal-dot${index === activeDishSlide ? " is-active" : ""}" type="button" data-slide-index="${index}" aria-label="Перейти к фото ${index + 1}"></button>`
+  )).join("");
+
+  const multipleSlides = totalSlides > 1;
+  prevBtn.classList.toggle("is-hidden", !multipleSlides);
+  nextBtn.classList.toggle("is-hidden", !multipleSlides);
+  dots.classList.toggle("is-hidden", !multipleSlides);
+
+  dots.querySelectorAll("[data-slide-index]").forEach((button) => {
+    button.addEventListener("click", () => {
+      activeDishSlide = Number(button.dataset.slideIndex) || 0;
+      updateDishModalCarousel(item);
+    });
+  });
+}
+
+function updateDishModalControls() {
+  const controls = document.getElementById("dish-modal-controls");
+  if (!controls || !activeDishName) return;
+  const qty = getCartQty(activeDishName);
+  const previousState = controls.dataset.state || "add";
+  const nextState = qty > 0 ? "qty" : "add";
+  controls.dataset.state = nextState;
+  controls.innerHTML = buildControlsHtml(activeDishName, {
+    animate: previousState !== nextState,
+    state: nextState
+  });
+  bindMenuControlEvents();
+}
+
+function renderDishModal(item) {
+  if (!item) return;
+  const title = document.getElementById("dish-modal-title");
+  const price = document.getElementById("dish-modal-price");
+  const weight = document.getElementById("dish-modal-weight");
+  const category = document.getElementById("dish-modal-category");
+  const meta = document.getElementById("dish-modal-meta");
+  const description = document.getElementById("dish-modal-description");
+
+  const metaParts = [];
+  if (item.calories) metaParts.push(`${item.calories} ккал`);
+
+  title.textContent = item.name;
+  price.textContent = money(item.price);
+  weight.textContent = item.weight || "";
+  weight.classList.toggle("is-empty", !item.weight);
+  category.textContent = item.category || "Без категории";
+  category.classList.toggle("is-empty", !item.category);
+  meta.textContent = metaParts.join(" • ");
+  meta.classList.toggle("is-empty", !metaParts.length);
+  description.textContent = item.description || "Подробное описание скоро появится.";
+  description.classList.toggle("is-empty", !item.description);
+
+  updateDishModalCarousel(item);
+  updateDishModalControls();
+}
+
+function openDishModal(name) {
+  const item = getItemByName(name);
+  const modal = document.getElementById("dish-modal");
+  if (!item || !modal) return;
+  activeDishName = item.name;
+  activeDishSlide = 0;
+  renderDishModal(item);
+  modal.classList.add("show");
+  modal.setAttribute("aria-hidden", "false");
+  syncOverlayState();
+}
+
+function closeDishModal() {
+  const modal = document.getElementById("dish-modal");
+  if (!modal) return;
+  modal.classList.remove("show");
+  modal.setAttribute("aria-hidden", "true");
+  activeDishName = "";
+  activeDishSlide = 0;
+  syncOverlayState();
 }
 
 function updateCartButton() {
@@ -187,7 +321,7 @@ function updateSearchClearVisibility() {
 }
 
 function updateMenuControls() {
-  document.querySelectorAll("[data-item-name]").forEach((card) => {
+  document.querySelectorAll(".food-card[data-item-name]").forEach((card) => {
     const name = card.dataset.itemName;
     const controls = card.querySelector(".item-controls");
     if (!controls) return;
@@ -204,6 +338,7 @@ function updateMenuControls() {
   });
 
   bindMenuControlEvents();
+  updateDishModalControls();
 }
 
 function addToCart(item) {
@@ -283,21 +418,41 @@ function buildControlsHtml(name, options = {}) {
 }
 
 function bindMenuControlEvents() {
-  const grid = document.getElementById("menu-grid");
-
-  grid.querySelectorAll(".btn-add").forEach((btn) => {
-    btn.onclick = () => {
+  document.querySelectorAll(".btn-add").forEach((btn) => {
+    btn.onclick = (event) => {
+      event.stopPropagation();
       const item = menuData.find((x) => x.name === btn.dataset.name);
       if (item) addToCart(item);
     };
   });
 
-  grid.querySelectorAll(".card-plus").forEach((btn) => {
-    btn.onclick = () => changeQty(btn.dataset.name, 1);
+  document.querySelectorAll(".card-plus").forEach((btn) => {
+    btn.onclick = (event) => {
+      event.stopPropagation();
+      changeQty(btn.dataset.name, 1);
+    };
   });
 
-  grid.querySelectorAll(".card-minus").forEach((btn) => {
-    btn.onclick = () => changeQty(btn.dataset.name, -1);
+  document.querySelectorAll(".card-minus").forEach((btn) => {
+    btn.onclick = (event) => {
+      event.stopPropagation();
+      changeQty(btn.dataset.name, -1);
+    };
+  });
+}
+
+function bindMenuCardEvents() {
+  const grid = document.getElementById("menu-grid");
+  if (!grid) return;
+
+  grid.querySelectorAll(".food-card").forEach((card) => {
+    card.onclick = () => openDishModal(card.dataset.itemName);
+    card.onkeydown = (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openDishModal(card.dataset.itemName);
+      }
+    };
   });
 }
 
@@ -319,16 +474,14 @@ function renderMenu() {
       const metaHtml = `<p class="food-meta${metaParts.length ? "" : " is-empty"}">${metaParts.length ? escapeHtml(metaParts.join(" • ")) : "&nbsp;"}</p>`;
       const descriptionHtml = `<p class="food-description${item.description ? "" : " is-empty"}">${item.description ? escapeHtml(item.description) : "&nbsp;"}</p>`;
       const weightHtml = `<span class="food-weight${item.weight ? "" : " is-empty"}">${item.weight ? escapeHtml(item.weight) : "&nbsp;"}</span>`;
-      const photoUrl = normalizePhotoUrl(item.photo);
-      const imageHtml = photoUrl
-        ? `<img class="food-image" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend','<div class=&quot;food-image-placeholder&quot;>Фотография блюда скоро появится</div>');" />`
-        : `<div class="food-image-placeholder">Фотография блюда скоро появится</div>`;
+      const imageHtml = buildDishPhotoHtml(item);
 
-      return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" data-cart-state="${getCartQty(item.name) > 0 ? "qty" : "add"}" style="animation-delay:${index * 0.06}s">${imageHtml}<div class="food-copy"><div class="food-topline"><div class="food-price">${money(item.price)}</div>${weightHtml}</div><h3 class="food-title">${escapeHtml(item.name)}</h3><div class="food-details">${categoryHtml}${metaHtml}${descriptionHtml}</div></div><div class="food-footer"><div class="item-controls" data-state="${getCartQty(item.name) > 0 ? "qty" : "add"}">${buildControlsHtml(item.name)}</div></div></article>`;
+      return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" data-cart-state="${getCartQty(item.name) > 0 ? "qty" : "add"}" tabindex="0" role="button" aria-label="Открыть ${escapeHtml(item.name)}" style="animation-delay:${index * 0.06}s">${imageHtml}<div class="food-copy"><div class="food-topline"><div class="food-price">${money(item.price)}</div>${weightHtml}</div><h3 class="food-title">${escapeHtml(item.name)}</h3><div class="food-details">${categoryHtml}${metaHtml}${descriptionHtml}</div></div><div class="food-footer"><div class="item-controls" data-state="${getCartQty(item.name) > 0 ? "qty" : "add"}">${buildControlsHtml(item.name)}</div></div></article>`;
     })
     .join("");
 
   bindMenuControlEvents();
+  bindMenuCardEvents();
 }
 
 function renderCart() {
@@ -418,6 +571,11 @@ async function loadMenu() {
     };
 
     const findIndexByAliases = (key) => cleanHeaders.findIndex((header) => aliases[key].includes(header));
+    const photoIndexes = cleanHeaders.reduce((acc, header, index) => {
+      const isPhotoColumn = aliases.photo.includes(header) || /^(photo|image|фото|картинка)(\s*\d+)?$/i.test(header);
+      if (isPhotoColumn) acc.push(index);
+      return acc;
+    }, []);
 
     const iName = findIndexByAliases("name");
     const iPrice = findIndexByAliases("price");
@@ -449,16 +607,24 @@ async function loadMenu() {
     menuData = rows
       .slice(1)
       .map((line) => parseCsvLine(line))
-      .map((cols) => ({
-        name: cols[iName] || "",
-        price: Number(cols[iPrice]) || 0,
-        category: cols[iCategory] || "",
-        available: ["true", "да", "yes", "1"].includes(String(cols[iAvailable] || "").trim().toLowerCase()),
-        photo: iPhoto >= 0 ? cols[iPhoto] : "",
-        description: iDescription >= 0 ? cols[iDescription] : "",
-        weight: iWeight >= 0 ? cols[iWeight] : "",
-        calories: iCalories >= 0 ? cols[iCalories] : ""
-      }))
+      .map((cols) => {
+        const photos = photoIndexes
+          .map((index) => cols[index] || "")
+          .map((value) => normalizePhotoUrl(value))
+          .filter(Boolean);
+
+        return {
+          name: cols[iName] || "",
+          price: Number(cols[iPrice]) || 0,
+          category: cols[iCategory] || "",
+          available: ["true", "да", "yes", "1"].includes(String(cols[iAvailable] || "").trim().toLowerCase()),
+          photo: photos[0] || (iPhoto >= 0 ? normalizePhotoUrl(cols[iPhoto]) : ""),
+          photos,
+          description: iDescription >= 0 ? cols[iDescription] : "",
+          weight: iWeight >= 0 ? cols[iWeight] : "",
+          calories: iCalories >= 0 ? cols[iCalories] : ""
+        };
+      })
       .filter((item) => item.name && item.available);
 
     if (!menuData.length) {
@@ -482,6 +648,26 @@ document.getElementById("thanks-close").addEventListener("click", hideThanksModa
 document.getElementById("thanks-modal").addEventListener("click", (e) => { if (e.target.id === "thanks-modal") hideThanksModal(); });
 document.getElementById("close-modal").addEventListener("click", closeCart);
 document.getElementById("cart-modal").addEventListener("click", (e) => { if (e.target.id === "cart-modal") closeCart(); });
+document.getElementById("dish-modal-close").addEventListener("click", closeDishModal);
+document.getElementById("dish-modal").addEventListener("click", (e) => {
+  if (e.target.id === "dish-modal") closeDishModal();
+});
+document.getElementById("dish-modal-prev").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const item = getItemByName(activeDishName);
+  if (!item) return;
+  const totalSlides = Math.max(getItemPhotos(item).length, 1);
+  activeDishSlide = (activeDishSlide - 1 + totalSlides) % totalSlides;
+  updateDishModalCarousel(item);
+});
+document.getElementById("dish-modal-next").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const item = getItemByName(activeDishName);
+  if (!item) return;
+  const totalSlides = Math.max(getItemPhotos(item).length, 1);
+  activeDishSlide = (activeDishSlide + 1) % totalSlides;
+  updateDishModalCarousel(item);
+});
 
 document.getElementById("promo-apply").addEventListener("click", applyPromoCode);
 document.getElementById("promo-code").addEventListener("keydown", (e) => {
@@ -531,6 +717,32 @@ window.addEventListener("resize", () => {
 }, { passive: true });
 
 window.addEventListener("load", syncStickyOffsets);
+window.addEventListener("keydown", (event) => {
+  const dishModal = document.getElementById("dish-modal");
+  const cartModal = document.getElementById("cart-modal");
+  if (dishModal && dishModal.classList.contains("show") && event.key === "ArrowLeft") {
+    const item = getItemByName(activeDishName);
+    if (!item) return;
+    const totalSlides = Math.max(getItemPhotos(item).length, 1);
+    activeDishSlide = (activeDishSlide - 1 + totalSlides) % totalSlides;
+    updateDishModalCarousel(item);
+    return;
+  }
+  if (dishModal && dishModal.classList.contains("show") && event.key === "ArrowRight") {
+    const item = getItemByName(activeDishName);
+    if (!item) return;
+    const totalSlides = Math.max(getItemPhotos(item).length, 1);
+    activeDishSlide = (activeDishSlide + 1) % totalSlides;
+    updateDishModalCarousel(item);
+    return;
+  }
+  if (event.key !== "Escape") return;
+  if (dishModal && dishModal.classList.contains("show")) {
+    closeDishModal();
+    return;
+  }
+  if (cartModal && cartModal.classList.contains("show")) closeCart();
+});
 
 document.getElementById("order-form").addEventListener("submit", (e) => {
   e.preventDefault();

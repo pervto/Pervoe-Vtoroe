@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=35" />
+  <link rel="stylesheet" href="style.css?v=36" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -133,6 +133,48 @@
     </div>
   </div>
 
+  <div id="dish-modal" class="dish-modal" aria-hidden="true">
+    <div class="dish-modal-shell">
+      <button id="dish-modal-close" class="dish-modal-close" type="button" aria-label="Закрыть просмотр блюда">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+
+      <div class="dish-modal-gallery">
+        <div id="dish-modal-track" class="dish-modal-track"></div>
+        <button id="dish-modal-prev" class="dish-modal-nav dish-modal-nav-prev" type="button" aria-label="Предыдущее фото">
+          <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+        </button>
+        <button id="dish-modal-next" class="dish-modal-nav dish-modal-nav-next" type="button" aria-label="Следующее фото">
+          <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+        </button>
+        <div id="dish-modal-dots" class="dish-modal-dots"></div>
+      </div>
+
+      <div class="dish-modal-body">
+        <div class="dish-modal-topline">
+          <div id="dish-modal-price" class="dish-modal-price">0₸</div>
+          <div id="dish-modal-weight" class="dish-modal-weight"></div>
+        </div>
+
+        <h2 id="dish-modal-title" class="dish-modal-title"></h2>
+
+        <div class="dish-modal-tags">
+          <span id="dish-modal-category" class="dish-modal-tag"></span>
+          <span id="dish-modal-meta" class="dish-modal-tag dish-modal-tag-muted"></span>
+        </div>
+
+        <div class="dish-modal-copy">
+          <p class="dish-modal-copy-label">О блюде</p>
+          <p id="dish-modal-description" class="dish-modal-description"></p>
+        </div>
+
+        <div class="dish-modal-footer">
+          <div id="dish-modal-controls" class="dish-modal-controls"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="thanks-modal" class="thanks-modal" aria-hidden="true">
     <div class="thanks-card">
       <h3>Спасибо за заказ!</h3>
@@ -142,7 +184,7 @@
   </div>
 
   <script src="config.js?v=30"></script>
-  <script src="script.js?v=31"></script>
+  <script src="script.js?v=32"></script>
   <script>
     const siteLogo = document.querySelector("[data-logo-src]");
     if (siteLogo) {
