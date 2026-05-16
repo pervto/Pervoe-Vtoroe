@@ -888,8 +888,78 @@ main.container {
   .brand-logo { height: 48px; }
   .hero-title { font-size: 20px; }
   .search-wrap { margin-top: 10px; }
-  .food-title { font-size: 30px; }
-  .food-price { font-size: 28px; }
+  .menu-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    padding-bottom: 96px;
+  }
+  .food-card {
+    padding: 10px;
+    border-radius: 16px;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.05);
+  }
+  .food-image,
+  .food-image-placeholder {
+    height: 128px;
+    border-radius: 11px;
+    margin-bottom: 10px;
+  }
+  .food-title {
+    font-size: 19px;
+    line-height: 1.1;
+    margin-bottom: 3px;
+  }
+  .food-category,
+  .food-meta {
+    font-size: 12px;
+    min-height: 18px;
+  }
+  .food-meta { margin-top: 4px; }
+  .food-description {
+    margin-top: 6px;
+    font-size: 11px;
+    line-height: 1.35;
+    min-height: 30px;
+  }
+  .food-footer {
+    margin-top: 10px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .food-price {
+    font-size: 20px;
+    align-self: flex-start;
+  }
+  .item-controls {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+  }
+  .btn-add,
+  .qty-inline {
+    min-height: 40px;
+  }
+  .btn-add {
+    padding: 4px 4px 4px 12px;
+    font-size: 13px;
+    gap: 4px;
+  }
+  .btn-add::after,
+  .qty-inline button {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+    font-size: 20px;
+  }
+  .qty-inline {
+    padding: 4px;
+    gap: 6px;
+  }
+  .qty-inline span {
+    min-width: 22px;
+    font-size: 14px;
+  }
   .cart-button {
     min-width: 124px;
     min-height: 46px;
