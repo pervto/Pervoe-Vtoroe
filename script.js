@@ -487,7 +487,7 @@ function bindMenuCardEvents() {
 }
 
 function bindDishModalSwipeEvents() {
-  const gallery = document.getElementById("dish-modal-gallery");
+  const gallery = document.getElementById("dish-modal-gallery") || document.querySelector(".dish-modal-gallery");
   if (!gallery || gallery.dataset.swipeBound === "true") return;
   gallery.dataset.swipeBound = "true";
 

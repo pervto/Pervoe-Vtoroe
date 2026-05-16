@@ -1087,12 +1087,12 @@ main.container {
 
 .dish-modal-controls {
   width: 100%;
-  max-width: 360px;
+  max-width: 420px;
 }
 
 .dish-modal-controls .item-controls {
   width: 100%;
-  min-height: 54px;
+  min-height: 64px;
   max-width: none;
 }
 
@@ -1100,28 +1100,35 @@ main.container {
 .dish-modal-controls .qty-inline {
   width: 100%;
   min-width: 0;
-  min-height: 54px;
+  min-height: 64px;
 }
 
 .dish-modal-controls .btn-add {
-  padding: 5px 5px 5px 16px;
-  font-size: 16px;
+  padding: 7px 7px 7px 22px;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.dish-modal-controls .btn-add-label {
+  font-size: 19px;
+  font-weight: 800;
 }
 
 .dish-modal-controls .btn-add::after,
 .dish-modal-controls .qty-inline button {
-  width: 44px;
-  height: 44px;
-  flex-basis: 44px;
-  font-size: 24px;
+  width: 50px;
+  height: 50px;
+  flex-basis: 50px;
+  font-size: 28px;
 }
 
 .dish-modal-controls .qty-inline {
-  padding: 5px;
+  padding: 7px;
 }
 
 .dish-modal-controls .qty-inline span {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
@@ -1580,25 +1587,28 @@ main.container {
     max-width: none;
   }
   .dish-modal-controls .item-controls {
-    min-height: 46px;
+    min-height: 54px;
   }
   .dish-modal-controls .btn-add,
   .dish-modal-controls .qty-inline {
-    min-height: 46px;
+    min-height: 54px;
   }
   .dish-modal-controls .btn-add {
-    padding: 4px 4px 4px 12px;
-    font-size: 14px;
+    padding: 6px 6px 6px 16px;
+    font-size: 16px;
+  }
+  .dish-modal-controls .btn-add-label {
+    font-size: 16px;
   }
   .dish-modal-controls .btn-add::after,
   .dish-modal-controls .qty-inline button {
-    width: 36px;
-    height: 36px;
-    flex-basis: 36px;
-    font-size: 20px;
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+    font-size: 24px;
   }
   .dish-modal-controls .qty-inline span {
-    font-size: 15px;
+    font-size: 17px;
   }
   .modal-content {
     max-width:none;
