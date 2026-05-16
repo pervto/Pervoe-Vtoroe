@@ -386,20 +386,20 @@ main.container {
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .food-title {
   font-size: 30px;
-  font-weight: 680;
+  font-weight: 650;
   line-height: 1.12;
-  margin: 0 0 2px;
+  margin: 0;
   color:#0f172d;
 }
 .food-copy {
   display: grid;
   align-content: start;
-  gap: 1px;
+  gap: 0;
   flex: 1 1 auto;
 }
 .food-weight {
@@ -410,13 +410,13 @@ main.container {
   text-align: right;
   white-space: nowrap;
 }
-.food-category { margin:0; color:#5f6884; font-size: 15px; line-height: 1.32; }
-.food-meta { margin:1px 0 0; color:#56607a; font-size: 15px; line-height: 1.3; }
+.food-category { margin:0; color:#5f6884; font-size: 15px; line-height: 1.26; }
+.food-meta { margin:0; color:#56607a; font-size: 15px; line-height: 1.26; }
 .food-description {
-  margin: 2px 0 0;
+  margin: 1px 0 0;
   color: #4b5563;
   font-size: 14px;
-  line-height: 1.38;
+  line-height: 1.32;
 }
 .food-category.is-empty,
 .food-weight.is-empty,
@@ -425,7 +425,7 @@ main.container {
   display: none;
 }
 
-.food-footer { margin-top:8px; display:flex; align-items:center; gap:10px; }
+.food-footer { margin-top:6px; display:flex; align-items:center; gap:10px; }
 .food-price {
   font-size: 24px;
   font-weight: 650;
@@ -950,45 +950,45 @@ main.container {
     padding-bottom: 96px;
   }
   .food-card {
-    padding: 10px 10px 11px;
-    border-radius: 16px;
+    padding: 9px 9px 10px;
+    border-radius: 15px;
     box-shadow: 0 12px 24px rgba(15, 23, 42, 0.055);
   }
   .food-image,
   .food-image-placeholder {
-    height: 122px;
-    border-radius: 12px;
-    margin-bottom: 8px;
+    height: 116px;
+    border-radius: 11px;
+    margin-bottom: 7px;
   }
   .food-title {
     font-size: 16px;
-    font-weight: 650;
-    line-height: 1.12;
+    font-weight: 600;
+    line-height: 1.08;
     margin-bottom: 0;
-    min-height: 35px;
+    min-height: 32px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
   .food-topline {
-    margin-bottom: 4px;
-    gap: 6px;
+    margin-bottom: 3px;
+    gap: 5px;
   }
   .food-category,
   .food-meta {
-    font-size: 10px;
-    line-height: 1.22;
+    font-size: 11px;
+    line-height: 1.16;
   }
   .food-weight {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 650;
   }
   .food-meta { margin-top: 0; }
   .food-description {
-    margin-top: 1px;
-    font-size: 10px;
-    line-height: 1.28;
+    margin-top: 0;
+    font-size: 11px;
+    line-height: 1.18;
     min-height: 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -996,7 +996,7 @@ main.container {
     overflow: hidden;
   }
   .food-footer {
-    margin-top: 6px;
+    margin-top: 4px;
     display: block;
   }
   .food-price {
@@ -1007,16 +1007,16 @@ main.container {
   .item-controls {
     width: 100%;
     min-width: 0;
-    min-height: 40px;
+    min-height: 38px;
   }
   .btn-add,
   .qty-inline {
-    min-height: 40px;
+    min-height: 38px;
   }
   .btn-add {
-    padding: 3px 3px 3px 11px;
+    padding: 3px 3px 3px 10px;
     font-size: 12px;
-    gap: 5px;
+    gap: 4px;
     box-shadow: 0 10px 18px rgba(224, 54, 59, 0.18);
   }
   .btn-add-main {
@@ -1034,22 +1034,22 @@ main.container {
   }
   .btn-add::after,
   .qty-inline button {
-    width: 32px;
-    height: 32px;
-    flex-basis: 32px;
-    font-size: 21px;
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
+    font-size: 20px;
   }
   .qty-inline {
     padding: 3px;
-    gap: 4px;
+    gap: 3px;
     width: 100%;
     min-width: 0;
     background: rgba(17, 24, 39, 0.07);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32);
   }
   .qty-inline span {
-    min-width: 22px;
-    font-size: 14px;
+    min-width: 20px;
+    font-size: 13px;
   }
   .cart-button {
     min-width: 124px;
