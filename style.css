@@ -880,6 +880,8 @@ main.container {
   overflow: hidden;
   background:
     linear-gradient(135deg, rgba(11, 15, 26, .94), rgba(20, 26, 40, .9));
+  touch-action: pan-y;
+  user-select: none;
 }
 
 .dish-modal-track {
@@ -943,34 +945,34 @@ main.container {
 .dish-modal-dots {
   position: absolute;
   left: 50%;
-  bottom: 22px;
+  bottom: 18px;
   transform: translateX(-50%);
   z-index: 3;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(15, 22, 36, 0.32);
-  border: 1px solid rgba(255,255,255,.16);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  gap: 10px;
+  padding: 0;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.22));
 }
 
 .dish-modal-dot {
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   border: none;
   border-radius: 50%;
   padding: 0;
-  background: rgba(255,255,255,.45);
+  background: rgba(255,255,255,.34);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.26);
   cursor: pointer;
-  transition: transform .2s ease, background .2s ease;
+  transition: transform .2s ease, background .2s ease, box-shadow .2s ease, opacity .2s ease;
 }
 
 .dish-modal-dot.is-active {
   background: #ffffff;
-  transform: scale(1.18);
+  box-shadow:
+    0 0 0 4px rgba(255,255,255,.14),
+    0 6px 16px rgba(255,255,255,.18);
+  transform: scale(1.08);
 }
 
 .dish-modal-body {
@@ -1538,7 +1540,8 @@ main.container {
   .dish-modal-nav-prev { left: 14px; }
   .dish-modal-nav-next { right: 14px; }
   .dish-modal-dots {
-    bottom: 16px;
+    bottom: 14px;
+    gap: 9px;
   }
   .dish-modal-body {
     padding: 18px 16px calc(20px + env(safe-area-inset-bottom));

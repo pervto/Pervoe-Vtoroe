@@ -7,9 +7,14 @@ let promo = { code: "", discount: 0 };
 let categoryOrderList = [];
 let activeDishName = "";
 let activeDishSlide = 0;
+let activeDishPointerId = null;
+let activeDishDragStartX = 0;
+let activeDishDragOffsetX = 0;
+let activeDishIsDragging = false;
 
 const CART_KEY = "pervoe-vtoroe-cart";
 const PROMO_KEY = "pervoe-vtoroe-promo";
+const DISH_CAROUSEL_TRANSITION = "transform .34s cubic-bezier(.22, 1, .36, 1)";
 function parseCsvLine(line) {
   const result = [];
   let current = "";
@@ -78,6 +83,23 @@ function buildDishPhotoHtml(item, className = "food-image") {
     return `<img class="${className}" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(item.name)}" loading="lazy" />`;
   }
   return `<div class="food-image-placeholder">Фотография блюда скоро появится</div>`;
+}
+
+function getDishSlideCount(item) {
+  return Math.max(getItemPhotos(item).length, 1);
+}
+
+function syncDishModalTrack(options = {}) {
+  const track = document.getElementById("dish-modal-track");
+  const gallery = document.querySelector(".dish-modal-gallery");
+  if (!track || !gallery) return;
+
+  const width = gallery.clientWidth || 1;
+  const offsetX = Number(options.offsetX || 0);
+  const withTransition = options.withTransition !== false;
+
+  track.style.transition = withTransition ? DISH_CAROUSEL_TRANSITION : "none";
+  track.style.transform = `translateX(${(-activeDishSlide * width) + offsetX}px)`;
 }
 
 function showToast(text) {
@@ -196,10 +218,10 @@ function updateDishModalCarousel(item) {
     )).join("")
     : `<div class="dish-modal-slide"><div class="dish-modal-image-placeholder">Фотография блюда скоро появится</div></div>`;
 
-  const totalSlides = Math.max(photos.length, 1);
+  const totalSlides = getDishSlideCount(item);
   activeDishSlide = Math.min(Math.max(activeDishSlide, 0), totalSlides - 1);
   track.innerHTML = slides;
-  track.style.transform = `translateX(-${activeDishSlide * 100}%)`;
+  syncDishModalTrack({ withTransition: !activeDishIsDragging, offsetX: activeDishIsDragging ? activeDishDragOffsetX : 0 });
 
   dots.innerHTML = Array.from({ length: totalSlides }, (_, index) => (
     `<button class="dish-modal-dot${index === activeDishSlide ? " is-active" : ""}" type="button" data-slide-index="${index}" aria-label="Перейти к фото ${index + 1}"></button>`
@@ -265,6 +287,10 @@ function openDishModal(name) {
   if (!item || !modal) return;
   activeDishName = item.name;
   activeDishSlide = 0;
+  activeDishPointerId = null;
+  activeDishDragStartX = 0;
+  activeDishDragOffsetX = 0;
+  activeDishIsDragging = false;
   renderDishModal(item);
   modal.classList.add("show");
   modal.setAttribute("aria-hidden", "false");
@@ -278,6 +304,10 @@ function closeDishModal() {
   modal.setAttribute("aria-hidden", "true");
   activeDishName = "";
   activeDishSlide = 0;
+  activeDishPointerId = null;
+  activeDishDragStartX = 0;
+  activeDishDragOffsetX = 0;
+  activeDishIsDragging = false;
   syncOverlayState();
 }
 
@@ -456,6 +486,61 @@ function bindMenuCardEvents() {
   });
 }
 
+function bindDishModalSwipeEvents() {
+  const gallery = document.getElementById("dish-modal-gallery");
+  if (!gallery || gallery.dataset.swipeBound === "true") return;
+  gallery.dataset.swipeBound = "true";
+
+  gallery.addEventListener("pointerdown", (event) => {
+    const item = getItemByName(activeDishName);
+    if (!item || getDishSlideCount(item) <= 1) return;
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (event.target.closest(".dish-modal-nav, .dish-modal-dot, .dish-modal-close")) return;
+
+    activeDishPointerId = event.pointerId;
+    activeDishDragStartX = event.clientX;
+    activeDishDragOffsetX = 0;
+    activeDishIsDragging = true;
+    gallery.setPointerCapture(event.pointerId);
+    syncDishModalTrack({ withTransition: false, offsetX: 0 });
+  });
+
+  gallery.addEventListener("pointermove", (event) => {
+    if (!activeDishIsDragging || activeDishPointerId !== event.pointerId) return;
+    activeDishDragOffsetX = event.clientX - activeDishDragStartX;
+    syncDishModalTrack({ withTransition: false, offsetX: activeDishDragOffsetX });
+  });
+
+  const finishSwipe = (event) => {
+    if (!activeDishIsDragging || activeDishPointerId !== event.pointerId) return;
+
+    const item = getItemByName(activeDishName);
+    const totalSlides = item ? getDishSlideCount(item) : 1;
+    const galleryWidth = gallery.clientWidth || 1;
+    const swipeThreshold = Math.max(galleryWidth * 0.16, 44);
+
+    if (Math.abs(activeDishDragOffsetX) > swipeThreshold && totalSlides > 1) {
+      if (activeDishDragOffsetX < 0 && activeDishSlide < totalSlides - 1) activeDishSlide += 1;
+      if (activeDishDragOffsetX > 0 && activeDishSlide > 0) activeDishSlide -= 1;
+    }
+
+    activeDishPointerId = null;
+    activeDishDragStartX = 0;
+    activeDishDragOffsetX = 0;
+    activeDishIsDragging = false;
+
+    if (item) updateDishModalCarousel(item);
+    else syncDishModalTrack({ withTransition: true, offsetX: 0 });
+  };
+
+  gallery.addEventListener("pointerup", finishSwipe);
+  gallery.addEventListener("pointercancel", finishSwipe);
+  gallery.addEventListener("lostpointercapture", (event) => {
+    if (!activeDishIsDragging || activeDishPointerId !== event.pointerId) return;
+    finishSwipe(event);
+  });
+}
+
 function renderMenu() {
   const grid = document.getElementById("menu-grid");
   const byCategory = activeCategory === "Все" ? menuData : menuData.filter((item) => item.category === activeCategory);
@@ -563,7 +648,7 @@ async function loadMenu() {
       price: ["price", "цена"],
       category: ["category", "категория"],
       available: ["available", "наличие (да/нет)", "наличие"],
-      photo: ["photo", "фото", "фото 1", "image", "картинка"],
+      photo: ["photo", "photo 1", "photo 2", "фото", "фото 1", "фото 2", "image", "image 1", "image 2", "картинка", "картинка 1", "картинка 2"],
       description: ["description", "описание"],
       weight: ["weight", "граммовка", "вес", "граммы"],
       calories: ["calories", "калории", "ккал"],
@@ -668,6 +753,7 @@ document.getElementById("dish-modal-next").addEventListener("click", (e) => {
   activeDishSlide = (activeDishSlide + 1) % totalSlides;
   updateDishModalCarousel(item);
 });
+bindDishModalSwipeEvents();
 
 document.getElementById("promo-apply").addEventListener("click", applyPromoCode);
 document.getElementById("promo-code").addEventListener("keydown", (e) => {
@@ -711,6 +797,7 @@ window.addEventListener("resize", () => {
     window.__stickyMetricsTicking = true;
     requestAnimationFrame(() => {
       syncStickyOffsets();
+      if (activeDishName) syncDishModalTrack({ withTransition: false, offsetX: 0 });
       window.__stickyMetricsTicking = false;
     });
   }
