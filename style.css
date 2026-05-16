@@ -109,7 +109,7 @@ main.container {
 
 .hero-band .container {
   padding-top: 0;
-  padding-bottom: 4px;
+  padding-bottom: 16px;
 }
 
 .hero {
@@ -128,6 +128,8 @@ main.container {
 
 .hero-inner {
   padding: 16px;
+  position: relative;
+  z-index: 1;
   opacity: 1;
   transform: translateY(0);
   transform-origin: top center;
@@ -153,19 +155,13 @@ main.container {
   background-size: 210px;
   background-repeat: repeat;
   background-position: center;
-  opacity: 0.2;
+  opacity: 0.14;
   pointer-events: none;
+  z-index: 0;
 }
 
 .hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(rgba(255,255,255,.055) 0.7px, transparent 0.7px);
-  background-size: 3px 3px;
-  opacity: .33;
-  pointer-events: none;
+  content: none;
 }
 
 .hero-title {
@@ -174,6 +170,7 @@ main.container {
   font-size: 24px;
   line-height: 1.2;
   color: #f4f7ff;
+  margin-bottom: 12px;
 }
 
 .hero-subtitle { margin: 0; min-height: 0; color: #cfd8ef; }
