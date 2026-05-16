@@ -275,13 +275,11 @@ function renderCategoriesSkeleton() {
 
 function buildControlsHtml(name, options = {}) {
   const qty = getCartQty(name);
-  const item = menuData.find((x) => x.name === name);
-  const priceText = item ? money(item.price) : "";
   const state = options.state || (qty > 0 ? "qty" : "add");
   const animationClass = options.animate ? " is-entering" : "";
   return qty > 0
     ? `<div class="qty-inline${animationClass}" data-state="${state}"><button class="card-minus" data-name="${escapeHtml(name)}">-</button><span>${qty}</span><button class="card-plus" data-name="${escapeHtml(name)}">+</button></div>`
-    : `<button class="btn-add${animationClass}" data-state="${state}" data-name="${escapeHtml(name)}"><span class="btn-add-main"><span class="btn-add-price">${escapeHtml(priceText)}</span><span class="btn-add-label">Добавить</span></span></button>`;
+    : `<button class="btn-add${animationClass}" data-state="${state}" data-name="${escapeHtml(name)}"><span class="btn-add-main"><span class="btn-add-label">Добавить</span></span></button>`;
 }
 
 function bindMenuControlEvents() {
