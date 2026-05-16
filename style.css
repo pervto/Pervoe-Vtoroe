@@ -933,8 +933,9 @@ main.container {
   }
   .food-footer {
     margin-top: 10px;
-    flex-direction: column;
-    align-items: stretch;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: end;
     gap: 8px;
   }
   .food-card[data-cart-state="add"] .food-price {
@@ -943,14 +944,24 @@ main.container {
   .food-card[data-cart-state="add"] .food-footer {
     margin-top: 12px;
   }
+  .food-card[data-cart-state="qty"] .food-footer {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+  }
   .food-price {
     font-size: 20px;
-    align-self: flex-start;
+    align-self: end;
+    margin: 0;
   }
   .item-controls {
     width: 100%;
     min-width: 0;
     min-height: 40px;
+  }
+  .food-card[data-cart-state="qty"] .item-controls {
+    width: auto;
+    min-width: 108px;
+    justify-self: end;
   }
   .btn-add,
   .qty-inline {
@@ -989,6 +1000,8 @@ main.container {
   .qty-inline {
     padding: 4px;
     gap: 6px;
+    width: auto;
+    min-width: 108px;
   }
   .qty-inline span {
     min-width: 22px;
