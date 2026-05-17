@@ -386,7 +386,7 @@ main.container {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("pattern.svg");
+  background-image: url("icons/pattern.svg");
   background-size: 210px;
   background-repeat: repeat;
   background-position: center;
@@ -828,7 +828,7 @@ main.container {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("pattern.svg");
+  background-image: url("icons/pattern.svg");
   background-size: 210px;
   background-repeat: repeat;
   background-position: center;
@@ -1070,7 +1070,7 @@ main.container {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("pattern.svg");
+  background-image: url("icons/pattern.svg");
   background-size: 220px;
   background-repeat: repeat;
   background-position: center;
