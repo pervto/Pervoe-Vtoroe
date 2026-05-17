@@ -837,6 +837,16 @@ function getDisplayHeroBanner(banner, lang = currentLanguage) {
   };
 }
 
+function buildHeroBannerStepIconMarkup(iconName) {
+  const icons = {
+    language: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm6.93 9h-3.1a15.727 15.727 0 0 0-1.37-5.02A8.018 8.018 0 0 1 18.93 11ZM12 4.04c.83 1.12 1.82 3.54 2.06 6.96H9.94C10.18 7.58 11.17 5.16 12 4.04ZM4.07 13h3.1a15.727 15.727 0 0 0 1.37 5.02A8.018 8.018 0 0 1 4.07 13Zm3.1-2h-3.1a8.018 8.018 0 0 1 4.47-5.02A15.727 15.727 0 0 0 7.17 11Zm4.83 8.96c-.83-1.12-1.82-3.54-2.06-6.96h4.12C13.82 16.42 12.83 18.84 12 19.96ZM14.46 18.02A15.727 15.727 0 0 0 15.83 13h3.1a8.018 8.018 0 0 1-4.47 5.02Z"/></svg>',
+    ios_share: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3a1 1 0 0 1 1 1v7.59l2.3-2.29a1 1 0 1 1 1.4 1.41l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.41L11 11.59V4a1 1 0 0 1 1-1Zm-6 9a1 1 0 0 1 1 1v5h10v-5a1 1 0 1 1 2 0v5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5a1 1 0 0 1 1-1Z"/></svg>',
+    add_box: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4V7a4 4 0 0 0-4-4H7Zm5 4a1 1 0 0 1 1 1v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0v-3H8a1 1 0 1 1 0-2h3V8a1 1 0 0 1 1-1Z"/></svg>'
+  };
+
+  return icons[iconName] || icons.add_box;
+}
+
 function buildHeroBannerHtml(banner, index) {
   const displayBanner = getDisplayHeroBanner(banner) || banner;
 
@@ -871,7 +881,7 @@ function buildHeroBannerHtml(banner, index) {
           <h2 class="hero-banner-title">${escapeHtml(displayBanner.displayTitle)}</h2>
           <p class="hero-banner-text">${escapeHtml(displayBanner.displayBody)}</p>
           <div class="hero-banner-steps">
-            ${displayBanner.steps.map((step) => `<div class="hero-banner-step"><span class="material-symbols-outlined hero-banner-step-icon" aria-hidden="true">${step.icon}</span><span class="hero-banner-step-text">${escapeHtml(step.text)}</span></div>`).join("")}
+            ${displayBanner.steps.map((step) => `<div class="hero-banner-step"><span class="hero-banner-step-icon" aria-hidden="true">${buildHeroBannerStepIconMarkup(step.icon)}</span><span class="hero-banner-step-text">${escapeHtml(step.text)}</span></div>`).join("")}
           </div>
           <p class="hero-banner-note">${escapeHtml(displayBanner.displayNote)}</p>
         </div>

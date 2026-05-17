@@ -471,22 +471,20 @@ main.container {
 }
 
 .hero-banner--image {
+  display: block;
+  grid-template-columns: 1fr;
+  gap: 0;
   padding: 0;
   overflow: hidden;
-  background: rgba(255,255,255,.12);
+  background: transparent;
 }
 
 .hero-banner--image::before {
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(180deg, rgba(8, 16, 29, .04), rgba(8, 16, 29, .16));
+  content: none;
 }
 
 .hero-banner--image::after {
-  inset: auto 16px 16px auto;
-  width: 120px;
-  height: 120px;
-  background: radial-gradient(circle, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 72%);
+  content: none;
 }
 
 .hero-banner--generic::before {
@@ -578,19 +576,19 @@ main.container {
   margin-top: auto;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 .hero-banner-classic-badge {
   display: inline-flex;
   align-items: center;
-  min-height: 30px;
-  padding: 7px 12px;
+  min-height: 36px;
+  padding: 8px 15px;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,.14);
   background: rgba(255,255,255,.08);
   color: #f1f5ff;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -603,11 +601,15 @@ main.container {
   gap: 10px;
 }
 
+.hero-banner--ios .hero-banner-content {
+  padding-right: 188px;
+}
+
 .hero-banner--ios .hero-banner-kicker,
 .hero-banner--ios .hero-banner-title,
 .hero-banner--ios .hero-banner-text,
 .hero-banner--ios .hero-banner-note {
-  max-width: calc(100% - 188px);
+  max-width: none;
 }
 
 .hero-banner--ios .hero-banner-steps {
@@ -616,12 +618,12 @@ main.container {
 }
 
 .hero-banner--ios .hero-banner-step {
-  min-height: 96px;
-  padding: 14px 12px;
+  min-height: 108px;
+  padding: 16px 14px;
 }
 
 .hero-banner--ios .hero-banner-step-text {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.34;
 }
 
@@ -640,15 +642,15 @@ main.container {
 }
 
 .hero-banner-step-icon {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   border-radius: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: rgba(7, 42, 44, .12);
   color: #08353a;
-  font-size: 19px;
+  flex-shrink: 0;
 }
 
 .hero-banner-step-text {
@@ -656,6 +658,13 @@ main.container {
   line-height: 1.32;
   font-weight: 700;
   color: rgba(7, 31, 35, .9);
+}
+
+.hero-banner-step-icon svg {
+  width: 19px;
+  height: 19px;
+  display: block;
+  fill: currentColor;
 }
 
 .hero-banner-note {
@@ -672,10 +681,10 @@ main.container {
 
 .hero-banner--ios .hero-banner-art {
   position: absolute;
-  top: 18px;
-  right: 16px;
-  bottom: 18px;
-  width: 176px;
+  right: 18px;
+  bottom: 14px;
+  width: 156px;
+  height: 168px;
 }
 
 .hero-banner-orb {
@@ -689,6 +698,7 @@ main.container {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
 }
 
 .hero-banner-orb-one {
@@ -2284,36 +2294,40 @@ main.container {
   .hero-banner--ios .hero-banner-title,
   .hero-banner--ios .hero-banner-text,
   .hero-banner--ios .hero-banner-note {
-    max-width: calc(100% - 156px);
+    max-width: none;
+  }
+  .hero-banner--ios .hero-banner-content {
+    padding-right: 154px;
   }
   .hero-banner-classic-badge {
-    min-height: 28px;
-    padding: 6px 10px;
-    font-size: 11px;
+    min-height: 32px;
+    padding: 7px 12px;
+    font-size: 12px;
   }
   .hero-banner--ios .hero-banner-steps {
     gap: 10px;
   }
   .hero-banner--ios .hero-banner-step {
-    min-height: 84px;
-    padding: 12px 10px;
+    min-height: 92px;
+    padding: 14px 12px;
     border-radius: 16px;
     gap: 8px;
   }
   .hero-banner--ios .hero-banner-step-text {
-    font-size: 12px;
+    font-size: 13px;
   }
   .hero-banner-note {
     font-size: 11px;
   }
   .hero-banner--ios .hero-banner-art {
-    width: 146px;
-    right: 8px;
-    top: 16px;
-    bottom: 16px;
+    width: 136px;
+    right: 10px;
+    bottom: 14px;
+    top: auto;
+    height: 150px;
   }
   .hero-banner-device {
-    width: 138px;
+    width: 130px;
     right: 0;
     bottom: 0;
   }
@@ -2382,35 +2396,37 @@ main.container {
   }
   .hero-banner--ios .hero-banner-title,
   .hero-banner--ios .hero-banner-text {
-    max-width: calc(100% - 98px);
+    max-width: none;
+  }
+  .hero-banner--ios .hero-banner-content {
+    padding-right: 104px;
   }
   .hero-banner-classic-badges {
     gap: 6px;
   }
   .hero-banner-classic-badge {
-    min-height: 24px;
-    padding: 5px 8px;
-    font-size: 9px;
+    min-height: 28px;
+    padding: 6px 10px;
+    font-size: 11px;
   }
   .hero-banner-steps {
     margin-top: 12px;
     gap: 8px;
   }
   .hero-banner--ios .hero-banner-step {
-    min-height: 58px;
-    padding: 8px;
+    min-height: 72px;
+    padding: 10px 9px;
     border-radius: 14px;
     gap: 7px;
   }
   .hero-banner-step-icon {
-    width: 26px;
-    height: 26px;
+    width: 30px;
+    height: 30px;
     border-radius: 8px;
-    font-size: 15px;
   }
   .hero-banner--ios .hero-banner-step-text {
-    font-size: 10px;
-    line-height: 1.22;
+    font-size: 11px;
+    line-height: 1.25;
   }
   .hero-banner--ios .hero-banner-note {
     display: none;
@@ -2419,14 +2435,14 @@ main.container {
     min-height: 0;
   }
   .hero-banner--ios .hero-banner-art {
-    width: 96px;
-    top: 16px;
-    right: 8px;
-    bottom: auto;
-    height: 116px;
+    width: 90px;
+    right: 10px;
+    bottom: 12px;
+    top: auto;
+    height: 108px;
   }
   .hero-banner-device {
-    width: 96px;
+    width: 88px;
     padding: 6px;
     border-radius: 22px;
     right: 0;
