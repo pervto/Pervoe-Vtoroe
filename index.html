@@ -32,7 +32,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=61" />
+  <link rel="stylesheet" href="style.css?v=63" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -85,14 +85,9 @@
   <section id="hero-band" class="hero-band">
     <div class="container">
       <section id="hero" class="hero">
-        <div class="hero-inner">
-          <p id="hero-title" class="hero-title">Выберите блюда, добавьте в корзину и отправьте заказ в WhatsApp за 1 минуту.</p>
-          <p id="hero-subtitle" class="hero-subtitle">Доставка работает ежедневно с 9:00 до 18:00.</p>
-          <div class="hero-badges">
-            <span id="hero-badge-fresh" class="hero-badge">Свежие блюда</span>
-            <span id="hero-badge-fast" class="hero-badge">Быстрая доставка</span>
-            <span id="hero-badge-free" class="hero-badge">Без регистрации</span>
-          </div>
+        <div id="hero-banner-carousel" class="hero-carousel" aria-label="Информационные баннеры">
+          <div id="hero-banner-track" class="hero-banner-track"></div>
+          <div id="hero-banner-dots" class="hero-banner-dots"></div>
         </div>
       </section>
     </div>
@@ -241,7 +236,7 @@
   </div>
 
   <script src="config.js?v=30"></script>
-  <script src="script.js?v=43"></script>
+  <script src="script.js?v=44"></script>
   <script>
     const siteLogo = document.querySelector("[data-logo-src-light]");
     if (siteLogo) {

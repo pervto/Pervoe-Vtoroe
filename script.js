@@ -5,6 +5,7 @@ let searchQuery = "";
 let toastTimer = null;
 let promo = { code: "", discount: 0 };
 let categoryOrderList = [];
+let heroBanners = [];
 let activeDishName = "";
 let activeDishSlide = 0;
 let activeDishPhotoKey = "";
@@ -12,6 +13,11 @@ let activeDishPointerId = null;
 let activeDishDragStartX = 0;
 let activeDishDragOffsetX = 0;
 let activeDishIsDragging = false;
+let activeHeroBanner = 0;
+let activeHeroPointerId = null;
+let activeHeroDragStartX = 0;
+let activeHeroDragOffsetX = 0;
+let activeHeroIsDragging = false;
 
 const CART_KEY = "pervoe-vtoroe-cart";
 const PROMO_KEY = "pervoe-vtoroe-promo";
@@ -19,6 +25,7 @@ const LANGUAGE_KEY = "pervoe-vtoroe-language";
 const THEME_KEY = "pervoe-vtoroe-theme";
 const TRANSLATION_CACHE_KEY = "pervoe-vtoroe-translation-cache-v1";
 const DISH_CAROUSEL_TRANSITION = "transform .34s cubic-bezier(.22, 1, .36, 1)";
+const HERO_CAROUSEL_TRANSITION = "transform .34s cubic-bezier(.22, 1, .36, 1)";
 const ALL_CATEGORY = "__all__";
 const LANGUAGE_META = {
   ru: { locale: "ru-RU", translationCode: "ru" },
@@ -43,11 +50,19 @@ const UI_TRANSLATIONS = {
     themeAuto: "Авто",
     themeLight: "Светлая",
     themeDark: "Тёмная",
-    heroTitle: "Выберите блюда, добавьте в корзину и отправьте заказ в WhatsApp за 1 минуту.",
-    heroSubtitle: "Доставка работает ежедневно с 9:00 до 18:00.",
-    heroBadgeFresh: "Свежие блюда",
-    heroBadgeFast: "Быстрая доставка",
-    heroBadgeFree: "Без регистрации",
+    heroBannerCarouselAria: "Информационные баннеры",
+    heroBannerDotAria: "Открыть баннер {index}",
+    heroBannerInfoKicker: "Информация",
+    heroBannerInstallChipPhone: "iPhone",
+    heroBannerInstallChipPwa: "PWA",
+    heroBannerInstallChipSafari: "Safari",
+    heroBannerInstallKicker: "Добавить на экран",
+    heroBannerInstallTitle: "Как скачать приложение на iPhone",
+    heroBannerInstallText: "Сохраните сайт на рабочий стол и открывайте его как приложение без интерфейса браузера.",
+    heroBannerInstallStep1: "Откройте сайт в Safari",
+    heroBannerInstallStep2: "Нажмите кнопку «Поделиться»",
+    heroBannerInstallStep3: "Выберите «На экран Домой»",
+    heroBannerInstallNote: "После этого иконка появится на главном экране, а сайт будет запускаться как отдельное приложение.",
     searchPlaceholder: "Поиск по блюдам",
     searchClearAria: "Очистить поиск",
     loadingMenu: "Загружаем меню...",
@@ -124,11 +139,19 @@ const UI_TRANSLATIONS = {
     themeAuto: "Авто",
     themeLight: "Ашық",
     themeDark: "Қараңғы",
-    heroTitle: "Тағамдарды таңдаңыз, себетке қосыңыз және тапсырысты WhatsApp арқылы 1 минутта жіберіңіз.",
-    heroSubtitle: "Жеткізу күн сайын 9:00-ден 18:00-ге дейін жұмыс істейді.",
-    heroBadgeFresh: "Жаңа тағамдар",
-    heroBadgeFast: "Жылдам жеткізу",
-    heroBadgeFree: "Тіркелусіз",
+    heroBannerCarouselAria: "Ақпараттық баннерлер",
+    heroBannerDotAria: "{index}-баннерді ашу",
+    heroBannerInfoKicker: "Ақпарат",
+    heroBannerInstallChipPhone: "iPhone",
+    heroBannerInstallChipPwa: "PWA",
+    heroBannerInstallChipSafari: "Safari",
+    heroBannerInstallKicker: "Басты экранға қосу",
+    heroBannerInstallTitle: "Қосымшаны iPhone-ға қалай орнатуға болады",
+    heroBannerInstallText: "Сайтты басты экранға сақтап, оны браузер жолағынсыз жеке қосымша сияқты ашыңыз.",
+    heroBannerInstallStep1: "Сайтты Safari-де ашыңыз",
+    heroBannerInstallStep2: "«Бөлісу» батырмасын басыңыз",
+    heroBannerInstallStep3: "«Басты экранға» тармағын таңдаңыз",
+    heroBannerInstallNote: "Осыдан кейін белгіше басты экранда пайда болады, ал сайт бөлек қосымша сияқты ашылады.",
     searchPlaceholder: "Тағамдар бойынша іздеу",
     searchClearAria: "Іздеуді тазарту",
     loadingMenu: "Мәзір жүктелуде...",
@@ -205,11 +228,19 @@ const UI_TRANSLATIONS = {
     themeAuto: "Auto",
     themeLight: "Light",
     themeDark: "Dark",
-    heroTitle: "Choose your dishes, add them to the cart, and send your order via WhatsApp in 1 minute.",
-    heroSubtitle: "Delivery is available daily from 9:00 to 18:00.",
-    heroBadgeFresh: "Fresh dishes",
-    heroBadgeFast: "Fast delivery",
-    heroBadgeFree: "No registration",
+    heroBannerCarouselAria: "Info banners",
+    heroBannerDotAria: "Open banner {index}",
+    heroBannerInfoKicker: "Info",
+    heroBannerInstallChipPhone: "iPhone",
+    heroBannerInstallChipPwa: "PWA",
+    heroBannerInstallChipSafari: "Safari",
+    heroBannerInstallKicker: "Add to home screen",
+    heroBannerInstallTitle: "How to install the app on iPhone",
+    heroBannerInstallText: "Save the site to your home screen and launch it like a real app without the browser interface.",
+    heroBannerInstallStep1: "Open the site in Safari",
+    heroBannerInstallStep2: "Tap the Share button",
+    heroBannerInstallStep3: "Choose Add to Home Screen",
+    heroBannerInstallNote: "After that, the icon will appear on your home screen and the site will open like a standalone app.",
     searchPlaceholder: "Search dishes",
     searchClearAria: "Clear search",
     loadingMenu: "Loading menu...",
@@ -274,6 +305,8 @@ let currentLanguage = loadSavedLanguage();
 let currentThemeMode = loadSavedThemeMode();
 let menuTranslations = { kk: {}, en: {} };
 let menuTranslationPromises = {};
+let heroBannerTranslations = { kk: {}, en: {} };
+let heroBannerTranslationPromises = {};
 let translationCache = loadTranslationCache();
 const systemThemeMedia = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
 function parseCsvLine(line) {
@@ -582,6 +615,307 @@ function getDisplayCategoryLabel(category) {
   if (currentLanguage === "ru") return category;
   const match = menuData.find((item) => item.category === category);
   return match ? (menuTranslations[currentLanguage]?.[match.id]?.category || category) : category;
+}
+
+function splitHeroBannerCopy(source) {
+  const rawText = String(source || "").trim().replace(/\s+/g, " ");
+  if (!rawText) return { title: "", body: "" };
+
+  const separators = [" || ", " | ", " — ", " - ", ": "];
+  for (const separator of separators) {
+    if (!rawText.includes(separator)) continue;
+    const [title, ...rest] = rawText.split(separator);
+    const body = rest.join(separator).trim();
+    if (title.trim() && body) {
+      return { title: title.trim(), body };
+    }
+  }
+
+  return { title: rawText, body: "" };
+}
+
+function createHeroBanner(rawValue, index) {
+  const value = String(rawValue || "").trim();
+  if (!value) return null;
+  const bannerKey = encodeURIComponent(value.toLowerCase()).replace(/%/g, "").slice(0, 72) || String(index);
+
+  const normalized = value.toLowerCase().replace(/\s+/g, " ");
+  if (
+    normalized.includes("как скачать приложение на ios") ||
+    normalized.includes("как скачать приложение на iphone") ||
+    normalized.includes("скачать приложение на ios") ||
+    normalized.includes("скачать приложение на iphone")
+  ) {
+    return {
+      id: `hero-banner-ios-${index}`,
+      type: "ios-install",
+      raw: value
+    };
+  }
+
+  const { title, body } = splitHeroBannerCopy(value);
+  if (!title) return null;
+
+  return {
+    id: `hero-banner-text-${bannerKey}-${index}`,
+    type: "text",
+    raw: value,
+    title,
+    body
+  };
+}
+
+function getDefaultHeroBanners() {
+  return [
+    {
+      id: "hero-banner-ios-default",
+      type: "ios-install",
+      raw: "Как скачать приложение на IOS"
+    }
+  ];
+}
+
+function buildHeroBannersFromRows(rows, bannerColumnIndex) {
+  if (!Array.isArray(rows) || bannerColumnIndex < 0) return getDefaultHeroBanners();
+
+  const seen = new Set();
+  const banners = rows
+    .slice(1)
+    .map((line, index) => createHeroBanner(parseCsvLine(line)[bannerColumnIndex], index))
+    .filter(Boolean)
+    .filter((banner) => {
+      const dedupeKey = banner.type === "ios-install"
+        ? "ios-install"
+        : `${banner.title}::${banner.body}`;
+      if (seen.has(dedupeKey)) return false;
+      seen.add(dedupeKey);
+      return true;
+    });
+
+  return banners.length ? banners : getDefaultHeroBanners();
+}
+
+async function ensureHeroBannerTranslations(lang) {
+  if (lang === "ru" || !heroBanners.length) return;
+  if (heroBannerTranslationPromises[lang]) return heroBannerTranslationPromises[lang];
+
+  const untranslatedBanners = heroBanners.filter((banner) => (
+    banner.type === "text" && !heroBannerTranslations[lang]?.[banner.id]
+  ));
+
+  if (!untranslatedBanners.length) return;
+
+  heroBannerTranslationPromises[lang] = mapWithConcurrency(untranslatedBanners, async (banner) => {
+    const [title, body] = await Promise.all([
+      translateText(banner.title, lang),
+      banner.body ? translateText(banner.body, lang) : ""
+    ]);
+
+    heroBannerTranslations[lang][banner.id] = {
+      title: title || banner.title,
+      body: body || banner.body
+    };
+  }, 3).finally(() => {
+    delete heroBannerTranslationPromises[lang];
+  });
+
+  return heroBannerTranslationPromises[lang];
+}
+
+function getDisplayHeroBanner(banner, lang = currentLanguage) {
+  if (!banner) return null;
+
+  if (banner.type === "ios-install") {
+    return {
+      ...banner,
+      displayKicker: t("heroBannerInstallKicker"),
+      displayTitle: t("heroBannerInstallTitle"),
+      displayBody: t("heroBannerInstallText"),
+      displayNote: t("heroBannerInstallNote"),
+      chips: [
+        t("heroBannerInstallChipPhone"),
+        t("heroBannerInstallChipPwa"),
+        t("heroBannerInstallChipSafari")
+      ],
+      steps: [
+        { icon: "language", text: t("heroBannerInstallStep1") },
+        { icon: "ios_share", text: t("heroBannerInstallStep2") },
+        { icon: "add_box", text: t("heroBannerInstallStep3") }
+      ]
+    };
+  }
+
+  if (lang === "ru") {
+    return {
+      ...banner,
+      displayKicker: t("heroBannerInfoKicker"),
+      displayTitle: banner.title,
+      displayBody: banner.body
+    };
+  }
+
+  const translated = heroBannerTranslations[lang]?.[banner.id] || {};
+  return {
+    ...banner,
+    displayKicker: t("heroBannerInfoKicker"),
+    displayTitle: translated.title || banner.title,
+    displayBody: translated.body || banner.body
+  };
+}
+
+function buildHeroBannerHtml(banner, index) {
+  const displayBanner = getDisplayHeroBanner(banner) || banner;
+
+  if (banner.type === "ios-install") {
+    return `<article class="hero-banner-slide" aria-roledescription="slide" aria-label="${escapeHtml(`${index + 1}`)}">
+      <div class="hero-banner hero-banner--ios">
+        <div class="hero-banner-content">
+          <div class="hero-banner-chips">
+            ${displayBanner.chips.map((chip) => `<span class="hero-banner-chip">${escapeHtml(chip)}</span>`).join("")}
+          </div>
+          <p class="hero-banner-kicker">${escapeHtml(displayBanner.displayKicker)}</p>
+          <h2 class="hero-banner-title">${escapeHtml(displayBanner.displayTitle)}</h2>
+          <p class="hero-banner-text">${escapeHtml(displayBanner.displayBody)}</p>
+          <div class="hero-banner-steps">
+            ${displayBanner.steps.map((step) => `<div class="hero-banner-step"><span class="material-symbols-outlined hero-banner-step-icon" aria-hidden="true">${step.icon}</span><span class="hero-banner-step-text">${escapeHtml(step.text)}</span></div>`).join("")}
+          </div>
+          <p class="hero-banner-note">${escapeHtml(displayBanner.displayNote)}</p>
+        </div>
+        <div class="hero-banner-art" aria-hidden="true">
+          <div class="hero-banner-orb hero-banner-orb-one"></div>
+          <div class="hero-banner-orb hero-banner-orb-two"></div>
+          <div class="hero-banner-device">
+            <div class="hero-banner-device-notch"></div>
+            <div class="hero-banner-device-screen">
+              <div class="hero-banner-device-head"></div>
+              <div class="hero-banner-device-card"></div>
+              <div class="hero-banner-device-row"></div>
+              <div class="hero-banner-device-row is-short"></div>
+              <div class="hero-banner-device-footer">
+                <span class="hero-banner-device-pill"></span>
+                <span class="hero-banner-device-pill"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>`;
+  }
+
+  return `<article class="hero-banner-slide" aria-roledescription="slide" aria-label="${escapeHtml(`${index + 1}`)}">
+    <div class="hero-banner hero-banner--generic">
+      <div class="hero-banner-content">
+        <p class="hero-banner-kicker">${escapeHtml(displayBanner.displayKicker)}</p>
+        <h2 class="hero-banner-title">${escapeHtml(displayBanner.displayTitle)}</h2>
+        ${displayBanner.displayBody ? `<p class="hero-banner-text">${escapeHtml(displayBanner.displayBody)}</p>` : ""}
+      </div>
+      <div class="hero-banner-art hero-banner-art--generic" aria-hidden="true">
+        <div class="hero-banner-orb hero-banner-orb-one"></div>
+        <div class="hero-banner-orb hero-banner-orb-two"></div>
+      </div>
+    </div>
+  </article>`;
+}
+
+function syncHeroBannerTrack(options = {}) {
+  const carousel = document.getElementById("hero-banner-carousel");
+  const track = document.getElementById("hero-banner-track");
+  if (!carousel || !track) return;
+
+  const width = carousel.clientWidth || 1;
+  const offsetX = Number(options.offsetX || 0);
+  const withTransition = options.withTransition !== false;
+
+  track.style.transition = withTransition ? HERO_CAROUSEL_TRANSITION : "none";
+  track.style.transform = `translateX(${(-activeHeroBanner * width) + offsetX}px)`;
+}
+
+function updateHeroBannerCarousel() {
+  const dots = document.getElementById("hero-banner-dots");
+  if (!dots || !heroBanners.length) return;
+
+  activeHeroBanner = ((activeHeroBanner % heroBanners.length) + heroBanners.length) % heroBanners.length;
+  syncHeroBannerTrack({
+    withTransition: !activeHeroIsDragging,
+    offsetX: activeHeroIsDragging ? activeHeroDragOffsetX : 0
+  });
+
+  dots.querySelectorAll("[data-hero-slide-index]").forEach((button, index) => {
+    const isActive = index === activeHeroBanner;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-current", String(isActive));
+  });
+
+  dots.classList.toggle("is-hidden", heroBanners.length <= 1);
+}
+
+function renderHeroBanners() {
+  const carousel = document.getElementById("hero-banner-carousel");
+  const track = document.getElementById("hero-banner-track");
+  const dots = document.getElementById("hero-banner-dots");
+  if (!carousel || !track || !dots) return;
+
+  const banners = heroBanners.length ? heroBanners : getDefaultHeroBanners();
+  heroBanners = banners;
+  activeHeroBanner = Math.min(Math.max(activeHeroBanner, 0), banners.length - 1);
+
+  carousel.setAttribute("aria-label", t("heroBannerCarouselAria"));
+  track.innerHTML = banners.map((banner, index) => buildHeroBannerHtml(banner, index)).join("");
+  dots.innerHTML = banners.map((banner, index) => (
+    `<button class="hero-banner-dot${index === activeHeroBanner ? " is-active" : ""}" type="button" data-hero-slide-index="${index}" aria-label="${escapeHtml(t("heroBannerDotAria", { index: index + 1 }))}" aria-current="${index === activeHeroBanner ? "true" : "false"}"></button>`
+  )).join("");
+
+  updateHeroBannerCarousel();
+}
+
+function bindHeroBannerSwipeEvents() {
+  const carousel = document.getElementById("hero-banner-carousel");
+  if (!carousel || carousel.dataset.swipeBound === "true") return;
+  carousel.dataset.swipeBound = "true";
+
+  carousel.addEventListener("pointerdown", (event) => {
+    if (heroBanners.length <= 1) return;
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (event.target.closest(".hero-banner-dot")) return;
+
+    activeHeroPointerId = event.pointerId;
+    activeHeroDragStartX = event.clientX;
+    activeHeroDragOffsetX = 0;
+    activeHeroIsDragging = true;
+    carousel.setPointerCapture(event.pointerId);
+    syncHeroBannerTrack({ withTransition: false, offsetX: 0 });
+  });
+
+  carousel.addEventListener("pointermove", (event) => {
+    if (!activeHeroIsDragging || activeHeroPointerId !== event.pointerId) return;
+    activeHeroDragOffsetX = event.clientX - activeHeroDragStartX;
+    syncHeroBannerTrack({ withTransition: false, offsetX: activeHeroDragOffsetX });
+  });
+
+  const finishSwipe = (event) => {
+    if (!activeHeroIsDragging || activeHeroPointerId !== event.pointerId) return;
+
+    const carouselWidth = carousel.clientWidth || 1;
+    const swipeThreshold = Math.max(carouselWidth * 0.16, 44);
+
+    if (Math.abs(activeHeroDragOffsetX) > swipeThreshold && heroBanners.length > 1) {
+      if (activeHeroDragOffsetX < 0) activeHeroBanner = (activeHeroBanner + 1) % heroBanners.length;
+      if (activeHeroDragOffsetX > 0) activeHeroBanner = (activeHeroBanner - 1 + heroBanners.length) % heroBanners.length;
+    }
+
+    activeHeroPointerId = null;
+    activeHeroDragStartX = 0;
+    activeHeroDragOffsetX = 0;
+    activeHeroIsDragging = false;
+    updateHeroBannerCarousel();
+  };
+
+  carousel.addEventListener("pointerup", finishSwipe);
+  carousel.addEventListener("pointercancel", finishSwipe);
+  carousel.addEventListener("lostpointercapture", (event) => {
+    if (!activeHeroIsDragging || activeHeroPointerId !== event.pointerId) return;
+    finishSwipe(event);
+  });
 }
 
 function findItemByAnyName(name) {
@@ -1300,12 +1634,8 @@ function applyStaticTranslations() {
   setText('.settings-theme-btn[data-theme-mode="dark"]', t("themeDark"));
   const logo = document.querySelector("[data-logo-src-light]");
   if (logo) logo.alt = t("logoAlt");
-
-  setText("#hero-title", t("heroTitle"));
-  setText("#hero-subtitle", t("heroSubtitle"));
-  setText("#hero-badge-fresh", t("heroBadgeFresh"));
-  setText("#hero-badge-fast", t("heroBadgeFast"));
-  setText("#hero-badge-free", t("heroBadgeFree"));
+  const heroCarousel = document.getElementById("hero-banner-carousel");
+  if (heroCarousel) heroCarousel.setAttribute("aria-label", t("heroBannerCarouselAria"));
 
   setPlaceholder("#menu-search", t("searchPlaceholder"));
   setAriaLabel("#search-clear", t("searchClearAria"));
@@ -1347,6 +1677,8 @@ function applyStaticTranslations() {
     else if (promo.code === "SKIDKA10") promoHint.textContent = t("promoAppliedPercent");
     else if (promo.code === "FIRST200") promoHint.textContent = t("promoAppliedFixed");
   }
+
+  renderHeroBanners();
 }
 
 function showMenuTranslatingState() {
@@ -1364,9 +1696,13 @@ async function setLanguage(lang) {
 
   if (menuData.length && currentLanguage !== "ru") {
     showMenuTranslatingState();
-    await ensureMenuTranslations(currentLanguage);
+    await Promise.all([
+      ensureMenuTranslations(currentLanguage),
+      ensureHeroBannerTranslations(currentLanguage)
+    ]);
   }
 
+  renderHeroBanners();
   renderCategories();
   renderMenu();
   renderCart();
@@ -1433,6 +1769,7 @@ async function loadMenu() {
       category: ["category", "категория"],
       available: ["available", "наличие (да/нет)", "наличие"],
       photo: ["photo", "photo 1", "photo 2", "фото", "фото 1", "фото 2", "image", "image 1", "image 2", "картинка", "картинка 1", "картинка 2"],
+      banner: ["banner", "banners", "баннер", "баннеры"],
       description: ["description", "описание"],
       weight: ["weight", "граммовка", "вес", "граммы"],
       calories: ["calories", "калории", "ккал"],
@@ -1451,6 +1788,7 @@ async function loadMenu() {
     const iCategory = findIndexByAliases("category");
     const iAvailable = findIndexByAliases("available");
     const iPhoto = findIndexByAliases("photo");
+    const iBanner = findIndexByAliases("banner");
     const iDescription = findIndexByAliases("description");
     const iWeight = findIndexByAliases("weight");
     const iCalories = findIndexByAliases("calories");
@@ -1472,6 +1810,10 @@ async function loadMenu() {
     } else {
       categoryOrderList = [];
     }
+
+    heroBanners = buildHeroBannersFromRows(rows, iBanner);
+    activeHeroBanner = 0;
+    renderHeroBanners();
 
     menuData = rows
       .slice(1)
@@ -1504,7 +1846,11 @@ async function loadMenu() {
 
     if (currentLanguage !== "ru") {
       showMenuTranslatingState();
-      await ensureMenuTranslations(currentLanguage);
+      await Promise.all([
+        ensureMenuTranslations(currentLanguage),
+        ensureHeroBannerTranslations(currentLanguage)
+      ]);
+      renderHeroBanners();
     }
 
     renderCategories();
@@ -1552,6 +1898,13 @@ document.getElementById("dish-modal-dots").addEventListener("click", (e) => {
   updateDishModalCarousel(item);
 });
 bindDishModalSwipeEvents();
+document.getElementById("hero-banner-dots").addEventListener("click", (e) => {
+  const button = e.target.closest("[data-hero-slide-index]");
+  if (!button) return;
+  activeHeroBanner = Number(button.dataset.heroSlideIndex) || 0;
+  updateHeroBannerCarousel();
+});
+bindHeroBannerSwipeEvents();
 
 document.getElementById("promo-apply").addEventListener("click", applyPromoCode);
 document.getElementById("promo-code").addEventListener("keydown", (e) => {
@@ -1618,6 +1971,7 @@ window.addEventListener("resize", () => {
     requestAnimationFrame(() => {
       syncStickyOffsets();
       if (activeDishName) syncDishModalTrack({ withTransition: false, offsetX: 0 });
+      if (heroBanners.length) syncHeroBannerTrack({ withTransition: false, offsetX: 0 });
       window.__stickyMetricsTicking = false;
     });
   }
@@ -1692,6 +2046,7 @@ document.getElementById("order-form").addEventListener("submit", (e) => {
 
 loadCart();
 loadPromo();
+heroBanners = getDefaultHeroBanners();
 applyTheme(currentThemeMode);
 applyStaticTranslations();
 updateSettingsLanguageButtons(false);
