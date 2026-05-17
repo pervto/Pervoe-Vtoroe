@@ -245,39 +245,23 @@ main.container {
 
 .settings-language-btn.is-active,
 .settings-theme-btn.is-active {
-  padding-left: 20px;
-  background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(245, 225, 227, .98));
-  border-color: rgba(224, 54, 59, 0.32);
+  padding-left: 16px;
+  background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(236, 241, 247, .98));
+  border-color: rgba(95, 109, 138, 0.22);
   color: #121a2d;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.62),
-    0 12px 24px rgba(224, 54, 59, 0.12);
+    0 12px 24px rgba(15, 23, 42, 0.08);
 }
 
 .settings-language-btn.is-active::before,
 .settings-theme-btn.is-active::before {
-  content: "";
-  position: absolute;
-  left: 8px;
-  top: 8px;
-  bottom: 8px;
-  width: 4px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #ea4a4f, #c92b31);
+  content: none;
 }
 
 .settings-language-btn.is-active::after,
 .settings-theme-btn.is-active::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  right: 16px;
-  width: 11px;
-  height: 11px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #e0363b, #c92b31);
-  box-shadow: 0 0 0 5px rgba(224, 54, 59, 0.14);
-  transform: translateY(-50%);
+  content: none;
 }
 
 .settings-language-btn:disabled,
@@ -1910,6 +1894,29 @@ main.container {
   }
 }
 
+.food-card .btn-add {
+  border-color: rgba(224, 54, 59, 0.68);
+  background: rgba(224, 54, 59, 0.04);
+  color: var(--accent);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.58),
+    0 10px 20px rgba(224, 54, 59, 0.08);
+}
+
+.food-card .btn-add::after {
+  color: var(--accent);
+  background: rgba(224, 54, 59, 0.08);
+  border: 1px solid rgba(224, 54, 59, 0.26);
+  box-shadow: none;
+}
+
+.food-card .btn-add:hover {
+  background: rgba(224, 54, 59, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.62),
+    0 12px 22px rgba(224, 54, 59, 0.12);
+}
+
 html[data-theme="dark"] body {
   background: #0b1118;
   color: #edf3ff;
@@ -1918,9 +1925,10 @@ html[data-theme="dark"] body {
 html[data-theme="dark"] .header,
 html[data-theme="dark"] .hero-band,
 html[data-theme="dark"] .menu-dock {
-  background: rgba(10, 15, 24, 0.78);
+  background: rgba(25, 34, 47, 0.86);
   backdrop-filter: blur(34px) saturate(1.2);
   -webkit-backdrop-filter: blur(34px) saturate(1.2);
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,.03);
 }
 
 html[data-theme="dark"] .header::before,
@@ -1932,10 +1940,12 @@ html[data-theme="dark"] .menu-dock::before {
 }
 
 html[data-theme="dark"] .hero {
-  border-color: rgba(255,255,255,.08);
+  background:
+    linear-gradient(135deg, rgba(57, 70, 91, 0.96), rgba(40, 52, 71, 0.94));
+  border-color: rgba(255,255,255,.12);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.06),
-    0 18px 40px rgba(0,0,0,.28);
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 20px 44px rgba(0,0,0,.30);
 }
 
 html[data-theme="dark"] .hero-subtitle {
@@ -1994,28 +2004,28 @@ html[data-theme="dark"] .settings-theme-btn:hover {
 
 html[data-theme="dark"] .settings-language-btn.is-active,
 html[data-theme="dark"] .settings-theme-btn.is-active {
-  background: linear-gradient(135deg, rgba(224, 54, 59, 0.26), rgba(125, 21, 28, 0.38));
-  border-color: rgba(239, 109, 114, 0.34);
-  color: #fff4f4;
+  background: linear-gradient(135deg, rgba(103, 119, 147, 0.34), rgba(67, 81, 106, 0.42));
+  border-color: rgba(181, 196, 222, 0.24);
+  color: #f7faff;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.10),
-    0 14px 28px rgba(96, 14, 20, 0.20);
+    0 14px 28px rgba(0, 0, 0, 0.18);
 }
 
 html[data-theme="dark"] .settings-language-btn.is-active::before,
 html[data-theme="dark"] .settings-theme-btn.is-active::before {
-  background: linear-gradient(180deg, #ff7b80, #d5373d);
+  content: none;
 }
 
 html[data-theme="dark"] .settings-language-btn.is-active::after,
 html[data-theme="dark"] .settings-theme-btn.is-active::after {
-  box-shadow: 0 0 0 5px rgba(239, 109, 114, 0.18);
+  content: none;
 }
 
 html[data-theme="dark"] .search-wrap {
-  border-color: rgba(255,255,255,.10);
-  background: rgba(20, 27, 39, 0.58);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+  border-color: rgba(255,255,255,.12);
+  background: rgba(36, 47, 64, 0.74);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
 }
 
 html[data-theme="dark"] .search-wrap:focus-within {
@@ -2042,9 +2052,31 @@ html[data-theme="dark"] .search-input {
 }
 
 html[data-theme="dark"] .category-btn {
-  border-color: rgba(255,255,255,.09);
-  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.12);
+  background: rgba(36, 47, 64, 0.72);
   color: #ecf2ff;
+}
+
+html[data-theme="dark"] .food-card .btn-add {
+  border-color: rgba(239, 109, 114, 0.68);
+  background: rgba(224, 54, 59, 0.08);
+  color: #ff9ea2;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 12px 22px rgba(0, 0, 0, 0.18);
+}
+
+html[data-theme="dark"] .food-card .btn-add::after {
+  color: #ff9ea2;
+  background: rgba(224, 54, 59, 0.12);
+  border-color: rgba(239, 109, 114, 0.30);
+}
+
+html[data-theme="dark"] .food-card .btn-add:hover {
+  background: rgba(224, 54, 59, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 14px 24px rgba(0, 0, 0, 0.22);
 }
 
 html[data-theme="dark"] .category-btn.active {
