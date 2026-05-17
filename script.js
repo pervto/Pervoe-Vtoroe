@@ -1,6 +1,6 @@
 ﻿let menuData = [];
 let cart = [];
-let activeCategory = "Все";
+let activeCategory = "__all__";
 let searchQuery = "";
 let toastTimer = null;
 let promo = { code: "", discount: 0 };
@@ -15,7 +15,231 @@ let activeDishIsDragging = false;
 
 const CART_KEY = "pervoe-vtoroe-cart";
 const PROMO_KEY = "pervoe-vtoroe-promo";
+const LANGUAGE_KEY = "pervoe-vtoroe-language";
+const TRANSLATION_CACHE_KEY = "pervoe-vtoroe-translation-cache-v1";
 const DISH_CAROUSEL_TRANSITION = "transform .34s cubic-bezier(.22, 1, .36, 1)";
+const ALL_CATEGORY = "__all__";
+const LANGUAGE_META = {
+  ru: { locale: "ru-RU", translationCode: "ru" },
+  kk: { locale: "kk-KZ", translationCode: "kk" },
+  en: { locale: "en-US", translationCode: "en" }
+};
+const UI_TRANSLATIONS = {
+  ru: {
+    settingsButtonAria: "Открыть настройки",
+    settingsKicker: "Настройки",
+    settingsTitle: "Язык интерфейса",
+    settingsText: "Выберите язык. Сайт запомнит его и в следующий раз откроется уже на нём.",
+    settingsGroupAria: "Выбор языка",
+    heroTitle: "Выберите блюда, добавьте в корзину и отправьте заказ в WhatsApp за 1 минуту.",
+    heroSubtitle: "Доставка работает ежедневно с 9:00 до 18:00.",
+    heroBadgeFresh: "Свежие блюда",
+    heroBadgeFast: "Быстрая доставка",
+    heroBadgeFree: "Без регистрации",
+    searchPlaceholder: "Поиск по блюдам",
+    searchClearAria: "Очистить поиск",
+    loadingMenu: "Загружаем меню...",
+    translatingMenu: "Перевожу меню...",
+    noResults: "Ничего не найдено. Попробуйте другое название.",
+    noAvailable: "Нет доступных блюд. Проверьте колонку Наличие (Да/Нет).",
+    loadError: "Ошибка загрузки меню: {message}",
+    footerReview: "Будем рады вашим отзывам",
+    address: "Петропавловск, Интернациональная улица, 67",
+    toTopAria: "Наверх",
+    cartButton: "Корзина",
+    cartTitle: "Ваш заказ",
+    closeAria: "Закрыть",
+    promoLabel: "Промокод (необязательно)",
+    promoPlaceholder: "Введите промокод",
+    promoApply: "Применить",
+    promoMissing: "Промокод не указан",
+    promoAppliedPercent: "Промокод применен: скидка 10%",
+    promoAppliedFixed: "Промокод применен: скидка 200₸",
+    promoNotFound: "Промокод не найден",
+    subtotal: "Сумма",
+    discount: "Скидка",
+    total: "Итого",
+    totalFull: "Общая сумма",
+    deliveryTitle: "Данные для доставки",
+    namePlaceholder: "Ваше имя",
+    phonePlaceholder: "Ваш телефон",
+    addressPlaceholder: "Адрес доставки",
+    commentPlaceholder: "Комментарий к заказу (необязательно)",
+    orderButton: "Оформить в WhatsApp",
+    paymentNote: "Оплата временно осуществляется только через удалённую оплату Kaspi. Приносим извинения за неудобства.",
+    dishAbout: "О блюде",
+    dishNoCategory: "Без категории",
+    dishDescriptionFallback: "Подробное описание скоро появится.",
+    dishOpenAria: "Открыть {name}",
+    dishCloseAria: "Закрыть просмотр блюда",
+    dishPrevPhotoAria: "Предыдущее фото",
+    dishNextPhotoAria: "Следующее фото",
+    dishPhotoSoon: "Фотография блюда скоро появится",
+    thanksTitle: "Спасибо за заказ!",
+    thanksText: "Мы уже получили вашу заявку. Ждем вас снова.",
+    thanksButton: "Отлично",
+    categoriesAll: "Все",
+    addButton: "Добавить",
+    cartEmpty: "Корзина пока пустая.",
+    removeButton: "Удалить",
+    toastAdded: "{name} добавлено в корзину",
+    alertCartEmpty: "Корзина пустая. Добавьте блюда.",
+    alertFillRequired: "Заполните имя, телефон и адрес.",
+    waGreeting: "Здравствуйте!",
+    waIntro: "Хочу оформить заказ.",
+    waName: "Имя",
+    waPhone: "Телефон",
+    waAddress: "Адрес",
+    waComment: "Комментарий",
+    waPromo: "Промокод",
+    waOrder: "Заказ",
+    waTotal: "Итого"
+  },
+  kk: {
+    settingsButtonAria: "Баптауларды ашу",
+    settingsKicker: "Баптаулар",
+    settingsTitle: "Интерфейс тілі",
+    settingsText: "Тілді таңдаңыз. Сайт оны есте сақтап, келесі жолы сол тілде ашылады.",
+    settingsGroupAria: "Тілді таңдау",
+    heroTitle: "Тағамдарды таңдаңыз, себетке қосыңыз және тапсырысты WhatsApp арқылы 1 минутта жіберіңіз.",
+    heroSubtitle: "Жеткізу күн сайын 9:00-ден 18:00-ге дейін жұмыс істейді.",
+    heroBadgeFresh: "Жаңа тағамдар",
+    heroBadgeFast: "Жылдам жеткізу",
+    heroBadgeFree: "Тіркелусіз",
+    searchPlaceholder: "Тағамдар бойынша іздеу",
+    searchClearAria: "Іздеуді тазарту",
+    loadingMenu: "Мәзір жүктелуде...",
+    translatingMenu: "Мәзір аударылып жатыр...",
+    noResults: "Ештеңе табылмады. Басқа атауды қолданып көріңіз.",
+    noAvailable: "Қолжетімді тағамдар жоқ. Қолжетімділік бағанын тексеріңіз (Иә/Жоқ).",
+    loadError: "Мәзірді жүктеу қатесі: {message}",
+    footerReview: "Пікірлеріңізге қуаныштымыз",
+    address: "Петропавл, Интернациональная көшесі, 67",
+    toTopAria: "Жоғарыға",
+    cartButton: "Себет",
+    cartTitle: "Тапсырысыңыз",
+    closeAria: "Жабу",
+    promoLabel: "Промокод (міндетті емес)",
+    promoPlaceholder: "Промокодты енгізіңіз",
+    promoApply: "Қолдану",
+    promoMissing: "Промокод енгізілмеген",
+    promoAppliedPercent: "Промокод қолданылды: 10% жеңілдік",
+    promoAppliedFixed: "Промокод қолданылды: 200₸ жеңілдік",
+    promoNotFound: "Промокод табылмады",
+    subtotal: "Сома",
+    discount: "Жеңілдік",
+    total: "Барлығы",
+    totalFull: "Жалпы сома",
+    deliveryTitle: "Жеткізу деректері",
+    namePlaceholder: "Атыңыз",
+    phonePlaceholder: "Телефоныңыз",
+    addressPlaceholder: "Жеткізу мекенжайы",
+    commentPlaceholder: "Тапсырысқа пікір (міндетті емес)",
+    orderButton: "WhatsApp арқылы рәсімдеу",
+    paymentNote: "Қазір төлем тек Kaspi арқылы қашықтан қабылданады. Қолайсыздық үшін кешірім сұраймыз.",
+    dishAbout: "Тағам туралы",
+    dishNoCategory: "Санатсыз",
+    dishDescriptionFallback: "Толық сипаттама жақында қосылады.",
+    dishOpenAria: "{name} ашу",
+    dishCloseAria: "Тағам көрінісін жабу",
+    dishPrevPhotoAria: "Алдыңғы фото",
+    dishNextPhotoAria: "Келесі фото",
+    dishPhotoSoon: "Тағам суреті жақында қосылады",
+    thanksTitle: "Тапсырысыңызға рахмет!",
+    thanksText: "Өтініміңіз қабылданды. Қайта күтеміз.",
+    thanksButton: "Тамаша",
+    categoriesAll: "Барлығы",
+    addButton: "Қосу",
+    cartEmpty: "Себет әзірге бос.",
+    removeButton: "Жою",
+    toastAdded: "{name} себетке қосылды",
+    alertCartEmpty: "Себет бос. Тағам қосыңыз.",
+    alertFillRequired: "Атыңызды, телефоныңызды және мекенжайыңызды толтырыңыз.",
+    waGreeting: "Сәлеметсіз бе!",
+    waIntro: "Тапсырыс бергім келеді.",
+    waName: "Аты",
+    waPhone: "Телефон",
+    waAddress: "Мекенжай",
+    waComment: "Пікір",
+    waPromo: "Промокод",
+    waOrder: "Тапсырыс",
+    waTotal: "Барлығы"
+  },
+  en: {
+    settingsButtonAria: "Open settings",
+    settingsKicker: "Settings",
+    settingsTitle: "Interface language",
+    settingsText: "Choose a language. The site will remember it and open in it next time.",
+    settingsGroupAria: "Language selection",
+    heroTitle: "Choose your dishes, add them to the cart, and send your order via WhatsApp in 1 minute.",
+    heroSubtitle: "Delivery is available daily from 9:00 to 18:00.",
+    heroBadgeFresh: "Fresh dishes",
+    heroBadgeFast: "Fast delivery",
+    heroBadgeFree: "No registration",
+    searchPlaceholder: "Search dishes",
+    searchClearAria: "Clear search",
+    loadingMenu: "Loading menu...",
+    translatingMenu: "Translating menu...",
+    noResults: "Nothing found. Try another dish name.",
+    noAvailable: "No dishes are currently available. Check the availability column.",
+    loadError: "Menu loading error: {message}",
+    footerReview: "We would love to hear your feedback",
+    address: "Petropavlovsk, Internationalnaya Street, 67",
+    toTopAria: "Back to top",
+    cartButton: "Cart",
+    cartTitle: "Your order",
+    closeAria: "Close",
+    promoLabel: "Promo code (optional)",
+    promoPlaceholder: "Enter promo code",
+    promoApply: "Apply",
+    promoMissing: "No promo code entered",
+    promoAppliedPercent: "Promo code applied: 10% discount",
+    promoAppliedFixed: "Promo code applied: 200₸ discount",
+    promoNotFound: "Promo code not found",
+    subtotal: "Subtotal",
+    discount: "Discount",
+    total: "Total",
+    totalFull: "Grand total",
+    deliveryTitle: "Delivery details",
+    namePlaceholder: "Your name",
+    phonePlaceholder: "Your phone",
+    addressPlaceholder: "Delivery address",
+    commentPlaceholder: "Order comment (optional)",
+    orderButton: "Checkout via WhatsApp",
+    paymentNote: "Payment is currently available only via remote Kaspi payment. We apologize for the inconvenience.",
+    dishAbout: "About the dish",
+    dishNoCategory: "No category",
+    dishDescriptionFallback: "Detailed description will be added soon.",
+    dishOpenAria: "Open {name}",
+    dishCloseAria: "Close dish view",
+    dishPrevPhotoAria: "Previous photo",
+    dishNextPhotoAria: "Next photo",
+    dishPhotoSoon: "Dish photo will appear soon",
+    thanksTitle: "Thank you for your order!",
+    thanksText: "We have already received your request. See you again soon.",
+    thanksButton: "Great",
+    categoriesAll: "All",
+    addButton: "Add",
+    cartEmpty: "Your cart is empty for now.",
+    removeButton: "Remove",
+    toastAdded: "{name} added to cart",
+    alertCartEmpty: "Your cart is empty. Add some dishes first.",
+    alertFillRequired: "Please fill in your name, phone number, and address.",
+    waGreeting: "Hello!",
+    waIntro: "I would like to place an order.",
+    waName: "Name",
+    waPhone: "Phone",
+    waAddress: "Address",
+    waComment: "Comment",
+    waPromo: "Promo code",
+    waOrder: "Order",
+    waTotal: "Total"
+  }
+};
+let currentLanguage = loadSavedLanguage();
+let menuTranslations = { kk: {}, en: {} };
+let menuTranslationPromises = {};
+let translationCache = loadTranslationCache();
 function parseCsvLine(line) {
   const result = [];
   let current = "";
@@ -41,8 +265,52 @@ function parseCsvLine(line) {
   return result.map((item) => item.replace(/^"|"$/g, ""));
 }
 
+function loadSavedLanguage() {
+  const saved = localStorage.getItem(LANGUAGE_KEY);
+  return LANGUAGE_META[saved] ? saved : "ru";
+}
+
+function loadTranslationCache() {
+  try {
+    const raw = localStorage.getItem(TRANSLATION_CACHE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveTranslationCache() {
+  localStorage.setItem(TRANSLATION_CACHE_KEY, JSON.stringify(translationCache));
+}
+
+function getLocale() {
+  return LANGUAGE_META[currentLanguage]?.locale || "ru-RU";
+}
+
+function t(key, vars = {}) {
+  const table = UI_TRANSLATIONS[currentLanguage] || UI_TRANSLATIONS.ru;
+  const fallback = UI_TRANSLATIONS.ru[key] || key;
+  const value = table[key] || fallback;
+  return Object.entries(vars).reduce((text, [name, replacement]) => text.replaceAll(`{${name}}`, replacement), value);
+}
+
 function money(value) {
-  return `${Number(value || 0).toLocaleString("ru-RU")}₸`;
+  return `${Number(value || 0).toLocaleString(getLocale())}₸`;
+}
+
+function getLocalizedCalories(value) {
+  if (!value) return "";
+  if (currentLanguage === "en") return `${value} kcal`;
+  return `${value} ккал`;
+}
+
+function getLocalizedWeight(value) {
+  const weight = String(value || "").trim();
+  if (!weight) return "";
+  if (currentLanguage === "en") return weight.replace(/шт\b/gi, "pcs");
+  if (currentLanguage === "kk") return weight.replace(/шт\b/gi, "дана");
+  return weight;
 }
 
 function escapeHtml(value) {
@@ -68,6 +336,139 @@ function normalizePhotoUrl(rawUrl) {
   return url;
 }
 
+function getTranslationCacheKey(text, lang) {
+  return `${lang}::${text}`;
+}
+
+async function translateViaGoogle(text, lang) {
+  const url = new URL("https://translate.googleapis.com/translate_a/single");
+  url.searchParams.set("client", "gtx");
+  url.searchParams.set("sl", "ru");
+  url.searchParams.set("tl", LANGUAGE_META[lang]?.translationCode || lang);
+  url.searchParams.set("dt", "t");
+  url.searchParams.set("q", text);
+  const response = await fetch(url.toString());
+  if (!response.ok) throw new Error(`Google translate error ${response.status}`);
+  const data = await response.json();
+  if (!Array.isArray(data) || !Array.isArray(data[0])) throw new Error("Unexpected Google translate response");
+  return data[0].map((part) => part[0] || "").join("").trim();
+}
+
+async function translateViaMyMemory(text, lang) {
+  const url = new URL("https://api.mymemory.translated.net/get");
+  url.searchParams.set("q", text);
+  url.searchParams.set("langpair", `ru|${LANGUAGE_META[lang]?.translationCode || lang}`);
+  url.searchParams.set("mt", "1");
+  const response = await fetch(url.toString());
+  if (!response.ok) throw new Error(`MyMemory error ${response.status}`);
+  const data = await response.json();
+  const translated = data?.responseData?.translatedText;
+  if (!translated) throw new Error("Empty MyMemory response");
+  return String(translated).trim();
+}
+
+async function translateText(text, lang) {
+  const source = String(text || "").trim();
+  if (!source || lang === "ru") return source;
+
+  const cacheKey = getTranslationCacheKey(source, lang);
+  if (translationCache[cacheKey]) return translationCache[cacheKey];
+
+  let translated = source;
+  try {
+    translated = await translateViaGoogle(source, lang);
+  } catch {
+    try {
+      translated = await translateViaMyMemory(source, lang);
+    } catch {
+      translated = source;
+    }
+  }
+
+  translationCache[cacheKey] = translated || source;
+  saveTranslationCache();
+  return translationCache[cacheKey];
+}
+
+async function mapWithConcurrency(items, worker, concurrency = 3) {
+  const results = new Array(items.length);
+  let index = 0;
+
+  async function next() {
+    while (index < items.length) {
+      const currentIndex = index++;
+      results[currentIndex] = await worker(items[currentIndex], currentIndex);
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length || 1) }, next));
+  return results;
+}
+
+async function ensureMenuTranslations(lang) {
+  if (lang === "ru" || !menuData.length) return;
+  if (menuTranslationPromises[lang]) return menuTranslationPromises[lang];
+
+  const untranslatedItems = menuData.filter((item) => !menuTranslations[lang]?.[item.id]);
+  if (!untranslatedItems.length) return;
+
+  menuTranslationPromises[lang] = mapWithConcurrency(untranslatedItems, async (item) => {
+    const [name, category, description] = await Promise.all([
+      translateText(item.name, lang),
+      translateText(item.category, lang),
+      translateText(item.description, lang)
+    ]);
+
+    menuTranslations[lang][item.id] = {
+      name: name || item.name,
+      category: category || item.category,
+      description: description || item.description
+    };
+  }, 3).finally(() => {
+    delete menuTranslationPromises[lang];
+  });
+
+  return menuTranslationPromises[lang];
+}
+
+function getDisplayItem(item) {
+  if (!item) return null;
+  if (currentLanguage === "ru") {
+    return {
+      ...item,
+      displayName: item.name,
+      displayCategory: item.category,
+      displayDescription: item.description,
+      displayWeight: getLocalizedWeight(item.weight),
+      displayCalories: getLocalizedCalories(item.calories)
+    };
+  }
+
+  const translated = menuTranslations[currentLanguage]?.[item.id] || {};
+  return {
+    ...item,
+    displayName: translated.name || item.name,
+    displayCategory: translated.category || item.category,
+    displayDescription: translated.description || item.description,
+    displayWeight: getLocalizedWeight(item.weight),
+    displayCalories: getLocalizedCalories(item.calories)
+  };
+}
+
+function getDisplayCategoryLabel(category) {
+  if (!category) return "";
+  if (currentLanguage === "ru") return category;
+  const match = menuData.find((item) => item.category === category);
+  return match ? (menuTranslations[currentLanguage]?.[match.id]?.category || category) : category;
+}
+
+function findItemByAnyName(name) {
+  return menuData.find((item) => {
+    const displayItem = getDisplayItem(item);
+    return item.name === name || displayItem?.displayName === name;
+  }) || null;
+}
+
 function getItemByName(name) {
   return menuData.find((item) => item.name === name) || null;
 }
@@ -80,10 +481,11 @@ function getItemPhotos(item) {
 
 function buildDishPhotoHtml(item, className = "food-image") {
   const [photoUrl] = getItemPhotos(item);
+  const displayItem = getDisplayItem(item) || item;
   if (photoUrl) {
-    return `<img class="${className}" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(item.name)}" loading="lazy" />`;
+    return `<img class="${className}" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(displayItem.displayName || item.name)}" loading="lazy" />`;
   }
-  return `<div class="food-image-placeholder">Фотография блюда скоро появится</div>`;
+  return `<div class="food-image-placeholder">${escapeHtml(t("dishPhotoSoon"))}</div>`;
 }
 
 function getDishSlideCount(item) {
@@ -110,15 +512,16 @@ function renderDishModalSlides(item) {
   const photos = getItemPhotos(item);
   const totalSlides = getDishSlideCount(item);
   const photoKey = photos.length ? photos.join("|") : "__empty__";
+  const displayItem = getDisplayItem(item) || item;
 
   if (track.dataset.photoKey !== photoKey) {
     track.innerHTML = photos.length
       ? photos.map((photoUrl, index) => (
         `<div class="dish-modal-slide">
-          <img class="dish-modal-image" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(`${item.name} ${index + 1}`)}" loading="eager" decoding="async" draggable="false" />
+          <img class="dish-modal-image" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(`${displayItem.displayName || item.name} ${index + 1}`)}" loading="eager" decoding="async" draggable="false" />
         </div>`
       )).join("")
-      : `<div class="dish-modal-slide"><div class="dish-modal-image-placeholder">Фотография блюда скоро появится</div></div>`;
+      : `<div class="dish-modal-slide"><div class="dish-modal-image-placeholder">${escapeHtml(t("dishPhotoSoon"))}</div></div>`;
 
     track.dataset.photoKey = photoKey;
   }
@@ -132,7 +535,7 @@ function renderDishModalDots(totalSlides) {
   if (!dots) return;
 
   dots.innerHTML = Array.from({ length: totalSlides }, (_, index) => (
-    `<button class="dish-modal-dot${index === activeDishSlide ? " is-active" : ""}" type="button" data-slide-index="${index}" aria-label="Перейти к фото ${index + 1}" aria-current="${index === activeDishSlide ? "true" : "false"}"></button>`
+    `<button class="dish-modal-dot${index === activeDishSlide ? " is-active" : ""}" type="button" data-slide-index="${index}" aria-label="${escapeHtml(`${t("dishNextPhotoAria")} ${index + 1}`)}" aria-current="${index === activeDishSlide ? "true" : "false"}"></button>`
   )).join("");
 }
 
@@ -183,7 +586,7 @@ function applyPromoCode() {
 
   if (!code) {
     promo = { code: "", discount: 0 };
-    hint.textContent = "Промокод не указан";
+    hint.textContent = t("promoMissing");
     savePromo();
     updateTotals();
     return;
@@ -191,13 +594,13 @@ function applyPromoCode() {
 
   if (code === "SKIDKA10") {
     promo = { code, discount: 10 };
-    hint.textContent = "Промокод применен: скидка 10%";
+    hint.textContent = t("promoAppliedPercent");
   } else if (code === "FIRST200") {
     promo = { code, discount: 200 };
-    hint.textContent = "Промокод применен: скидка 200₸";
+    hint.textContent = t("promoAppliedFixed");
   } else {
     promo = { code: "", discount: 0 };
-    hint.textContent = "Промокод не найден";
+    hint.textContent = t("promoNotFound");
   }
 
   savePromo();
@@ -278,6 +681,7 @@ function updateDishModalControls() {
 
 function renderDishModal(item) {
   if (!item) return;
+  const displayItem = getDisplayItem(item);
   const title = document.getElementById("dish-modal-title");
   const price = document.getElementById("dish-modal-price");
   const weight = document.getElementById("dish-modal-weight");
@@ -287,20 +691,20 @@ function renderDishModal(item) {
   const description = document.getElementById("dish-modal-description");
 
   const metaParts = [];
-  if (item.calories) metaParts.push(`${item.calories} ккал`);
+  if (displayItem.displayCalories) metaParts.push(displayItem.displayCalories);
 
-  title.textContent = item.name;
+  title.textContent = displayItem.displayName;
   price.textContent = money(item.price);
   weight.textContent = "";
   weight.classList.add("is-empty");
-  category.textContent = item.category || "Без категории";
-  category.classList.toggle("is-empty", !item.category);
-  tagWeight.textContent = item.weight || "";
-  tagWeight.classList.toggle("is-empty", !item.weight);
+  category.textContent = displayItem.displayCategory || t("dishNoCategory");
+  category.classList.toggle("is-empty", !displayItem.displayCategory && !t("dishNoCategory"));
+  tagWeight.textContent = displayItem.displayWeight || "";
+  tagWeight.classList.toggle("is-empty", !displayItem.displayWeight);
   meta.textContent = metaParts.join(" • ");
   meta.classList.toggle("is-empty", !metaParts.length);
-  description.textContent = item.description || "Подробное описание скоро появится.";
-  description.classList.toggle("is-empty", !item.description);
+  description.textContent = displayItem.displayDescription || t("dishDescriptionFallback");
+  description.classList.toggle("is-empty", !displayItem.displayDescription);
 
   preloadDishPhotos(item);
   updateDishModalCarousel(item);
@@ -361,10 +765,10 @@ function updateTotals() {
 
   document.getElementById("subtotal-amount").textContent = money(subtotal);
   document.getElementById("discount-amount").textContent = money(discountAmount);
-  document.getElementById("total-amount").textContent = Number(finalTotal).toLocaleString("ru-RU");
+  document.getElementById("total-amount").textContent = Number(finalTotal).toLocaleString(getLocale());
   if (subtotalRow) subtotalRow.classList.toggle("is-hidden", !hasDiscount);
   if (discountRow) discountRow.classList.toggle("is-hidden", !hasDiscount);
-  if (totalLabel) totalLabel.textContent = hasDiscount ? "Итого" : "Общая сумма";
+  if (totalLabel) totalLabel.textContent = hasDiscount ? t("total") : t("totalFull");
   if (totalsBox) totalsBox.classList.toggle("is-compact", !hasDiscount);
   return { finalTotal };
 }
@@ -405,7 +809,8 @@ function addToCart(item) {
   renderCart();
   updateMenuControls();
   saveCart();
-  showToast(`${item.name} добавлено в корзину`);
+  const displayItem = getDisplayItem(item);
+  showToast(t("toastAdded", { name: displayItem.displayName || item.name }));
 }
 
 function changeQty(name, delta) {
@@ -431,10 +836,15 @@ function renderCategories() {
   const uniqueCategories = [...new Set(menuData.map((item) => item.category).filter(Boolean))];
   const orderedFromSheet = categoryOrderList.filter((cat) => uniqueCategories.includes(cat));
   const notInSheetOrder = uniqueCategories.filter((cat) => !orderedFromSheet.includes(cat));
-  const categories = ["Все", ...orderedFromSheet, ...notInSheetOrder];
+  const categories = [ALL_CATEGORY, ...orderedFromSheet, ...notInSheetOrder];
 
   categoriesEl.innerHTML = categories
-    .map((cat) => `<button class="category-btn ${cat === activeCategory ? "active" : ""}" data-category="${cat}">${cat}</button>`)
+    .map((cat) => {
+      const translatedCategory = cat === ALL_CATEGORY
+        ? t("categoriesAll")
+        : getDisplayCategoryLabel(cat);
+      return `<button class="category-btn ${cat === activeCategory ? "active" : ""}" data-category="${cat}">${escapeHtml(translatedCategory)}</button>`;
+    })
     .join("");
 
   categoriesEl.querySelectorAll(".category-btn").forEach((btn) => {
@@ -470,7 +880,7 @@ function buildControlsHtml(name, options = {}) {
   const animationClass = options.animate ? " is-entering" : "";
   return qty > 0
     ? `<div class="qty-inline${animationClass}" data-state="${state}"><button class="card-minus" data-name="${escapeHtml(name)}">-</button><span>${qty}</span><button class="card-plus" data-name="${escapeHtml(name)}">+</button></div>`
-    : `<button class="btn-add${animationClass}" data-state="${state}" data-name="${escapeHtml(name)}"><span class="btn-add-main"><span class="btn-add-label">Добавить</span></span></button>`;
+    : `<button class="btn-add${animationClass}" data-state="${state}" data-name="${escapeHtml(name)}"><span class="btn-add-main"><span class="btn-add-label">${escapeHtml(t("addButton"))}</span></span></button>`;
 }
 
 function bindMenuControlEvents() {
@@ -569,21 +979,26 @@ function bindDishModalSwipeEvents() {
 
 function renderMenu() {
   const grid = document.getElementById("menu-grid");
-  const byCategory = activeCategory === "Все" ? menuData : menuData.filter((item) => item.category === activeCategory);
-  const filtered = byCategory.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const byCategory = activeCategory === ALL_CATEGORY ? menuData : menuData.filter((item) => item.category === activeCategory);
+  const filtered = byCategory.filter((item) => {
+    const displayItem = getDisplayItem(item);
+    const query = searchQuery.toLowerCase();
+    return !query || item.name.toLowerCase().includes(query) || String(displayItem.displayName || "").toLowerCase().includes(query);
+  });
 
   if (filtered.length === 0) {
-    grid.innerHTML = '<p class="status">Ничего не найдено. Попробуйте другое название.</p>';
+    grid.innerHTML = `<p class="status">${escapeHtml(t("noResults"))}</p>`;
     return;
   }
 
   grid.innerHTML = filtered
     .map((item, index) => {
-      const categoryHtml = `<p class="food-category${item.category ? "" : " is-empty"}">${item.category ? escapeHtml(item.category) : "&nbsp;"}</p>`;
-      const weightHtml = `<span class="food-weight${item.weight ? "" : " is-empty"}">${item.weight ? escapeHtml(item.weight) : "&nbsp;"}</span>`;
+      const displayItem = getDisplayItem(item);
+      const categoryHtml = `<p class="food-category${displayItem.displayCategory ? "" : " is-empty"}">${displayItem.displayCategory ? escapeHtml(displayItem.displayCategory) : "&nbsp;"}</p>`;
+      const weightHtml = `<span class="food-weight${displayItem.displayWeight ? "" : " is-empty"}">${displayItem.displayWeight ? escapeHtml(displayItem.displayWeight) : "&nbsp;"}</span>`;
       const imageHtml = buildDishPhotoHtml(item);
 
-      return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" data-cart-state="${getCartQty(item.name) > 0 ? "qty" : "add"}" tabindex="0" role="button" aria-label="Открыть ${escapeHtml(item.name)}" style="animation-delay:${index * 0.06}s">${imageHtml}<div class="food-copy"><div class="food-topline"><div class="food-price">${money(item.price)}</div>${weightHtml}</div><h3 class="food-title">${escapeHtml(item.name)}</h3><div class="food-details">${categoryHtml}</div></div><div class="food-footer"><div class="item-controls" data-state="${getCartQty(item.name) > 0 ? "qty" : "add"}">${buildControlsHtml(item.name)}</div></div></article>`;
+      return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" data-cart-state="${getCartQty(item.name) > 0 ? "qty" : "add"}" tabindex="0" role="button" aria-label="${escapeHtml(t("dishOpenAria", { name: displayItem.displayName || item.name }))}" style="animation-delay:${index * 0.06}s">${imageHtml}<div class="food-copy"><div class="food-topline"><div class="food-price">${money(item.price)}</div>${weightHtml}</div><h3 class="food-title">${escapeHtml(displayItem.displayName || item.name)}</h3><div class="food-details">${categoryHtml}</div></div><div class="food-footer"><div class="item-controls" data-state="${getCartQty(item.name) > 0 ? "qty" : "add"}">${buildControlsHtml(item.name)}</div></div></article>`;
     })
     .join("");
 
@@ -595,7 +1010,7 @@ function renderCart() {
   const cartItems = document.getElementById("cart-items");
 
   if (cart.length === 0) {
-    cartItems.innerHTML = '<p class="status">Корзина пока пустая.</p>';
+    cartItems.innerHTML = `<p class="status">${escapeHtml(t("cartEmpty"))}</p>`;
     document.getElementById("subtotal-amount").textContent = money(0);
     document.getElementById("discount-amount").textContent = money(0);
     document.getElementById("total-amount").textContent = "0";
@@ -605,8 +1020,10 @@ function renderCart() {
 
   cartItems.innerHTML = cart
     .map((item) => {
+      const menuItem = getItemByName(item.name);
+      const displayItem = menuItem ? getDisplayItem(menuItem) : { displayName: item.name };
       const sum = item.price * item.qty;
-      return `<div class="cart-item"><div class="cart-item-top"><span class="cart-item-name">${item.name}</span><strong>${money(sum)}</strong></div><div class="cart-controls"><div class="qty-box"><button class="qty-btn" data-action="minus" data-name="${item.name}">-</button><span>${item.qty}</span><button class="qty-btn" data-action="plus" data-name="${item.name}">+</button></div><button class="remove-btn" data-action="remove" data-name="${item.name}">Удалить</button></div></div>`;
+      return `<div class="cart-item"><div class="cart-item-top"><span class="cart-item-name">${escapeHtml(displayItem.displayName || item.name)}</span><strong>${money(sum)}</strong></div><div class="cart-controls"><div class="qty-box"><button class="qty-btn" data-action="minus" data-name="${item.name}">-</button><span>${item.qty}</span><button class="qty-btn" data-action="plus" data-name="${item.name}">+</button></div><button class="remove-btn" data-action="remove" data-name="${item.name}">${escapeHtml(t("removeButton"))}</button></div></div>`;
     })
     .join("");
 
@@ -625,10 +1042,14 @@ function renderCart() {
 
 function createWhatsAppMessage(userName, userPhone, userAddress, orderComment) {
   const { finalTotal } = updateTotals();
-  const orderLines = cart.map((item) => `- ${item.name} x${item.qty} \"${money(item.price * item.qty)}\"`).join("\n");
-  const promoText = promo.code ? `\nПромокод: ${promo.code}` : "";
-  const commentText = orderComment ? `\nКомментарий: ${orderComment}` : "";
-  return `Здравствуйте!\nХочу оформить заказ.\nИмя: ${userName}\nТелефон: ${userPhone}\nАдрес: ${userAddress}${commentText}${promoText}\nЗаказ:\n${orderLines}\n\nИтого: ${money(finalTotal)}`;
+  const orderLines = cart.map((item) => {
+    const menuItem = getItemByName(item.name);
+    const displayItem = menuItem ? getDisplayItem(menuItem) : { displayName: item.name };
+    return `- ${displayItem.displayName || item.name} x${item.qty} "${money(item.price * item.qty)}"`;
+  }).join("\n");
+  const promoText = promo.code ? `\n${t("waPromo")}: ${promo.code}` : "";
+  const commentText = orderComment ? `\n${t("waComment")}: ${orderComment}` : "";
+  return `${t("waGreeting")}\n${t("waIntro")}\n${t("waName")}: ${userName}\n${t("waPhone")}: ${userPhone}\n${t("waAddress")}: ${userAddress}${commentText}${promoText}\n${t("waOrder")}:\n${orderLines}\n\n${t("waTotal")}: ${money(finalTotal)}`;
 }
 
 function cleanPhone(phone) {
@@ -647,6 +1068,116 @@ function updateHeroSearchState() {
   if (!heroBand || !searchInput) return;
   const shouldHide = document.activeElement === searchInput || searchQuery.trim().length > 0;
   heroBand.classList.toggle("is-hidden", shouldHide);
+}
+
+function updateSettingsLanguageButtons(isBusy = false) {
+  document.querySelectorAll(".settings-language-btn").forEach((button) => {
+    const isActive = button.dataset.lang === currentLanguage;
+    button.classList.toggle("is-active", isActive);
+    button.disabled = isBusy;
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+}
+
+function applyStaticTranslations() {
+  document.documentElement.lang = currentLanguage;
+
+  const setText = (selector, value) => {
+    const el = document.querySelector(selector);
+    if (el) el.textContent = value;
+  };
+  const setPlaceholder = (selector, value) => {
+    const el = document.querySelector(selector);
+    if (el) el.placeholder = value;
+  };
+  const setAriaLabel = (selector, value) => {
+    const el = document.querySelector(selector);
+    if (el) el.setAttribute("aria-label", value);
+  };
+
+  setAriaLabel("#settings-toggle", t("settingsButtonAria"));
+  setText("#settings-popover-kicker", t("settingsKicker"));
+  setText("#settings-popover-title", t("settingsTitle"));
+  setText("#settings-popover-text", t("settingsText"));
+  const languageGroup = document.querySelector(".settings-language-list");
+  if (languageGroup) languageGroup.setAttribute("aria-label", t("settingsGroupAria"));
+
+  setText("#hero-title", t("heroTitle"));
+  setText("#hero-subtitle", t("heroSubtitle"));
+  setText("#hero-badge-fresh", t("heroBadgeFresh"));
+  setText("#hero-badge-fast", t("heroBadgeFast"));
+  setText("#hero-badge-free", t("heroBadgeFree"));
+
+  setPlaceholder("#menu-search", t("searchPlaceholder"));
+  setAriaLabel("#search-clear", t("searchClearAria"));
+  setText("#menu-loading-text", t("loadingMenu"));
+
+  setText("#address-link", t("address"));
+  setText("#review-link-text", t("footerReview"));
+  setAriaLabel("#to-top", t("toTopAria"));
+  setText("#cart-button-label", t("cartButton"));
+
+  setText("#cart-modal-title", t("cartTitle"));
+  setAriaLabel("#close-modal", t("closeAria"));
+  setText("#promo-code-label", t("promoLabel"));
+  setPlaceholder("#promo-code", t("promoPlaceholder"));
+  setText("#promo-apply", t("promoApply"));
+  setText("#subtotal-label", t("subtotal"));
+  setText("#discount-label", t("discount"));
+  setText("#order-form-title", t("deliveryTitle"));
+  setPlaceholder("#user-name", t("namePlaceholder"));
+  setPlaceholder("#user-phone", t("phonePlaceholder"));
+  setPlaceholder("#user-address", t("addressPlaceholder"));
+  setPlaceholder("#order-comment", t("commentPlaceholder"));
+  setText("#btn-order-text", t("orderButton"));
+  setText("#payment-note", t("paymentNote"));
+
+  setAriaLabel("#dish-modal-close", t("dishCloseAria"));
+  setAriaLabel("#dish-modal-prev", t("dishPrevPhotoAria"));
+  setAriaLabel("#dish-modal-next", t("dishNextPhotoAria"));
+  setText("#dish-modal-copy-label", t("dishAbout"));
+
+  setText("#thanks-title", t("thanksTitle"));
+  setText("#thanks-text", t("thanksText"));
+  setText("#thanks-close", t("thanksButton"));
+
+  const promoHint = document.getElementById("promo-hint");
+  if (promoHint) {
+    if (!promo.code) promoHint.textContent = "";
+    else if (promo.code === "SKIDKA10") promoHint.textContent = t("promoAppliedPercent");
+    else if (promo.code === "FIRST200") promoHint.textContent = t("promoAppliedFixed");
+  }
+}
+
+function showMenuTranslatingState() {
+  const grid = document.getElementById("menu-grid");
+  if (!grid) return;
+  grid.innerHTML = `<div class="ios-loader-wrap"><div class="ios-loader"></div><p class="status">${t("translatingMenu")}</p></div>`;
+}
+
+async function setLanguage(lang) {
+  if (!LANGUAGE_META[lang] || lang === currentLanguage) return;
+  currentLanguage = lang;
+  localStorage.setItem(LANGUAGE_KEY, currentLanguage);
+  applyStaticTranslations();
+  updateSettingsLanguageButtons(true);
+
+  if (menuData.length && currentLanguage !== "ru") {
+    showMenuTranslatingState();
+    await ensureMenuTranslations(currentLanguage);
+  }
+
+  renderCategories();
+  renderMenu();
+  renderCart();
+  updateTotals();
+  updateCartButton();
+  if (activeDishName) {
+    const item = getItemByName(activeDishName);
+    if (item) renderDishModal(item);
+  }
+
+  updateSettingsLanguageButtons(false);
 }
 
 function openSettingsPopover() {
@@ -678,14 +1209,14 @@ async function loadMenu() {
   const grid = document.getElementById("menu-grid");
   document.body.classList.add("menu-loading");
   renderCategoriesSkeleton();
-  grid.innerHTML = '<div class="ios-loader-wrap"><div class="ios-loader"></div><p class="status">Загружаем меню...</p></div>';
+  grid.innerHTML = `<div class="ios-loader-wrap"><div class="ios-loader"></div><p class="status">${escapeHtml(t("loadingMenu"))}</p></div>`;
   try {
     const response = await fetch(CONFIG.csvUrl, { redirect: "follow" });
     if (!response.ok) throw new Error(`Не удалось загрузить CSV (код ${response.status})`);
 
     const text = await response.text();
     const rows = text.split(/\r?\n/).filter((line) => line.trim() !== "");
-    if (rows.length < 2) throw new Error("CSV пустой или нет строк с блюдами");
+    if (rows.length < 2) throw new Error("CSV empty");
 
     const headers = parseCsvLine(rows[0]).map((h) => h.trim().toLowerCase());
     const cleanHeaders = headers.map((h) => h.replace(/\s+/g, " "));
@@ -720,7 +1251,7 @@ async function loadMenu() {
     const iCategoryOrder = findIndexByAliases("categoryOrder");
 
     if ([iName, iPrice, iCategory, iAvailable].some((i) => i === -1)) {
-      throw new Error("В CSV нужны колонки: name/Наименование, price/Цена, category/Категория, available/Наличие (Да/Нет)");
+      throw new Error("Missing required CSV columns");
     }
 
     // Порядок категорий берется из отдельного столбца.
@@ -738,14 +1269,15 @@ async function loadMenu() {
 
     menuData = rows
       .slice(1)
-      .map((line) => parseCsvLine(line))
-      .map((cols) => {
+      .map((line, index) => ({ cols: parseCsvLine(line), index }))
+      .map(({ cols, index }) => {
         const photos = photoIndexes
           .map((index) => cols[index] || "")
           .map((value) => normalizePhotoUrl(value))
           .filter(Boolean);
 
         return {
+          id: `item-${index}`,
           name: cols[iName] || "",
           price: Number(cols[iPrice]) || 0,
           category: cols[iCategory] || "",
@@ -760,14 +1292,19 @@ async function loadMenu() {
       .filter((item) => item.name && item.available);
 
     if (!menuData.length) {
-      grid.innerHTML = '<p class="status">Нет доступных блюд. Проверьте колонку Наличие (Да/Нет).</p>';
+      grid.innerHTML = `<p class="status">${escapeHtml(t("noAvailable"))}</p>`;
       return;
+    }
+
+    if (currentLanguage !== "ru") {
+      showMenuTranslatingState();
+      await ensureMenuTranslations(currentLanguage);
     }
 
     renderCategories();
     renderMenu();
   } catch (error) {
-    grid.innerHTML = `<p class="status">Ошибка загрузки меню: ${error.message}</p>`;
+    grid.innerHTML = `<p class="status">${escapeHtml(t("loadError", { message: error.message }))}</p>`;
   } finally {
     document.body.classList.remove("menu-loading");
     updateCartButton();
@@ -823,6 +1360,14 @@ document.getElementById("settings-toggle").addEventListener("click", (e) => {
 });
 document.getElementById("settings-popover").addEventListener("click", (e) => {
   e.stopPropagation();
+});
+document.querySelectorAll(".settings-language-btn").forEach((button) => {
+  button.addEventListener("click", async () => {
+    const nextLanguage = button.dataset.lang;
+    if (!nextLanguage || nextLanguage === currentLanguage) return;
+    await setLanguage(nextLanguage);
+    closeSettingsPopover();
+  });
 });
 
 const searchInput = document.getElementById("menu-search");
@@ -906,13 +1451,13 @@ document.addEventListener("click", (event) => {
 
 document.getElementById("order-form").addEventListener("submit", (e) => {
   e.preventDefault();
-  if (!cart.length) return alert("Корзина пустая. Добавьте блюда.");
+  if (!cart.length) return alert(t("alertCartEmpty"));
 
   const userName = document.getElementById("user-name").value.trim();
   const userPhone = document.getElementById("user-phone").value.trim();
   const userAddress = document.getElementById("user-address").value.trim();
   const orderComment = document.getElementById("order-comment").value.trim();
-  if (!userName || !userPhone || !userAddress) return alert("Заполните имя, телефон и адрес.");
+  if (!userName || !userPhone || !userAddress) return alert(t("alertFillRequired"));
 
   const message = createWhatsAppMessage(userName, userPhone, userAddress, orderComment);
   const encoded = encodeURIComponent(message);
@@ -934,6 +1479,8 @@ document.getElementById("order-form").addEventListener("submit", (e) => {
 
 loadCart();
 loadPromo();
+applyStaticTranslations();
+updateSettingsLanguageButtons(false);
 loadMenu();
 renderCart();
 updateSearchClearVisibility();
@@ -941,7 +1488,6 @@ syncStickyOffsets();
 updateHeroSearchState();
 if (promo.code) {
   document.getElementById("promo-code").value = promo.code;
-  document.getElementById("promo-hint").textContent = "Промокод применен";
 }
 
 if (document.fonts && document.fonts.ready) {

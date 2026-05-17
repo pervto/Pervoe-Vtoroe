@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=42" />
+  <link rel="stylesheet" href="style.css?v=43" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -29,9 +29,14 @@
 
           <div id="settings-popover" class="settings-popover" aria-hidden="true">
             <div class="settings-popover-inner">
-              <p class="settings-popover-kicker">Настройки</p>
-              <h3 class="settings-popover-title">Панель скоро наполнится</h3>
-              <p class="settings-popover-text">Я подготовил красивое мини-окно для будущих настроек. Функциональные элементы можно добавить следующим шагом.</p>
+              <p id="settings-popover-kicker" class="settings-popover-kicker">Настройки</p>
+              <h3 id="settings-popover-title" class="settings-popover-title">Язык интерфейса</h3>
+              <p id="settings-popover-text" class="settings-popover-text">Выберите язык. Сайт запомнит его и в следующий раз откроется уже на нём.</p>
+              <div class="settings-language-list" role="group" aria-label="Выбор языка">
+                <button class="settings-language-btn" type="button" data-lang="ru">Русский</button>
+                <button class="settings-language-btn" type="button" data-lang="kk">Қазақша</button>
+                <button class="settings-language-btn" type="button" data-lang="en">English</button>
+              </div>
             </div>
           </div>
         </div>
@@ -43,12 +48,12 @@
     <div class="container">
       <section id="hero" class="hero">
         <div class="hero-inner">
-          <p class="hero-title">Выберите блюда, добавьте в корзину и отправьте заказ в WhatsApp за 1 минуту.</p>
-          <p class="hero-subtitle">Доставка работает ежедневно с 9:00 до 18:00.</p>
+          <p id="hero-title" class="hero-title">Выберите блюда, добавьте в корзину и отправьте заказ в WhatsApp за 1 минуту.</p>
+          <p id="hero-subtitle" class="hero-subtitle">Доставка работает ежедневно с 9:00 до 18:00.</p>
           <div class="hero-badges">
-            <span class="hero-badge">Свежие блюда</span>
-            <span class="hero-badge">Быстрая доставка</span>
-            <span class="hero-badge">Без регистрации</span>
+            <span id="hero-badge-fresh" class="hero-badge">Свежие блюда</span>
+            <span id="hero-badge-fast" class="hero-badge">Быстрая доставка</span>
+            <span id="hero-badge-free" class="hero-badge">Без регистрации</span>
           </div>
         </div>
       </section>
@@ -72,7 +77,7 @@
     <section id="menu-grid" class="menu-grid">
       <div class="ios-loader-wrap" aria-label="Загрузка меню">
         <div class="ios-loader"></div>
-        <p class="status">Загружаем меню...</p>
+        <p id="menu-loading-text" class="status">Загружаем меню...</p>
       </div>
     </section>
   </main>
@@ -84,7 +89,7 @@
       </a>
       <a class="review-link" href="https://go.2gis.com/nJoY6" target="_blank" rel="noopener noreferrer">
         <img class="logo-2gis" src="Mask%20group.svg" alt="2ГИС" />
-        <span>Будем рады вашим отзывам</span>
+        <span id="review-link-text">Будем рады вашим отзывам</span>
       </a>
     </div>
   </footer>
@@ -96,21 +101,21 @@
 
   <button id="cart-button" class="cart-button" type="button">
     <span class="material-symbols-outlined cart-icon" aria-hidden="true">shopping_bag</span>
-    <span class="cart-label">Корзина</span>
+    <span id="cart-button-label" class="cart-label">Корзина</span>
     <span id="cart-count" class="cart-count">0</span>
   </button>
 
   <div id="cart-modal" class="modal" aria-hidden="true">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Ваш заказ</h2>
+        <h2 id="cart-modal-title">Ваш заказ</h2>
         <button id="close-modal" class="close" type="button" aria-label="Закрыть">×</button>
       </div>
 
       <div id="cart-items" class="cart-items"></div>
 
       <div class="promo-block">
-        <label for="promo-code">Промокод (необязательно)</label>
+        <label id="promo-code-label" for="promo-code">Промокод (необязательно)</label>
         <div class="promo-row">
           <input id="promo-code" type="text" placeholder="Введите промокод" />
           <button id="promo-apply" type="button">Применить</button>
@@ -119,8 +124,8 @@
       </div>
 
       <div class="totals-box">
-        <div id="subtotal-row" class="totals-row"><span>Сумма</span><strong id="subtotal-amount">0 ₸</strong></div>
-        <div id="discount-row" class="totals-row"><span>Скидка</span><strong id="discount-amount">0 ₸</strong></div>
+        <div id="subtotal-row" class="totals-row"><span id="subtotal-label">Сумма</span><strong id="subtotal-amount">0 ₸</strong></div>
+        <div id="discount-row" class="totals-row"><span id="discount-label">Скидка</span><strong id="discount-amount">0 ₸</strong></div>
         <div class="cart-total-row">
           <span id="total-label" class="cart-total-label">Итого</span>
           <strong class="cart-total-value"><span id="total-amount">0</span> ₸</strong>
@@ -128,7 +133,7 @@
       </div>
 
       <form id="order-form" class="order-form">
-        <h3>Данные для доставки</h3>
+        <h3 id="order-form-title">Данные для доставки</h3>
         <input id="user-name" type="text" placeholder="Ваше имя" required />
         <input id="user-phone" type="tel" placeholder="Ваш телефон" required />
         <input id="user-address" type="text" placeholder="Адрес доставки" required />
@@ -139,9 +144,9 @@
               <path fill="currentColor" d="M12 2a10 10 0 0 0-8.64 15.03L2 22l5.09-1.33A10 10 0 1 0 12 2Zm0 18.18a8.15 8.15 0 0 1-4.15-1.14l-.3-.18-3.02.79.8-2.94-.2-.3A8.17 8.17 0 1 1 12 20.18Zm4.48-5.82c-.24-.12-1.42-.7-1.64-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1-.37-1.91-1.18-.7-.63-1.17-1.41-1.31-1.65-.14-.24-.01-.36.1-.48.1-.1.24-.26.36-.39.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.29-.74-1.77-.2-.48-.4-.4-.54-.41h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.31.98 2.47c.12.16 1.7 2.6 4.12 3.65.58.25 1.03.4 1.38.51.58.18 1.11.16 1.53.1.47-.07 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28Z"/>
             </svg>
           </span>
-          <span>Оформить в WhatsApp</span>
+          <span id="btn-order-text">Оформить в WhatsApp</span>
         </button>
-        <div class="payment-note">Оплата временно осуществляется только через удалённую оплату Kaspi. Приносим извинения за неудобства.</div>
+        <div id="payment-note" class="payment-note">Оплата временно осуществляется только через удалённую оплату Kaspi. Приносим извинения за неудобства.</div>
       </form>
     </div>
   </div>
@@ -178,7 +183,7 @@
         </div>
 
         <div class="dish-modal-copy">
-          <p class="dish-modal-copy-label">О блюде</p>
+          <p id="dish-modal-copy-label" class="dish-modal-copy-label">О блюде</p>
           <p id="dish-modal-description" class="dish-modal-description"></p>
         </div>
 
@@ -191,14 +196,14 @@
 
   <div id="thanks-modal" class="thanks-modal" aria-hidden="true">
     <div class="thanks-card">
-      <h3>Спасибо за заказ!</h3>
-      <p>Мы уже получили вашу заявку. Ждем вас снова.</p>
+      <h3 id="thanks-title">Спасибо за заказ!</h3>
+      <p id="thanks-text">Мы уже получили вашу заявку. Ждем вас снова.</p>
       <button id="thanks-close" type="button">Отлично</button>
     </div>
   </div>
 
   <script src="config.js?v=30"></script>
-  <script src="script.js?v=37"></script>
+  <script src="script.js?v=38"></script>
   <script>
     const siteLogo = document.querySelector("[data-logo-src]");
     if (siteLogo) {
