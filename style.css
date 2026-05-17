@@ -2065,8 +2065,8 @@ html[data-theme="dark"] .hero {
 }
 
 html[data-theme="dark"] .hero::after {
-  opacity: 0.24;
-  filter: invert(1) brightness(1.6) saturate(0.7);
+  opacity: 0.12;
+  filter: invert(1) brightness(1.35) saturate(0.6);
   mix-blend-mode: screen;
 }
 
