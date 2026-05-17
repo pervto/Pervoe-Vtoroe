@@ -1558,3 +1558,9 @@ if (promo.code) {
 if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(syncStickyOffsets);
 }
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+  });
+}
