@@ -93,7 +93,7 @@ main.container {
   position: relative;
   z-index: 1;
   padding-top: 12px;
-  padding-bottom: 2px;
+  padding-bottom: 10px;
 }
 
 .brand-row {
@@ -440,7 +440,7 @@ main.container {
 }
 
 .hero-band.is-hidden + .menu-dock .container {
-  padding-top: 14px;
+  padding-top: 6px;
 }
 
 .search-wrap:focus-within { transform: translateY(-1px); box-shadow: 0 14px 30px rgba(21,34,76,.12); }
@@ -1610,7 +1610,7 @@ main.container {
   .hero-title { font-size: 20px; }
   .search-wrap { margin-top: 10px; }
   .hero-band.is-hidden + .menu-dock .container {
-    padding-top: 10px;
+    padding-top: 4px;
   }
   .menu-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
