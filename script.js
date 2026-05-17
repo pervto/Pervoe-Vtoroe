@@ -737,9 +737,15 @@ function getCartQty(name) {
 function syncOverlayState() {
   const cartModal = document.getElementById("cart-modal");
   const dishModal = document.getElementById("dish-modal");
+
+  const isOverlayActive = (element) => Boolean(
+    element &&
+    (element.classList.contains("show") || element.classList.contains("is-closing"))
+  );
+
   const hasOverlayOpen = Boolean(
-    (cartModal && cartModal.classList.contains("show")) ||
-    (dishModal && dishModal.classList.contains("show"))
+    isOverlayActive(cartModal) ||
+    isOverlayActive(dishModal)
   );
 
   document.body.classList.toggle("no-scroll", hasOverlayOpen);
@@ -748,14 +754,49 @@ function syncOverlayState() {
   if (cartButton) cartButton.classList.toggle("is-hidden", hasOverlayOpen);
 }
 
-function openCart() {
-  document.getElementById("cart-modal").classList.add("show");
+const OVERLAY_CLOSE_DURATION = 340;
+
+function openOverlay(element) {
+  if (!element) return;
+  if (element.__closeTimer) {
+    clearTimeout(element.__closeTimer);
+    element.__closeTimer = null;
+  }
+
+  element.classList.remove("is-closing");
+  element.setAttribute("aria-hidden", "false");
   syncOverlayState();
+  requestAnimationFrame(() => {
+    element.classList.add("show");
+  });
+}
+
+function closeOverlay(element) {
+  if (!element) return;
+  if (!element.classList.contains("show") && !element.classList.contains("is-closing")) return;
+
+  if (element.__closeTimer) {
+    clearTimeout(element.__closeTimer);
+  }
+
+  element.classList.remove("show");
+  element.classList.add("is-closing");
+  syncOverlayState();
+
+  element.__closeTimer = setTimeout(() => {
+    element.classList.remove("is-closing");
+    element.setAttribute("aria-hidden", "true");
+    element.__closeTimer = null;
+    syncOverlayState();
+  }, OVERLAY_CLOSE_DURATION);
+}
+
+function openCart() {
+  openOverlay(document.getElementById("cart-modal"));
 }
 
 function closeCart() {
-  document.getElementById("cart-modal").classList.remove("show");
-  syncOverlayState();
+  closeOverlay(document.getElementById("cart-modal"));
 }
 
 function showThanksModal() {
@@ -844,23 +885,19 @@ function openDishModal(name) {
   activeDishDragOffsetX = 0;
   activeDishIsDragging = false;
   renderDishModal(item);
-  modal.classList.add("show");
-  modal.setAttribute("aria-hidden", "false");
-  syncOverlayState();
+  openOverlay(modal);
 }
 
 function closeDishModal() {
   const modal = document.getElementById("dish-modal");
   if (!modal) return;
-  modal.classList.remove("show");
-  modal.setAttribute("aria-hidden", "true");
+  closeOverlay(modal);
   activeDishName = "";
   activeDishSlide = 0;
   activeDishPointerId = null;
   activeDishDragStartX = 0;
   activeDishDragOffsetX = 0;
   activeDishIsDragging = false;
-  syncOverlayState();
 }
 
 function updateCartButton() {
