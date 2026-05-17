@@ -68,11 +68,11 @@ main.container {
   position: sticky;
   top: 0;
   z-index: 42;
-  background: rgba(180, 188, 198, 0.96);
+  background: rgba(171, 180, 191, 0.82);
   border-bottom: none;
   box-shadow: none;
-  backdrop-filter: blur(24px) saturate(1.08);
-  -webkit-backdrop-filter: blur(24px) saturate(1.08);
+  backdrop-filter: blur(32px) saturate(1.12);
+  -webkit-backdrop-filter: blur(32px) saturate(1.12);
   overflow: visible;
 }
 
@@ -81,10 +81,10 @@ main.container {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.06;
+  opacity: 0.05;
   background-image:
-    radial-gradient(rgba(20, 24, 31, 0.14) 0.6px, transparent 0.6px),
-    radial-gradient(rgba(255, 255, 255, 0.56) 0.5px, transparent 0.5px);
+    radial-gradient(rgba(20, 24, 31, 0.13) 0.6px, transparent 0.6px),
+    radial-gradient(rgba(255, 255, 255, 0.48) 0.5px, transparent 0.5px);
   background-position: 0 0, 12px 12px;
   background-size: 14px 14px, 18px 18px;
 }
@@ -282,13 +282,13 @@ main.container {
 .hero-band {
   position: relative;
   z-index: 18;
-  background: rgba(180, 188, 198, 0.96);
+  background: rgba(171, 180, 191, 0.82);
   max-height: 360px;
   overflow: clip;
   transition: max-height .18s ease, opacity .18s ease;
   will-change: max-height, opacity;
-  backdrop-filter: blur(24px) saturate(1.08);
-  -webkit-backdrop-filter: blur(24px) saturate(1.08);
+  backdrop-filter: blur(32px) saturate(1.12);
+  -webkit-backdrop-filter: blur(32px) saturate(1.12);
 }
 
 .hero-band.is-hidden {
@@ -394,11 +394,11 @@ main.container {
   gap: 8px;
   padding: 10px 12px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.28);
-  background: rgba(234, 239, 246, 0.78);
+  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(232, 237, 244, 0.58);
   box-shadow: none;
-  backdrop-filter: blur(14px) saturate(1.06);
-  -webkit-backdrop-filter: blur(14px) saturate(1.06);
+  backdrop-filter: blur(22px) saturate(1.12);
+  -webkit-backdrop-filter: blur(22px) saturate(1.12);
   transition: .2s ease;
 }
 
@@ -406,11 +406,11 @@ main.container {
   position: sticky;
   top: var(--logo-bar-height);
   z-index: 40;
-  background: rgba(180, 188, 198, 0.96);
+  background: rgba(171, 180, 191, 0.82);
   border-bottom: 1px solid rgba(17, 24, 39, 0.05);
   box-shadow: none;
-  backdrop-filter: blur(24px) saturate(1.08);
-  -webkit-backdrop-filter: blur(24px) saturate(1.08);
+  backdrop-filter: blur(32px) saturate(1.12);
+  -webkit-backdrop-filter: blur(32px) saturate(1.12);
   overflow: hidden;
 }
 
@@ -419,10 +419,10 @@ main.container {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.06;
+  opacity: 0.05;
   background-image:
-    radial-gradient(rgba(20, 24, 31, 0.14) 0.6px, transparent 0.6px),
-    radial-gradient(rgba(255, 255, 255, 0.56) 0.5px, transparent 0.5px);
+    radial-gradient(rgba(20, 24, 31, 0.13) 0.6px, transparent 0.6px),
+    radial-gradient(rgba(255, 255, 255, 0.48) 0.5px, transparent 0.5px);
   background-position: 0 0, 12px 12px;
   background-size: 14px 14px, 18px 18px;
 }
@@ -432,10 +432,15 @@ main.container {
   z-index: 1;
   padding-top: 0;
   padding-bottom: 8px;
+  transition: padding-top .18s ease, padding-bottom .18s ease;
 }
 
 .menu-dock .search-wrap {
   margin-top: 0;
+}
+
+.hero-band.is-hidden + .menu-dock .container {
+  padding-top: 14px;
 }
 
 .search-wrap:focus-within { transform: translateY(-1px); box-shadow: 0 14px 30px rgba(21,34,76,.12); }
@@ -509,8 +514,8 @@ main.container {
 }
 
 .category-btn {
-  border: 1px solid rgba(255,255,255,.30);
-  background: rgba(233, 238, 245, .74);
+  border: 1px solid rgba(255,255,255,.24);
+  background: rgba(230, 235, 242, .58);
   color: #131b35;
   font-family: inherit;
   padding: 9px 14px;
@@ -519,8 +524,8 @@ main.container {
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
-  backdrop-filter: blur(12px) saturate(1.04);
-  -webkit-backdrop-filter: blur(12px) saturate(1.04);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
   transition: .2s ease;
 }
 
@@ -1604,6 +1609,9 @@ main.container {
   }
   .hero-title { font-size: 20px; }
   .search-wrap { margin-top: 10px; }
+  .hero-band.is-hidden + .menu-dock .container {
+    padding-top: 10px;
+  }
   .menu-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 10px;
