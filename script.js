@@ -885,23 +885,6 @@ function buildHeroBannerHtml(banner, index) {
           </div>
           <p class="hero-banner-note">${escapeHtml(displayBanner.displayNote)}</p>
         </div>
-        <div class="hero-banner-art" aria-hidden="true">
-          <div class="hero-banner-orb hero-banner-orb-one"></div>
-          <div class="hero-banner-orb hero-banner-orb-two"></div>
-          <div class="hero-banner-device">
-            <div class="hero-banner-device-notch"></div>
-            <div class="hero-banner-device-screen">
-              <div class="hero-banner-device-head"></div>
-              <div class="hero-banner-device-card"></div>
-              <div class="hero-banner-device-row"></div>
-              <div class="hero-banner-device-row is-short"></div>
-              <div class="hero-banner-device-footer">
-                <span class="hero-banner-device-pill"></span>
-                <span class="hero-banner-device-pill"></span>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </article>`;
   }

@@ -477,6 +477,7 @@ main.container {
   padding: 0;
   overflow: hidden;
   background: transparent;
+  border-radius: 20px;
 }
 
 .hero-banner--image::before {
@@ -699,6 +700,7 @@ main.container {
   height: 100%;
   object-fit: cover;
   object-position: center;
+  border-radius: inherit;
 }
 
 .hero-banner-orb-one {
