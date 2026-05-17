@@ -877,17 +877,13 @@ function buildHeroBannerHtml(banner, index) {
     return `<article class="hero-banner-slide" aria-roledescription="slide" aria-label="${escapeHtml(`${index + 1}`)}">
       <div class="hero-banner hero-banner--ios">
         <div class="hero-banner-content">
-          <div class="hero-banner-head">
-            <div class="hero-banner-copy">
-              <p class="hero-banner-kicker">${escapeHtml(displayBanner.displayKicker)}</p>
-              <h2 class="hero-banner-title">${escapeHtml(displayBanner.displayTitle)}</h2>
-              <p class="hero-banner-text">${escapeHtml(displayBanner.displayBody)}</p>
-            </div>
-            <p class="hero-banner-note">${escapeHtml(displayBanner.displayNote)}</p>
-          </div>
+          <p class="hero-banner-kicker">${escapeHtml(displayBanner.displayKicker)}</p>
+          <h2 class="hero-banner-title">${escapeHtml(displayBanner.displayTitle)}</h2>
+          <p class="hero-banner-text">${escapeHtml(displayBanner.displayBody)}</p>
           <div class="hero-banner-steps">
             ${displayBanner.steps.map((step) => `<div class="hero-banner-step"><span class="hero-banner-step-icon" aria-hidden="true">${buildHeroBannerStepIconMarkup(step.icon)}</span><span class="hero-banner-step-text">${escapeHtml(step.text)}</span></div>`).join("")}
           </div>
+          <p class="hero-banner-note">${escapeHtml(displayBanner.displayNote)}</p>
         </div>
       </div>
     </article>`;

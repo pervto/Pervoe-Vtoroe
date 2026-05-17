@@ -1,11 +1,6 @@
 :root {
   --bg-1: #ffffff;
   --bg-2: #ffffff;
-  --radius-2xl: 30px;
-  --radius-xl: 24px;
-  --radius-lg: 20px;
-  --radius-md: 16px;
-  --radius-sm: 12px;
   --logo-bar-height: 78px;
   --top-surface: #dfe4ea;
   --glass: rgba(255, 255, 255, 0.82);
@@ -170,12 +165,10 @@ main.container {
 }
 
 .settings-popover-inner {
-  --settings-panel-radius: 24px;
-  --settings-panel-padding: 14px;
   position: relative;
   overflow: hidden;
-  padding: var(--settings-panel-padding);
-  border-radius: var(--settings-panel-radius);
+  padding: 18px;
+  border-radius: 22px;
   border: 1px solid rgba(255,255,255,.28);
   background: rgba(225, 230, 236, 0.98);
   box-shadow: 0 24px 50px rgba(15, 23, 42, 0.16);
@@ -232,7 +225,7 @@ main.container {
   width: 100%;
   min-height: 44px;
   border: 1px solid rgba(17, 24, 39, 0.08);
-  border-radius: max(10px, calc(var(--settings-panel-radius) - var(--settings-panel-padding)));
+  border-radius: 16px;
   background: rgba(255,255,255,.72);
   color: #121a2d;
   text-align: left;
@@ -340,7 +333,7 @@ main.container {
   width: min(100%, 820px);
   margin: 0 auto;
   aspect-ratio: 4 / 3;
-  border-radius: var(--radius-lg);
+  border-radius: 20px;
   border: 1px solid rgba(255,255,255,.12);
   background:
     linear-gradient(135deg, rgba(13, 17, 29, .94), rgba(10, 14, 24, .90));
@@ -383,14 +376,11 @@ main.container {
 }
 
 .hero-banner {
-  --hero-banner-radius: var(--radius-lg);
-  --hero-banner-padding: 26px;
-  --hero-banner-inner-radius: max(10px, calc(var(--hero-banner-radius) - var(--hero-banner-padding)));
   position: relative;
   width: 100%;
   height: 100%;
   min-height: 0;
-  padding: var(--hero-banner-padding) var(--hero-banner-padding) 54px;
+  padding: 26px 26px 54px;
   display: grid;
   grid-template-columns: minmax(0, 1.08fr) minmax(220px, .92fr);
   gap: 20px;
@@ -487,7 +477,7 @@ main.container {
   padding: 0;
   overflow: hidden;
   background: transparent;
-  border-radius: var(--hero-banner-radius);
+  border-radius: 20px;
 }
 
 .hero-banner--image::before {
@@ -559,32 +549,11 @@ main.container {
   color: rgba(7, 42, 44, .72);
 }
 
-.hero-banner--ios .hero-banner-kicker {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: max-content;
-  min-height: 30px;
-  padding: 7px 12px;
-  border-radius: var(--radius-sm);
-  background: rgba(255,255,255,.22);
-  border: 1px solid rgba(255,255,255,.26);
-  color: rgba(7, 42, 44, .76);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
 .hero-banner-title {
   margin: 8px 0 10px;
   font-size: clamp(24px, 2.8vw, 35px);
   line-height: 1.04;
   letter-spacing: -0.035em;
-}
-
-.hero-banner--ios .hero-banner-title {
-  max-width: 12ch;
-  margin: 0;
-  text-wrap: balance;
 }
 
 .hero-banner-text {
@@ -593,10 +562,6 @@ main.container {
   font-size: 15px;
   line-height: 1.52;
   color: rgba(8, 31, 35, .82);
-}
-
-.hero-banner--ios .hero-banner-text {
-  max-width: 34ch;
 }
 
 .hero-banner--classic .hero-banner-kicker {
@@ -638,11 +603,7 @@ main.container {
 }
 
 .hero-banner--ios .hero-banner-content {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  align-content: start;
-  gap: 16px;
-  height: 100%;
+  padding-right: 188px;
 }
 
 .hero-banner--ios .hero-banner-kicker,
@@ -652,44 +613,19 @@ main.container {
   max-width: none;
 }
 
-.hero-banner-head {
-  display: grid;
-  gap: 14px;
-}
-
-.hero-banner-copy {
-  display: grid;
-  gap: 10px;
-}
-
 .hero-banner--ios .hero-banner-steps {
-  width: 100%;
-  margin-top: auto;
+  margin-top: 18px;
   gap: 12px;
 }
 
 .hero-banner--ios .hero-banner-step {
-  --hero-step-radius: 18px;
-  --hero-step-padding: 12px;
-  --hero-step-inner-radius: max(8px, calc(var(--hero-step-radius) - var(--hero-step-padding)));
-  min-height: 132px;
-  padding: var(--hero-step-padding);
-  border-radius: var(--hero-step-radius);
-  background: rgba(255,255,255,.20);
-  border-color: rgba(255,255,255,.24);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.24),
-    0 14px 24px rgba(8, 66, 74, .10);
-  grid-template-columns: auto 1fr;
-  grid-template-rows: auto 1fr;
-  gap: 10px 12px;
-  align-items: start;
+  min-height: 108px;
+  padding: 16px 14px;
 }
 
 .hero-banner--ios .hero-banner-step-text {
-  grid-column: 1 / -1;
   font-size: 14px;
-  line-height: 1.3;
+  line-height: 1.34;
 }
 
 .hero-banner-step {
@@ -704,14 +640,12 @@ main.container {
   display: grid;
   align-content: start;
   gap: 10px;
-  justify-items: start;
-  text-align: left;
 }
 
 .hero-banner-step-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--hero-step-inner-radius, 12px);
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -725,10 +659,6 @@ main.container {
   line-height: 1.32;
   font-weight: 700;
   color: rgba(7, 31, 35, .9);
-  overflow-wrap: normal;
-  word-break: normal;
-  text-wrap: balance;
-  hyphens: none;
 }
 
 .hero-banner-step-icon svg {
@@ -745,25 +675,17 @@ main.container {
   color: rgba(7, 42, 44, .74);
 }
 
-.hero-banner--ios .hero-banner-note {
-  margin: 0;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: rgba(255,255,255,.18);
-  border: 1px solid rgba(255,255,255,.22);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.22);
-  font-size: 12px;
-  line-height: 1.4;
-  color: rgba(7, 42, 44, .78);
-}
-
 .hero-banner-art {
   min-height: 0;
   align-self: stretch;
 }
 
 .hero-banner--ios .hero-banner-art {
-  display: none;
+  position: absolute;
+  right: 18px;
+  bottom: 14px;
+  width: 156px;
+  height: 168px;
 }
 
 .hero-banner-orb {
@@ -1024,17 +946,13 @@ main.container {
 }
 
 .search-wrap {
-  --search-wrap-radius: 14px;
-  --search-wrap-padding-y: 10px;
-  --search-wrap-padding-x: 12px;
-  --search-wrap-inner-radius: max(8px, calc(var(--search-wrap-radius) - var(--search-wrap-padding-y)));
   margin-top: 0;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 8px;
-  padding: var(--search-wrap-padding-y) var(--search-wrap-padding-x);
-  border-radius: var(--search-wrap-radius);
+  padding: 10px 12px;
+  border-radius: 14px;
   border: 1px solid rgba(255,255,255,0.22);
   background: rgba(232, 237, 244, 0.58);
   box-shadow: none;
@@ -1119,7 +1037,7 @@ main.container {
   border: none;
   width: 32px;
   height: 32px;
-  border-radius: var(--search-wrap-inner-radius);
+  border-radius: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1195,14 +1113,11 @@ main.container {
 .ios-loader { width:30px; height:30px; border:3px solid #d8ddee; border-top-color:#24304f; border-radius:50%; animation:iosSpin .8s linear infinite; }
 
 .food-card {
-  --food-card-radius: 24px;
-  --food-card-padding: 12px;
-  --food-card-inner-radius: max(10px, calc(var(--food-card-radius) - var(--food-card-padding)));
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(17, 24, 39, 0.07);
-  border-radius: var(--food-card-radius);
-  padding: var(--food-card-padding);
+  border-radius: var(--radius);
+  padding: 14px;
   background: #ffffff;
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
   opacity: 0;
@@ -1222,7 +1137,7 @@ main.container {
 .food-image-placeholder {
   width: 100%;
   height: 210px;
-  border-radius: var(--food-card-inner-radius);
+  border-radius: 13px;
   margin-bottom: 12px;
 }
 
@@ -1697,9 +1612,6 @@ main.container {
 }
 
 .modal-content {
-  --modal-content-radius: 24px;
-  --modal-content-padding: 20px;
-  --modal-content-inner-radius: max(10px, calc(var(--modal-content-radius) - var(--modal-content-padding)));
   width:100%;
   max-width:620px;
   margin:0;
@@ -1707,8 +1619,8 @@ main.container {
   overflow:auto;
   background: linear-gradient(180deg, #f8f9fb 0%, #eceff4 100%);
   border: 1px solid rgba(17, 24, 39, 0.08);
-  border-radius:var(--modal-content-radius);
-  padding:var(--modal-content-padding);
+  border-radius:24px;
+  padding:20px;
   padding-bottom:calc(22px + env(safe-area-inset-bottom));
   -webkit-overflow-scrolling:touch;
   backdrop-filter: none;
@@ -1773,9 +1685,6 @@ main.container {
 }
 
 .dish-modal-shell {
-  --dish-shell-radius: 30px;
-  --dish-shell-padding: 18px;
-  --dish-shell-inner-radius: max(12px, calc(var(--dish-shell-radius) - var(--dish-shell-padding)));
   position: relative;
   width: min(100%, 1040px);
   max-height: calc(100dvh - 24px);
@@ -1783,7 +1692,7 @@ main.container {
   overflow: hidden;
   display: grid;
   grid-template-rows: minmax(300px, 48vh) minmax(0, 1fr);
-  border-radius: var(--dish-shell-radius);
+  border-radius: 30px;
   border: 1px solid rgba(17, 24, 39, 0.08);
   background:
     radial-gradient(circle at top right, rgba(255,255,255,.22), transparent 32%),
@@ -2016,7 +1925,7 @@ main.container {
 .dish-modal-copy {
   padding: 18px;
   border: 1px solid rgba(17, 24, 39, 0.08);
-  border-radius: var(--dish-shell-inner-radius);
+  border-radius: 24px;
   background: rgba(255,255,255,.72);
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.05);
 }
@@ -2112,12 +2021,9 @@ main.container {
 }
 .cart-items { margin-top:8px; display:grid; gap:10px; }
 .cart-item {
-  --cart-item-radius: 20px;
-  --cart-item-padding: 14px;
-  --cart-item-inner-radius: max(10px, calc(var(--cart-item-radius) - var(--cart-item-padding)));
   border: 1px solid rgba(17, 24, 39, 0.07);
-  border-radius: var(--cart-item-radius);
-  padding: var(--cart-item-padding);
+  border-radius: 18px;
+  padding: 14px;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
   animation:fadeIn .2s ease;
@@ -2131,7 +2037,7 @@ main.container {
   align-items:center;
   gap:8px;
   padding:4px;
-  border-radius: var(--cart-item-inner-radius);
+  border-radius:999px;
   background: rgba(17, 24, 39, 0.06);
 }
 .qty-box span {
@@ -2146,7 +2052,7 @@ main.container {
   height:36px;
   border:none;
   font-family: inherit;
-  border-radius:max(8px, calc(var(--cart-item-inner-radius) - 2px));
+  border-radius:50%;
   background:#ffffff;
   color:#1d2640;
   cursor:pointer;
@@ -2161,27 +2067,24 @@ main.container {
   font-family: inherit;
   font-size: 14px;
   font-weight: 700;
-  border-radius: var(--cart-item-inner-radius);
+  border-radius: 999px;
   padding: 10px 14px;
   cursor: pointer;
 }
 
 .promo-block,
 .totals-box {
-  --panel-block-radius: 20px;
-  --panel-block-padding: 14px;
-  --panel-block-inner-radius: max(10px, calc(var(--panel-block-radius) - var(--panel-block-padding)));
   margin-top:14px;
   padding:16px;
   border:1px solid rgba(17, 24, 39, 0.08);
-  border-radius:var(--panel-block-radius);
+  border-radius:18px;
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
 }
 
 .promo-block label { font-size:14px; color:#3f4c70; font-weight:800; letter-spacing:0.02em; text-transform:uppercase; }
 .promo-row { display:flex; gap:8px; margin-top:8px; }
-.promo-row input { flex:1; padding:13px 14px; border:1px solid rgba(17, 24, 39, 0.10); border-radius:var(--panel-block-inner-radius); font-size:16px; background:#fff; }
+.promo-row input { flex:1; padding:13px 14px; border:1px solid rgba(17, 24, 39, 0.10); border-radius:14px; font-size:16px; background:#fff; }
 .promo-row button {
   flex: 0 0 auto;
   border:none;
@@ -2189,7 +2092,7 @@ main.container {
   color:#fff;
   font-family: inherit;
   padding:13px 18px;
-  border-radius:var(--panel-block-inner-radius);
+  border-radius:999px;
   cursor:pointer;
   font-size:15px;
   font-weight:800;
@@ -2223,7 +2126,7 @@ main.container {
   width:100%;
   padding:15px 16px;
   border:1px solid rgba(17, 24, 39, 0.10);
-  border-radius:var(--radius-sm);
+  border-radius:16px;
   font-size:16px;
   font-family:inherit;
   background: rgba(255, 255, 255, 0.92);
@@ -2258,7 +2161,7 @@ main.container {
   border: 1px solid rgba(224, 54, 59, .14);
   background: linear-gradient(135deg, rgba(255, 245, 245, 0.98), rgba(245, 236, 237, 0.98));
   color: #6a2327;
-  border-radius: var(--radius-sm);
+  border-radius: 16px;
   padding: 12px 14px;
   font-size: 14px;
   line-height: 1.35;
@@ -2271,22 +2174,19 @@ main.container {
 .thanks-modal { display:none; position:fixed; inset:0; z-index:70; background:rgba(8,12,24,.4); padding:16px; }
 .thanks-modal.show { display:grid; place-items:center; animation:fadeIn .2s ease; }
 .thanks-card {
-  --thanks-card-radius: 24px;
-  --thanks-card-padding: 24px;
-  --thanks-card-inner-radius: max(10px, calc(var(--thanks-card-radius) - var(--thanks-card-padding)));
   width:100%;
   max-width:420px;
   background: rgba(255,255,255,.96);
   border:1px solid rgba(17, 24, 39, 0.08);
-  border-radius:var(--thanks-card-radius);
-  padding:var(--thanks-card-padding);
+  border-radius:24px;
+  padding:24px;
   text-align:center;
   box-shadow:0 24px 50px rgba(15, 23, 42, .14);
 }
 
 .thanks-card h3 { margin:0; font-size:24px; }
 .thanks-card p { margin:10px 0 0; color:#555f7a; }
-.thanks-card button { margin-top:16px; border:none; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; border-radius:var(--thanks-card-inner-radius); padding:11px 16px; font-family:inherit; font-weight:800; cursor:pointer; }
+.thanks-card button { margin-top:16px; border:none; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; border-radius:10px; padding:11px 16px; font-family:inherit; font-weight:800; cursor:pointer; }
 
 @media (min-width:700px) {
   .menu-grid {
@@ -2382,8 +2282,7 @@ main.container {
     max-height: 560px;
   }
   .hero-banner {
-    --hero-banner-padding: 20px;
-    padding: var(--hero-banner-padding) var(--hero-banner-padding) 50px;
+    padding: 20px 20px 50px;
     gap: 14px;
   }
   .hero-banner-title {
@@ -2399,6 +2298,9 @@ main.container {
   .hero-banner--ios .hero-banner-note {
     max-width: none;
   }
+  .hero-banner--ios .hero-banner-content {
+    padding-right: 154px;
+  }
   .hero-banner-classic-badge {
     min-height: 32px;
     padding: 7px 12px;
@@ -2408,9 +2310,9 @@ main.container {
     gap: 10px;
   }
   .hero-banner--ios .hero-banner-step {
-    --hero-step-radius: 16px;
-    --hero-step-padding: 11px;
-    min-height: 102px;
+    min-height: 92px;
+    padding: 14px 12px;
+    border-radius: 16px;
     gap: 8px;
   }
   .hero-banner--ios .hero-banner-step-text {
@@ -2418,6 +2320,13 @@ main.container {
   }
   .hero-banner-note {
     font-size: 11px;
+  }
+  .hero-banner--ios .hero-banner-art {
+    width: 136px;
+    right: 10px;
+    bottom: 14px;
+    top: auto;
+    height: 150px;
   }
   .hero-banner-device {
     width: 130px;
@@ -2444,17 +2353,15 @@ main.container {
     top: calc(100% + 10px);
   }
   .settings-popover-inner {
-    --settings-panel-radius: 22px;
-    --settings-panel-padding: 14px;
-    padding: var(--settings-panel-padding);
-    border-radius: var(--settings-panel-radius);
+    padding: 16px;
+    border-radius: 20px;
   }
   .settings-popover-title {
     font-size: 20px;
   }
   .settings-language-btn {
     min-height: 42px;
-    border-radius: max(8px, calc(var(--settings-panel-radius) - var(--settings-panel-padding)));
+    border-radius: 14px;
     padding: 10px 12px;
     font-size: 13px;
   }
@@ -2463,15 +2370,14 @@ main.container {
   }
   .settings-theme-btn {
     min-height: 42px;
-    border-radius: max(8px, calc(var(--settings-panel-radius) - var(--settings-panel-padding)));
+    border-radius: 14px;
     font-size: 13px;
   }
   .hero-band {
     max-height: 420px;
   }
   .hero-banner {
-    --hero-banner-padding: 14px;
-    padding: 16px var(--hero-banner-padding) 44px;
+    padding: 16px 14px 44px;
     gap: 10px;
   }
   .hero-banner--ios .hero-banner-kicker,
@@ -2490,14 +2396,12 @@ main.container {
     font-size: 12px;
     line-height: 1.34;
   }
-  .hero-banner--ios .hero-banner-content {
-    gap: 10px;
-  }
-  .hero-banner--ios .hero-banner-title {
+  .hero-banner--ios .hero-banner-title,
+  .hero-banner--ios .hero-banner-text {
     max-width: none;
   }
-  .hero-banner--ios .hero-banner-text {
-    max-width: 100%;
+  .hero-banner--ios .hero-banner-content {
+    padding-right: 104px;
   }
   .hero-banner-classic-badges {
     gap: 6px;
@@ -2511,28 +2415,60 @@ main.container {
     margin-top: 12px;
     gap: 8px;
   }
-  .hero-banner-head {
-    gap: 10px;
-  }
   .hero-banner--ios .hero-banner-step {
-    --hero-step-radius: 12px;
-    --hero-step-padding: 8px;
-    min-height: 94px;
+    min-height: 72px;
+    padding: 10px 9px;
+    border-radius: 14px;
     gap: 7px;
   }
   .hero-banner-step-icon {
     width: 30px;
     height: 30px;
+    border-radius: 8px;
   }
   .hero-banner--ios .hero-banner-step-text {
     font-size: 11px;
-    line-height: 1.2;
+    line-height: 1.25;
   }
   .hero-banner--ios .hero-banner-note {
-    padding: 10px 12px;
-    border-radius: max(10px, calc(var(--hero-step-radius) - 2px));
-    font-size: 11px;
-    line-height: 1.32;
+    display: none;
+  }
+  .hero-banner-art {
+    min-height: 0;
+  }
+  .hero-banner--ios .hero-banner-art {
+    width: 90px;
+    right: 10px;
+    bottom: 12px;
+    top: auto;
+    height: 108px;
+  }
+  .hero-banner-device {
+    width: 88px;
+    padding: 6px;
+    border-radius: 22px;
+    right: 0;
+    bottom: 0;
+  }
+  .hero-banner-device-notch {
+    width: 42px;
+    height: 9px;
+    margin-bottom: 6px;
+  }
+  .hero-banner-device-screen {
+    min-height: 102px;
+    padding: 8px;
+    border-radius: 18px;
+  }
+  .hero-banner-device-card {
+    height: 34px;
+  }
+  .hero-banner-device-row {
+    height: 7px;
+  }
+  .hero-banner-device-pill {
+    width: 32px;
+    height: 16px;
   }
   .hero-banner-dots {
     bottom: 10px;
@@ -2556,17 +2492,14 @@ main.container {
     padding-bottom: 96px;
   }
   .food-card {
-    --food-card-radius: 18px;
-    --food-card-padding: 9px;
-    --food-card-inner-radius: max(8px, calc(var(--food-card-radius) - var(--food-card-padding)));
     padding: 9px 9px 10px;
-    border-radius: var(--food-card-radius);
+    border-radius: 15px;
     box-shadow: 0 12px 24px rgba(15, 23, 42, 0.055);
   }
   .food-image,
   .food-image-placeholder {
     height: 116px;
-    border-radius: var(--food-card-inner-radius);
+    border-radius: 11px;
     margin-bottom: 7px;
   }
   .food-title {
@@ -2685,8 +2618,6 @@ main.container {
     align-items:flex-end;
   }
   .dish-modal-shell {
-    --dish-shell-radius: 22px;
-    --dish-shell-padding: 14px;
     width: 100%;
     max-height: 92dvh;
     grid-template-rows: minmax(280px, 38vh) minmax(0, 1fr);
@@ -2727,7 +2658,7 @@ main.container {
   }
   .dish-modal-copy {
     padding: 14px;
-    border-radius: var(--dish-shell-inner-radius);
+    border-radius: 18px;
   }
   .dish-modal-description {
     font-size: 15px;
@@ -2764,13 +2695,11 @@ main.container {
     font-size: 17px;
   }
   .modal-content {
-    --modal-content-radius: 22px;
-    --modal-content-padding: 16px;
     max-width:none;
     width:100%;
     max-height:92dvh;
     border-radius:22px 22px 0 0;
-    padding:var(--modal-content-padding);
+    padding:16px;
     padding-bottom:calc(22px + env(safe-area-inset-bottom));
   }
   .modal-header h2 { font-size:24px; }
@@ -2818,7 +2747,6 @@ main.container {
 .food-card .qty-inline {
   width: 100%;
   min-width: 0;
-  border-radius: var(--food-card-inner-radius);
 }
 
 .food-card .btn-add {
@@ -2858,7 +2786,6 @@ main.container {
   border: 1px solid rgba(224, 54, 59, 0.24);
   color: var(--accent);
   box-shadow: none;
-  border-radius: max(8px, calc(var(--food-card-inner-radius) - 2px));
 }
 
 .food-card .qty-inline span {
