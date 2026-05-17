@@ -32,7 +32,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=54" />
+  <link rel="stylesheet" href="style.css?v=56" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -40,9 +40,10 @@
       <div class="brand-row">
         <img
           class="brand-logo"
-          src="logo.svg?v=20260517-pwa"
-          data-logo-src="logo.svg"
-          data-logo-version="20260517-pwa"
+          src="logo.svg?v=20260517-theme"
+          data-logo-src-light="logo.svg"
+          data-logo-src-dark="logo-dark.svg"
+          data-logo-version="20260517-theme"
           alt="Первое-Второе"
         />
         <div class="settings-wrap">
@@ -240,14 +241,16 @@
   </div>
 
   <script src="config.js?v=30"></script>
-  <script src="script.js?v=41"></script>
+  <script src="script.js?v=42"></script>
   <script>
-    const siteLogo = document.querySelector("[data-logo-src]");
+    const siteLogo = document.querySelector("[data-logo-src-light]");
     if (siteLogo) {
+      const effectiveTheme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+      const nextSrc = effectiveTheme === "dark"
+        ? siteLogo.dataset.logoSrcDark
+        : siteLogo.dataset.logoSrcLight;
       const logoVersion = siteLogo.dataset.logoVersion;
-      siteLogo.src = logoVersion
-        ? `${siteLogo.dataset.logoSrc}?v=${logoVersion}`
-        : siteLogo.dataset.logoSrc;
+      siteLogo.src = logoVersion ? `${nextSrc}?v=${logoVersion}` : nextSrc;
     }
   </script>
 </body>

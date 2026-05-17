@@ -332,6 +332,21 @@ function updateThemeMeta(theme = resolveThemeMode()) {
   if (appleStatusMeta) appleStatusMeta.setAttribute("content", theme === "dark" ? "black-translucent" : "default");
 }
 
+function syncBrandLogo(theme = resolveThemeMode()) {
+  const logo = document.querySelector("[data-logo-src-light]");
+  if (!logo) return;
+
+  const nextSrc = theme === "dark"
+    ? (logo.dataset.logoSrcDark || logo.dataset.logoSrcLight)
+    : logo.dataset.logoSrcLight;
+  const logoVersion = logo.dataset.logoVersion;
+  const resolvedSrc = logoVersion ? `${nextSrc}?v=${logoVersion}` : nextSrc;
+
+  if (logo.getAttribute("src") !== resolvedSrc) {
+    logo.setAttribute("src", resolvedSrc);
+  }
+}
+
 function applyTheme(mode = currentThemeMode, options = {}) {
   const persist = Boolean(options.persist);
   currentThemeMode = ["auto", "light", "dark"].includes(mode) ? mode : "auto";
@@ -341,6 +356,7 @@ function applyTheme(mode = currentThemeMode, options = {}) {
   document.documentElement.dataset.theme = effectiveTheme;
   document.documentElement.style.colorScheme = effectiveTheme;
   updateThemeMeta(effectiveTheme);
+  syncBrandLogo(effectiveTheme);
 
   if (persist) {
     try {
@@ -1245,7 +1261,7 @@ function applyStaticTranslations() {
   setText('.settings-theme-btn[data-theme-mode="auto"]', t("themeAuto"));
   setText('.settings-theme-btn[data-theme-mode="light"]', t("themeLight"));
   setText('.settings-theme-btn[data-theme-mode="dark"]', t("themeDark"));
-  const logo = document.querySelector("[data-logo-src]");
+  const logo = document.querySelector("[data-logo-src-light]");
   if (logo) logo.alt = t("logoAlt");
 
   setText("#hero-title", t("heroTitle"));
