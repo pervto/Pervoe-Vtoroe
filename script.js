@@ -6,6 +6,7 @@ let toastTimer = null;
 let promo = { code: "", discount: 0 };
 let categoryOrderList = [];
 let heroBanners = [];
+let lastMenuLoadError = "";
 let activeDishName = "";
 let activeDishSlide = 0;
 let activeDishPhotoKey = "";
@@ -52,6 +53,14 @@ const UI_TRANSLATIONS = {
     themeDark: "Тёмная",
     heroBannerCarouselAria: "Информационные баннеры",
     heroBannerDotAria: "Открыть баннер {index}",
+    heroBannerClassicKicker: "Доставка каждый день",
+    heroBannerClassicTitle: "Выберите блюда, добавьте в корзину и отправьте заказ в WhatsApp за 1 минуту.",
+    heroBannerClassicSubtitle: "Доставка работает ежедневно с 9:00 до 18:00.",
+    heroBannerClassicBadgeFresh: "Свежие блюда",
+    heroBannerClassicBadgeFast: "Быстрая доставка",
+    heroBannerClassicBadgeFree: "Без регистрации",
+    heroBannerClassicMetricLabel: "Среднее оформление",
+    heroBannerClassicMetricValue: "1 минута",
     heroBannerInfoKicker: "Информация",
     heroBannerInstallChipPhone: "iPhone",
     heroBannerInstallChipPwa: "PWA",
@@ -69,7 +78,9 @@ const UI_TRANSLATIONS = {
     translatingMenu: "Перевожу меню...",
     noResults: "Ничего не найдено. Попробуйте другое название.",
     noAvailable: "Нет доступных блюд. Проверьте колонку Наличие (Да/Нет).",
+    loadErrorHeading: "Не удалось загрузить меню",
     loadError: "Ошибка загрузки меню: {message}",
+    retryLoadButton: "Попробовать снова",
     footerReview: "Будем рады вашим отзывам",
     address: "Петропавловск, Интернациональная улица, 67",
     toTopAria: "Наверх",
@@ -141,6 +152,14 @@ const UI_TRANSLATIONS = {
     themeDark: "Қараңғы",
     heroBannerCarouselAria: "Ақпараттық баннерлер",
     heroBannerDotAria: "{index}-баннерді ашу",
+    heroBannerClassicKicker: "Күн сайын жеткізу",
+    heroBannerClassicTitle: "Тағамдарды таңдаңыз, себетке қосыңыз және тапсырысты WhatsApp арқылы 1 минутта жіберіңіз.",
+    heroBannerClassicSubtitle: "Жеткізу күн сайын 9:00-ден 18:00-ге дейін жұмыс істейді.",
+    heroBannerClassicBadgeFresh: "Жаңа тағамдар",
+    heroBannerClassicBadgeFast: "Жылдам жеткізу",
+    heroBannerClassicBadgeFree: "Тіркелусіз",
+    heroBannerClassicMetricLabel: "Рәсімдеудің орташа уақыты",
+    heroBannerClassicMetricValue: "1 минут",
     heroBannerInfoKicker: "Ақпарат",
     heroBannerInstallChipPhone: "iPhone",
     heroBannerInstallChipPwa: "PWA",
@@ -158,7 +177,9 @@ const UI_TRANSLATIONS = {
     translatingMenu: "Мәзір аударылып жатыр...",
     noResults: "Ештеңе табылмады. Басқа атауды қолданып көріңіз.",
     noAvailable: "Қолжетімді тағамдар жоқ. Қолжетімділік бағанын тексеріңіз (Иә/Жоқ).",
+    loadErrorHeading: "Мәзірді жүктеу мүмкін болмады",
     loadError: "Мәзірді жүктеу қатесі: {message}",
+    retryLoadButton: "Қайта көру",
     footerReview: "Пікірлеріңізге қуаныштымыз",
     address: "Петропавл, Интернациональная көшесі, 67",
     toTopAria: "Жоғарыға",
@@ -230,6 +251,14 @@ const UI_TRANSLATIONS = {
     themeDark: "Dark",
     heroBannerCarouselAria: "Info banners",
     heroBannerDotAria: "Open banner {index}",
+    heroBannerClassicKicker: "Delivery every day",
+    heroBannerClassicTitle: "Choose your dishes, add them to the cart, and send your order via WhatsApp in 1 minute.",
+    heroBannerClassicSubtitle: "Delivery is available daily from 9:00 to 18:00.",
+    heroBannerClassicBadgeFresh: "Fresh dishes",
+    heroBannerClassicBadgeFast: "Fast delivery",
+    heroBannerClassicBadgeFree: "No registration",
+    heroBannerClassicMetricLabel: "Average checkout",
+    heroBannerClassicMetricValue: "1 minute",
     heroBannerInfoKicker: "Info",
     heroBannerInstallChipPhone: "iPhone",
     heroBannerInstallChipPwa: "PWA",
@@ -247,7 +276,9 @@ const UI_TRANSLATIONS = {
     translatingMenu: "Translating menu...",
     noResults: "Nothing found. Try another dish name.",
     noAvailable: "No dishes are currently available. Check the availability column.",
+    loadErrorHeading: "Unable to load the menu",
     loadError: "Menu loading error: {message}",
+    retryLoadButton: "Try again",
     footerReview: "We would love to hear your feedback",
     address: "Petropavlovsk, Internationalnaya Street, 67",
     toTopAria: "Back to top",
@@ -665,8 +696,20 @@ function createHeroBanner(rawValue, index) {
   };
 }
 
+function getHeroBannerSignature(banner) {
+  if (!banner) return "";
+  if (banner.type === "classic") return "classic";
+  if (banner.type === "ios-install") return "ios-install";
+  return `${banner.type || "text"}::${banner.title || ""}::${banner.body || ""}`;
+}
+
 function getDefaultHeroBanners() {
   return [
+    {
+      id: "hero-banner-classic-default",
+      type: "classic",
+      raw: "__classic__"
+    },
     {
       id: "hero-banner-ios-default",
       type: "ios-install",
@@ -676,23 +719,22 @@ function getDefaultHeroBanners() {
 }
 
 function buildHeroBannersFromRows(rows, bannerColumnIndex) {
-  if (!Array.isArray(rows) || bannerColumnIndex < 0) return getDefaultHeroBanners();
+  const builtInBanners = getDefaultHeroBanners();
+  if (!Array.isArray(rows) || bannerColumnIndex < 0) return builtInBanners;
 
-  const seen = new Set();
+  const seen = new Set(builtInBanners.map(getHeroBannerSignature));
   const banners = rows
     .slice(1)
     .map((line, index) => createHeroBanner(parseCsvLine(line)[bannerColumnIndex], index))
     .filter(Boolean)
     .filter((banner) => {
-      const dedupeKey = banner.type === "ios-install"
-        ? "ios-install"
-        : `${banner.title}::${banner.body}`;
+      const dedupeKey = getHeroBannerSignature(banner);
       if (seen.has(dedupeKey)) return false;
       seen.add(dedupeKey);
       return true;
     });
 
-  return banners.length ? banners : getDefaultHeroBanners();
+  return [...builtInBanners, ...banners];
 }
 
 async function ensureHeroBannerTranslations(lang) {
@@ -724,6 +766,22 @@ async function ensureHeroBannerTranslations(lang) {
 
 function getDisplayHeroBanner(banner, lang = currentLanguage) {
   if (!banner) return null;
+
+  if (banner.type === "classic") {
+    return {
+      ...banner,
+      displayKicker: t("heroBannerClassicKicker"),
+      displayTitle: t("heroBannerClassicTitle"),
+      displayBody: t("heroBannerClassicSubtitle"),
+      displayMetricLabel: t("heroBannerClassicMetricLabel"),
+      displayMetricValue: t("heroBannerClassicMetricValue"),
+      badges: [
+        t("heroBannerClassicBadgeFresh"),
+        t("heroBannerClassicBadgeFast"),
+        t("heroBannerClassicBadgeFree")
+      ]
+    };
+  }
 
   if (banner.type === "ios-install") {
     return {
@@ -765,6 +823,30 @@ function getDisplayHeroBanner(banner, lang = currentLanguage) {
 
 function buildHeroBannerHtml(banner, index) {
   const displayBanner = getDisplayHeroBanner(banner) || banner;
+
+  if (banner.type === "classic") {
+    return `<article class="hero-banner-slide" aria-roledescription="slide" aria-label="${escapeHtml(`${index + 1}`)}">
+      <div class="hero-banner hero-banner--classic">
+        <div class="hero-banner-content">
+          <p class="hero-banner-kicker">${escapeHtml(displayBanner.displayKicker)}</p>
+          <h2 class="hero-banner-title">${escapeHtml(displayBanner.displayTitle)}</h2>
+          <p class="hero-banner-text">${escapeHtml(displayBanner.displayBody)}</p>
+          <div class="hero-banner-classic-badges">
+            ${displayBanner.badges.map((badge) => `<span class="hero-banner-classic-badge">${escapeHtml(badge)}</span>`).join("")}
+          </div>
+        </div>
+        <div class="hero-banner-art hero-banner-art--classic" aria-hidden="true">
+          <div class="hero-banner-classic-card">
+            <p class="hero-banner-classic-card-label">${escapeHtml(displayBanner.displayMetricLabel)}</p>
+            <p class="hero-banner-classic-card-value">${escapeHtml(displayBanner.displayMetricValue)}</p>
+            <div class="hero-banner-classic-card-dots">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>`;
+  }
 
   if (banner.type === "ios-install") {
     return `<article class="hero-banner-slide" aria-roledescription="slide" aria-label="${escapeHtml(`${index + 1}`)}">
@@ -1679,12 +1761,32 @@ function applyStaticTranslations() {
   }
 
   renderHeroBanners();
+  if (lastMenuLoadError && !menuData.length) renderMenuErrorState(lastMenuLoadError);
 }
 
 function showMenuTranslatingState() {
   const grid = document.getElementById("menu-grid");
   if (!grid) return;
   grid.innerHTML = `<div class="ios-loader-wrap"><div class="ios-loader"></div><p class="status">${t("translatingMenu")}</p></div>`;
+}
+
+function renderMenuErrorState(errorMessage) {
+  const grid = document.getElementById("menu-grid");
+  if (!grid) return;
+  lastMenuLoadError = String(errorMessage || "");
+
+  grid.innerHTML = `<div class="status-card">
+    <p class="status-card-title">${escapeHtml(t("loadErrorHeading"))}</p>
+    <p class="status">${escapeHtml(t("loadError", { message: errorMessage }))}</p>
+    <button id="menu-retry-button" class="status-retry-btn" type="button">${escapeHtml(t("retryLoadButton"))}</button>
+  </div>`;
+
+  const retryButton = document.getElementById("menu-retry-button");
+  if (retryButton) {
+    retryButton.addEventListener("click", () => {
+      loadMenu();
+    });
+  }
 }
 
 async function setLanguage(lang) {
@@ -1708,6 +1810,8 @@ async function setLanguage(lang) {
   renderCart();
   updateTotals();
   updateCartButton();
+  const retryButton = document.getElementById("menu-retry-button");
+  if (retryButton) retryButton.textContent = t("retryLoadButton");
   if (activeDishName) {
     const item = getItemByName(activeDishName);
     if (item) renderDishModal(item);
@@ -1749,6 +1853,7 @@ function toggleSettingsPopover() {
 
 async function loadMenu() {
   const grid = document.getElementById("menu-grid");
+  lastMenuLoadError = "";
   document.body.classList.add("menu-loading");
   renderCategoriesSkeleton();
   grid.innerHTML = `<div class="ios-loader-wrap"><div class="ios-loader"></div><p class="status">${escapeHtml(t("loadingMenu"))}</p></div>`;
@@ -1840,6 +1945,7 @@ async function loadMenu() {
       .filter((item) => item.name && item.available);
 
     if (!menuData.length) {
+      lastMenuLoadError = "";
       grid.innerHTML = `<p class="status">${escapeHtml(t("noAvailable"))}</p>`;
       return;
     }
@@ -1856,7 +1962,7 @@ async function loadMenu() {
     renderCategories();
     renderMenu();
   } catch (error) {
-    grid.innerHTML = `<p class="status">${escapeHtml(t("loadError", { message: error.message }))}</p>`;
+    renderMenuErrorState(error.message);
   } finally {
     document.body.classList.remove("menu-loading");
     updateCartButton();

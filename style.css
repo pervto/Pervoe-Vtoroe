@@ -311,7 +311,7 @@ main.container {
   position: relative;
   z-index: 18;
   background: rgba(171, 180, 191, 0.82);
-  max-height: 520px;
+  max-height: 680px;
   overflow: clip;
   transition: max-height .24s ease, opacity .18s ease;
   will-change: max-height, opacity;
@@ -330,6 +330,9 @@ main.container {
 }
 
 .hero {
+  width: min(100%, 820px);
+  margin: 0 auto;
+  aspect-ratio: 4 / 3;
   border-radius: 20px;
   border: 1px solid rgba(255,255,255,.12);
   background:
@@ -341,13 +344,14 @@ main.container {
   position: relative;
   transform: translateZ(0);
   will-change: opacity, transform;
-  min-height: 0;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
 .hero-carousel {
   position: relative;
+  width: 100%;
+  height: 100%;
   z-index: 1;
   overflow: hidden;
   touch-action: pan-y;
@@ -361,21 +365,25 @@ main.container {
 .hero-banner-track {
   display: flex;
   width: 100%;
+  height: 100%;
   will-change: transform;
 }
 
 .hero-banner-slide {
   flex: 0 0 100%;
   min-width: 100%;
+  height: 100%;
 }
 
 .hero-banner {
   position: relative;
-  min-height: 236px;
-  padding: 24px 24px 58px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 26px 26px 54px;
   display: grid;
   grid-template-columns: minmax(0, 1.08fr) minmax(220px, .92fr);
-  gap: 22px;
+  gap: 20px;
   isolation: isolate;
 }
 
@@ -418,6 +426,26 @@ main.container {
 .hero-banner--ios {
   background: linear-gradient(135deg, #149c99 0%, #29c5bc 42%, #8ce9dd 100%);
   color: #072a2c;
+}
+
+.hero-banner--classic {
+  background: linear-gradient(135deg, rgba(20, 28, 45, .98) 0%, rgba(14, 20, 33, .96) 100%);
+  color: #f4f8ff;
+}
+
+.hero-banner--classic::before {
+  inset: -56px auto auto -24px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(224, 54, 59, .20) 0%, rgba(224, 54, 59, 0) 74%);
+}
+
+.hero-banner--classic::after {
+  right: -54px;
+  bottom: -98px;
+  width: 216px;
+  height: 216px;
+  background: radial-gradient(circle, rgba(71, 102, 255, .16) 0%, rgba(71, 102, 255, 0) 74%);
 }
 
 .hero-banner--ios::before {
@@ -464,6 +492,7 @@ main.container {
 .hero-banner-content {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .hero-banner-chips {
@@ -509,22 +538,52 @@ main.container {
 
 .hero-banner-text {
   margin: 0;
-  max-width: 54ch;
+  max-width: 44ch;
   font-size: 15px;
   line-height: 1.52;
   color: rgba(8, 31, 35, .82);
 }
 
+.hero-banner--classic .hero-banner-kicker {
+  color: rgba(204, 216, 246, .68);
+}
+
+.hero-banner--classic .hero-banner-text {
+  color: rgba(221, 229, 244, .84);
+}
+
+.hero-banner-classic-badges {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hero-banner-classic-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.08);
+  color: #f1f5ff;
+  font-size: 12px;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
 .hero-banner-steps {
-  margin-top: 18px;
+  margin-top: auto;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
 .hero-banner-step {
-  min-height: 86px;
-  padding: 12px;
+  min-height: 74px;
+  padding: 11px;
   border-radius: 18px;
   border: 1px solid rgba(255,255,255,.26);
   background: rgba(255,255,255,.18);
@@ -549,21 +608,21 @@ main.container {
 }
 
 .hero-banner-step-text {
-  font-size: 13px;
-  line-height: 1.36;
+  font-size: 12px;
+  line-height: 1.32;
   font-weight: 700;
   color: rgba(7, 31, 35, .9);
 }
 
 .hero-banner-note {
-  margin: 14px 0 0;
-  font-size: 13px;
-  line-height: 1.45;
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.38;
   color: rgba(7, 42, 44, .74);
 }
 
 .hero-banner-art {
-  min-height: 180px;
+  min-height: 0;
   align-self: stretch;
 }
 
@@ -593,10 +652,10 @@ main.container {
   position: absolute;
   right: 14px;
   bottom: 4px;
-  width: 200px;
+  width: 172px;
   max-width: 100%;
-  padding: 10px;
-  border-radius: 32px;
+  padding: 8px;
+  border-radius: 28px;
   border: 1px solid rgba(255,255,255,.34);
   background: rgba(8, 74, 82, .16);
   box-shadow:
@@ -608,17 +667,17 @@ main.container {
 }
 
 .hero-banner-device-notch {
-  width: 78px;
-  height: 16px;
+  width: 66px;
+  height: 14px;
   border-radius: 999px;
-  margin: 0 auto 10px;
+  margin: 0 auto 8px;
   background: rgba(6, 25, 28, .58);
 }
 
 .hero-banner-device-screen {
-  min-height: 196px;
-  padding: 14px;
-  border-radius: 24px;
+  min-height: 164px;
+  padding: 12px;
+  border-radius: 22px;
   border: 1px solid rgba(255,255,255,.24);
   background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(218, 255, 249, .46));
   display: grid;
@@ -640,7 +699,7 @@ main.container {
 }
 
 .hero-banner-device-card {
-  height: 70px;
+  height: 54px;
   border-radius: 18px;
   background: linear-gradient(135deg, rgba(255,255,255,.62), rgba(142, 233, 223, .52));
 }
@@ -659,8 +718,67 @@ main.container {
 }
 
 .hero-banner-device-pill {
-  width: 64px;
-  height: 28px;
+  width: 54px;
+  height: 24px;
+}
+
+.hero-banner-art--classic {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.hero-banner-classic-card {
+  width: min(100%, 220px);
+  margin-left: auto;
+  padding: 16px;
+  border-radius: 26px;
+  border: 1px solid rgba(255,255,255,.12);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    0 18px 34px rgba(0,0,0,.18);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.hero-banner-classic-card-label {
+  margin: 0;
+  color: rgba(202, 214, 238, .70);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.hero-banner-classic-card-value {
+  margin: 12px 0 18px;
+  color: #ffffff;
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: .95;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+}
+
+.hero-banner-classic-card-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.hero-banner-classic-card-dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.84);
+}
+
+.hero-banner-classic-card-dots span:nth-child(2) {
+  background: rgba(224, 54, 59, .96);
+}
+
+.hero-banner-classic-card-dots span:nth-child(3) {
+  background: rgba(255,255,255,.34);
 }
 
 .hero-banner-art--generic::before,
@@ -1147,6 +1265,62 @@ main.container {
 }
 
 .status { color: #5b657f; font-size: 16px; }
+
+.status-card {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  place-self: center;
+  width: min(100%, 520px);
+  min-height: clamp(240px, 44vh, 420px);
+  padding: 28px 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.08);
+  text-align: center;
+}
+
+.status-card-title {
+  margin: 0;
+  color: #111a2d;
+  font-size: clamp(24px, 3.2vw, 32px);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+}
+
+.status-card .status {
+  margin: 0;
+  max-width: 34ch;
+  line-height: 1.5;
+}
+
+.status-retry-btn {
+  min-width: min(100%, 320px);
+  min-height: 58px;
+  padding: 14px 26px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #e0363b 0%, #c92b31 100%);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  box-shadow: 0 18px 34px rgba(224, 54, 59, 0.22);
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+
+.status-retry-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 22px 38px rgba(224, 54, 59, 0.26);
+}
+
+.status-retry-btn:active {
+  transform: translateY(0);
+  filter: brightness(.98);
+}
 
 .site-footer {
   margin-top: auto;
@@ -2043,30 +2217,56 @@ main.container {
 
 @media (max-width:860px) {
   .hero-band {
-    max-height: 660px;
+    max-height: 560px;
   }
   .hero-banner {
-    grid-template-columns: 1fr;
-    gap: 18px;
+    padding: 20px 20px 50px;
+    grid-template-columns: minmax(0, 1fr) 156px;
+    gap: 14px;
+  }
+  .hero-banner-title {
+    font-size: clamp(22px, 3.2vw, 30px);
   }
   .hero-banner-text {
-    max-width: none;
+    font-size: 14px;
+    line-height: 1.42;
   }
-  .hero-banner-steps {
-    grid-template-columns: 1fr;
+  .hero-banner-classic-badge {
+    min-height: 28px;
+    padding: 6px 10px;
+    font-size: 11px;
   }
   .hero-banner-step {
-    min-height: 0;
+    min-height: 62px;
+    padding: 10px;
+    border-radius: 16px;
+    gap: 8px;
   }
-  .hero-banner-art {
-    min-height: 150px;
+  .hero-banner-step-text {
+    font-size: 11px;
+  }
+  .hero-banner-note {
+    font-size: 11px;
   }
   .hero-banner-device {
-    position: relative;
-    right: auto;
-    bottom: auto;
-    margin-left: auto;
-    transform: rotate(5deg);
+    width: 142px;
+    right: 6px;
+    bottom: 0;
+  }
+  .hero-banner-device-screen {
+    min-height: 136px;
+  }
+  .hero-banner-device-card {
+    height: 46px;
+  }
+  .hero-banner-classic-card {
+    width: 146px;
+    padding: 12px;
+    border-radius: 22px;
+  }
+  .hero-banner-classic-card-value {
+    margin: 10px 0 14px;
+    font-size: 30px;
   }
 }
 
@@ -2103,75 +2303,118 @@ main.container {
     font-size: 13px;
   }
   .hero-band {
-    max-height: 720px;
+    max-height: 420px;
   }
   .hero-banner {
-    min-height: 0;
-    padding: 18px 16px 50px;
-    gap: 14px;
+    padding: 16px 14px 44px;
+    grid-template-columns: minmax(0, 1fr) 112px;
+    gap: 10px;
   }
   .hero-banner-chips {
     gap: 6px;
-    margin-bottom: 10px;
-  }
-  .hero-banner-chip {
-    min-height: 28px;
-    padding: 6px 10px;
-    font-size: 10px;
-  }
-  .hero-banner-kicker {
-    font-size: 10px;
-  }
-  .hero-banner-title {
-    margin: 7px 0 8px;
-    font-size: 24px;
-  }
-  .hero-banner-text {
-    font-size: 14px;
-    line-height: 1.46;
-  }
-  .hero-banner-steps {
-    margin-top: 14px;
-    gap: 8px;
-  }
-  .hero-banner-step {
-    padding: 10px 11px;
-    border-radius: 16px;
-    gap: 8px;
-  }
-  .hero-banner-step-icon {
-    width: 30px;
-    height: 30px;
-    border-radius: 10px;
-    font-size: 18px;
-  }
-  .hero-banner-step-text {
-    font-size: 12px;
-  }
-  .hero-banner-note {
-    margin-top: 12px;
-    font-size: 12px;
-  }
-  .hero-banner-art {
-    min-height: 126px;
-  }
-  .hero-banner-device {
-    width: 152px;
-    padding: 8px;
-    border-radius: 26px;
-  }
-  .hero-banner-device-notch {
-    width: 58px;
-    height: 12px;
     margin-bottom: 8px;
   }
+  .hero-banner--ios .hero-banner-chips,
+  .hero-banner--ios .hero-banner-kicker,
+  .hero-banner--classic .hero-banner-kicker {
+    display: none;
+  }
+  .hero-banner-chip {
+    min-height: 24px;
+    padding: 5px 8px;
+    font-size: 9px;
+  }
+  .hero-banner-kicker {
+    font-size: 9px;
+  }
+  .hero-banner-title {
+    margin: 6px 0 7px;
+    font-size: 18px;
+    line-height: 1.06;
+  }
+  .hero-banner-text {
+    font-size: 12px;
+    line-height: 1.34;
+  }
+  .hero-banner-classic-badges {
+    gap: 6px;
+  }
+  .hero-banner-classic-badge {
+    min-height: 24px;
+    padding: 5px 8px;
+    font-size: 9px;
+  }
+  .hero-banner-steps {
+    margin-top: auto;
+    gap: 6px;
+  }
+  .hero-banner-step {
+    min-height: 48px;
+    padding: 7px;
+    border-radius: 13px;
+    gap: 6px;
+  }
+  .hero-banner-step-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+  .hero-banner-step-text {
+    font-size: 9px;
+    line-height: 1.18;
+  }
+  .hero-banner-note {
+    display: none;
+  }
+  .hero-banner-art {
+    min-height: 0;
+  }
+  .hero-banner-device {
+    width: 104px;
+    padding: 6px;
+    border-radius: 22px;
+    right: 0;
+    bottom: 0;
+  }
+  .hero-banner-device-notch {
+    width: 42px;
+    height: 9px;
+    margin-bottom: 6px;
+  }
   .hero-banner-device-screen {
-    min-height: 156px;
-    padding: 11px;
-    border-radius: 20px;
+    min-height: 102px;
+    padding: 8px;
+    border-radius: 18px;
   }
   .hero-banner-device-card {
-    height: 56px;
+    height: 34px;
+  }
+  .hero-banner-device-row {
+    height: 7px;
+  }
+  .hero-banner-device-pill {
+    width: 32px;
+    height: 16px;
+  }
+  .hero-banner-classic-card {
+    width: 102px;
+    padding: 10px;
+    border-radius: 18px;
+  }
+  .hero-banner-classic-card-label {
+    font-size: 8px;
+  }
+  .hero-banner-classic-card-value {
+    margin: 8px 0 10px;
+    font-size: 22px;
+  }
+  .hero-banner-classic-card-dots {
+    gap: 5px;
+  }
+  .hero-banner-classic-card-dots span {
+    width: 7px;
+    height: 7px;
   }
   .hero-banner-dots {
     bottom: 10px;
@@ -2554,6 +2797,20 @@ html[data-theme="dark"] .hero-banner-dot {
 
 html[data-theme="dark"] .hero-banner-dot.is-active {
   background: rgba(255,255,255,.98);
+}
+
+html[data-theme="dark"] .status-card {
+  border-color: rgba(255,255,255,.08);
+  background: linear-gradient(180deg, rgba(16, 23, 34, .96), rgba(11, 17, 24, .98));
+  box-shadow: 0 20px 40px rgba(0, 0, 0, .22);
+}
+
+html[data-theme="dark"] .status-card-title {
+  color: #f3f7ff;
+}
+
+html[data-theme="dark"] .status-retry-btn {
+  box-shadow: 0 18px 34px rgba(224, 54, 59, .18);
 }
 
 html[data-theme="dark"] .settings-toggle {
