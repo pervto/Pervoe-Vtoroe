@@ -73,7 +73,7 @@ main.container {
   box-shadow: none;
   backdrop-filter: blur(14px) saturate(1.05);
   -webkit-backdrop-filter: blur(14px) saturate(1.05);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .header::before {
@@ -113,6 +113,7 @@ main.container {
 .settings-wrap {
   position: relative;
   flex: 0 0 auto;
+  z-index: 5;
 }
 
 .settings-toggle {
