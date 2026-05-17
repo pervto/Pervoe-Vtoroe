@@ -26,11 +26,16 @@ const LANGUAGE_META = {
 };
 const UI_TRANSLATIONS = {
   ru: {
+    siteTitle: "Первое-Второе",
+    logoAlt: "Первое-Второе",
     settingsButtonAria: "Открыть настройки",
     settingsKicker: "Настройки",
     settingsTitle: "Язык интерфейса",
     settingsText: "Выберите язык. Сайт запомнит его и в следующий раз откроется уже на нём.",
     settingsGroupAria: "Выбор языка",
+    languageRu: "Русский",
+    languageKk: "Казахский",
+    languageEn: "Английский",
     heroTitle: "Выберите блюда, добавьте в корзину и отправьте заказ в WhatsApp за 1 минуту.",
     heroSubtitle: "Доставка работает ежедневно с 9:00 до 18:00.",
     heroBadgeFresh: "Свежие блюда",
@@ -96,11 +101,16 @@ const UI_TRANSLATIONS = {
     waTotal: "Итого"
   },
   kk: {
+    siteTitle: "Бірінші-Екінші",
+    logoAlt: "Бірінші-Екінші",
     settingsButtonAria: "Баптауларды ашу",
     settingsKicker: "Баптаулар",
     settingsTitle: "Интерфейс тілі",
     settingsText: "Тілді таңдаңыз. Сайт оны есте сақтап, келесі жолы сол тілде ашылады.",
     settingsGroupAria: "Тілді таңдау",
+    languageRu: "Орысша",
+    languageKk: "Қазақша",
+    languageEn: "Ағылшынша",
     heroTitle: "Тағамдарды таңдаңыз, себетке қосыңыз және тапсырысты WhatsApp арқылы 1 минутта жіберіңіз.",
     heroSubtitle: "Жеткізу күн сайын 9:00-ден 18:00-ге дейін жұмыс істейді.",
     heroBadgeFresh: "Жаңа тағамдар",
@@ -166,11 +176,16 @@ const UI_TRANSLATIONS = {
     waTotal: "Барлығы"
   },
   en: {
+    siteTitle: "First-Second",
+    logoAlt: "First-Second",
     settingsButtonAria: "Open settings",
     settingsKicker: "Settings",
     settingsTitle: "Interface language",
     settingsText: "Choose a language. The site will remember it and open in it next time.",
     settingsGroupAria: "Language selection",
+    languageRu: "Russian",
+    languageKk: "Kazakh",
+    languageEn: "English",
     heroTitle: "Choose your dishes, add them to the cart, and send your order via WhatsApp in 1 minute.",
     heroSubtitle: "Delivery is available daily from 9:00 to 18:00.",
     heroBadgeFresh: "Fresh dishes",
@@ -295,21 +310,42 @@ function t(key, vars = {}) {
   return Object.entries(vars).reduce((text, [name, replacement]) => text.replaceAll(`{${name}}`, replacement), value);
 }
 
-function money(value) {
-  return `${Number(value || 0).toLocaleString(getLocale())}₸`;
+function money(value, lang = currentLanguage) {
+  const locale = LANGUAGE_META[lang]?.locale || "ru-RU";
+  return `${Number(value || 0).toLocaleString(locale)}₸`;
 }
 
-function getLocalizedCalories(value) {
+function getLocalizedCalories(value, lang = currentLanguage) {
   if (!value) return "";
-  if (currentLanguage === "en") return `${value} kcal`;
+  if (lang === "en") return `${value} kcal`;
   return `${value} ккал`;
 }
 
-function getLocalizedWeight(value) {
+function getLocalizedWeight(value, lang = currentLanguage) {
   const weight = String(value || "").trim();
   if (!weight) return "";
-  if (currentLanguage === "en") return weight.replace(/шт\b/gi, "pcs");
-  if (currentLanguage === "kk") return weight.replace(/шт\b/gi, "дана");
+
+  if (lang === "en") {
+    return weight
+      .replace(/грамм(?:а|ов)?/gi, "g")
+      .replace(/гр\b/gi, "g")
+      .replace(/г\b/gi, "g")
+      .replace(/килограмм(?:а|ов)?/gi, "kg")
+      .replace(/кг\b/gi, "kg")
+      .replace(/миллилитр(?:а|ов)?/gi, "ml")
+      .replace(/мл\b/gi, "ml")
+      .replace(/литр(?:а|ов)?/gi, "l")
+      .replace(/л\b/gi, "l")
+      .replace(/шт\b/gi, "pcs");
+  }
+
+  if (lang === "kk") {
+    return weight
+      .replace(/шт\b/gi, "дана")
+      .replace(/грамм(?:а|ов)?/gi, "г")
+      .replace(/гр\b/gi, "г");
+  }
+
   return weight;
 }
 
@@ -431,28 +467,32 @@ async function ensureMenuTranslations(lang) {
   return menuTranslationPromises[lang];
 }
 
-function getDisplayItem(item) {
+function getDisplayItemForLanguage(item, lang = currentLanguage) {
   if (!item) return null;
-  if (currentLanguage === "ru") {
+  if (lang === "ru") {
     return {
       ...item,
       displayName: item.name,
       displayCategory: item.category,
       displayDescription: item.description,
-      displayWeight: getLocalizedWeight(item.weight),
-      displayCalories: getLocalizedCalories(item.calories)
+      displayWeight: getLocalizedWeight(item.weight, lang),
+      displayCalories: getLocalizedCalories(item.calories, lang)
     };
   }
 
-  const translated = menuTranslations[currentLanguage]?.[item.id] || {};
+  const translated = menuTranslations[lang]?.[item.id] || {};
   return {
     ...item,
     displayName: translated.name || item.name,
     displayCategory: translated.category || item.category,
     displayDescription: translated.description || item.description,
-    displayWeight: getLocalizedWeight(item.weight),
-    displayCalories: getLocalizedCalories(item.calories)
+    displayWeight: getLocalizedWeight(item.weight, lang),
+    displayCalories: getLocalizedCalories(item.calories, lang)
   };
+}
+
+function getDisplayItem(item) {
+  return getDisplayItemForLanguage(item, currentLanguage);
 }
 
 function getDisplayCategoryLabel(category) {
@@ -1042,14 +1082,32 @@ function renderCart() {
 
 function createWhatsAppMessage(userName, userPhone, userAddress, orderComment) {
   const { finalTotal } = updateTotals();
-  const orderLines = cart.map((item) => {
-    const menuItem = getItemByName(item.name);
-    const displayItem = menuItem ? getDisplayItem(menuItem) : { displayName: item.name };
-    return `- ${displayItem.displayName || item.name} x${item.qty} "${money(item.price * item.qty)}"`;
-  }).join("\n");
-  const promoText = promo.code ? `\n${t("waPromo")}: ${promo.code}` : "";
-  const commentText = orderComment ? `\n${t("waComment")}: ${orderComment}` : "";
-  return `${t("waGreeting")}\n${t("waIntro")}\n${t("waName")}: ${userName}\n${t("waPhone")}: ${userPhone}\n${t("waAddress")}: ${userAddress}${commentText}${promoText}\n${t("waOrder")}:\n${orderLines}\n\n${t("waTotal")}: ${money(finalTotal)}`;
+  const buildSection = (lang) => {
+    const table = UI_TRANSLATIONS[lang] || UI_TRANSLATIONS.ru;
+    const lines = cart.map((item) => {
+      const menuItem = getItemByName(item.name);
+      const displayItem = menuItem
+        ? getDisplayItemForLanguage(menuItem, lang)
+        : { displayName: item.name, displayWeight: getLocalizedWeight(item.weight, lang) };
+      const weightText = displayItem.displayWeight ? ` (${displayItem.displayWeight})` : "";
+      return `- ${displayItem.displayName || item.name}${weightText} x${item.qty} - ${money(item.price * item.qty, lang)}`;
+    }).join("\n");
+
+    const commentText = orderComment ? `\n${table.waComment}: ${orderComment}` : "";
+    const promoText = promo.code ? `\n${table.waPromo}: ${promo.code}` : "";
+
+    return `${table.waGreeting}\n${table.waIntro}\n${table.waName}: ${userName}\n${table.waPhone}: ${userPhone}\n${table.waAddress}: ${userAddress}${commentText}${promoText}\n${table.waOrder}:\n${lines}\n\n${table.waTotal}: ${money(finalTotal, lang)}`;
+  };
+
+  if (currentLanguage === "kk") {
+    return `${buildSection("kk")}\n\n${buildSection("ru")}`;
+  }
+
+  if (currentLanguage === "en") {
+    return `${buildSection("ru")}\n\n${buildSection("en")}`;
+  }
+
+  return buildSection("ru");
 }
 
 function cleanPhone(phone) {
@@ -1081,6 +1139,7 @@ function updateSettingsLanguageButtons(isBusy = false) {
 
 function applyStaticTranslations() {
   document.documentElement.lang = currentLanguage;
+  document.title = t("siteTitle");
 
   const setText = (selector, value) => {
     const el = document.querySelector(selector);
@@ -1101,6 +1160,11 @@ function applyStaticTranslations() {
   setText("#settings-popover-text", t("settingsText"));
   const languageGroup = document.querySelector(".settings-language-list");
   if (languageGroup) languageGroup.setAttribute("aria-label", t("settingsGroupAria"));
+  setText('.settings-language-btn[data-lang="ru"]', t("languageRu"));
+  setText('.settings-language-btn[data-lang="kk"]', t("languageKk"));
+  setText('.settings-language-btn[data-lang="en"]', t("languageEn"));
+  const logo = document.querySelector("[data-logo-src]");
+  if (logo) logo.alt = t("logoAlt");
 
   setText("#hero-title", t("heroTitle"));
   setText("#hero-subtitle", t("heroSubtitle"));
@@ -1124,6 +1188,7 @@ function applyStaticTranslations() {
   setText("#promo-apply", t("promoApply"));
   setText("#subtotal-label", t("subtotal"));
   setText("#discount-label", t("discount"));
+  setText("#total-label", t("totalFull"));
   setText("#order-form-title", t("deliveryTitle"));
   setPlaceholder("#user-name", t("namePlaceholder"));
   setPlaceholder("#user-phone", t("phonePlaceholder"));
