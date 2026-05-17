@@ -708,21 +708,6 @@ main.container {
   text-align: left;
 }
 
-.hero-banner-step-index {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 28px;
-  height: 28px;
-  padding: 0 8px;
-  border-radius: 999px;
-  background: rgba(7, 42, 44, .14);
-  color: rgba(7, 42, 44, .72);
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 1;
-}
-
 .hero-banner-step-icon {
   width: 40px;
   height: 40px;
@@ -2534,12 +2519,6 @@ main.container {
     --hero-step-padding: 8px;
     min-height: 94px;
     gap: 7px;
-  }
-  .hero-banner-step-index {
-    min-width: 24px;
-    height: 24px;
-    padding: 0 6px;
-    font-size: 11px;
   }
   .hero-banner-step-icon {
     width: 30px;

@@ -886,7 +886,7 @@ function buildHeroBannerHtml(banner, index) {
             <p class="hero-banner-note">${escapeHtml(displayBanner.displayNote)}</p>
           </div>
           <div class="hero-banner-steps">
-            ${displayBanner.steps.map((step, stepIndex) => `<div class="hero-banner-step"><span class="hero-banner-step-index">${stepIndex + 1}</span><span class="hero-banner-step-icon" aria-hidden="true">${buildHeroBannerStepIconMarkup(step.icon)}</span><span class="hero-banner-step-text">${escapeHtml(step.text)}</span></div>`).join("")}
+            ${displayBanner.steps.map((step) => `<div class="hero-banner-step"><span class="hero-banner-step-icon" aria-hidden="true">${buildHeroBannerStepIconMarkup(step.icon)}</span><span class="hero-banner-step-text">${escapeHtml(step.text)}</span></div>`).join("")}
           </div>
         </div>
       </div>
