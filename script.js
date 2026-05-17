@@ -59,15 +59,10 @@ const UI_TRANSLATIONS = {
     heroBannerClassicBadgeFresh: "Свежие блюда",
     heroBannerClassicBadgeFast: "Быстрая доставка",
     heroBannerClassicBadgeFree: "Без регистрации",
-    heroBannerClassicMetricLabel: "Среднее оформление",
-    heroBannerClassicMetricValue: "1 минута",
     heroBannerInfoKicker: "Информация",
-    heroBannerInstallChipPhone: "iPhone",
-    heroBannerInstallChipPwa: "PWA",
-    heroBannerInstallChipSafari: "Safari",
     heroBannerInstallKicker: "Добавить на экран",
     heroBannerInstallTitle: "Как скачать приложение на iPhone",
-    heroBannerInstallText: "Сохраните сайт на рабочий стол и открывайте его как приложение без интерфейса браузера.",
+    heroBannerInstallText: "Сохраните сайт на рабочий стол и открывайте его как приложение.",
     heroBannerInstallStep1: "Откройте сайт в Safari",
     heroBannerInstallStep2: "Нажмите кнопку «Поделиться»",
     heroBannerInstallStep3: "Выберите «На экран Домой»",
@@ -158,15 +153,10 @@ const UI_TRANSLATIONS = {
     heroBannerClassicBadgeFresh: "Жаңа тағамдар",
     heroBannerClassicBadgeFast: "Жылдам жеткізу",
     heroBannerClassicBadgeFree: "Тіркелусіз",
-    heroBannerClassicMetricLabel: "Рәсімдеудің орташа уақыты",
-    heroBannerClassicMetricValue: "1 минут",
     heroBannerInfoKicker: "Ақпарат",
-    heroBannerInstallChipPhone: "iPhone",
-    heroBannerInstallChipPwa: "PWA",
-    heroBannerInstallChipSafari: "Safari",
     heroBannerInstallKicker: "Басты экранға қосу",
     heroBannerInstallTitle: "Қосымшаны iPhone-ға қалай орнатуға болады",
-    heroBannerInstallText: "Сайтты басты экранға сақтап, оны браузер жолағынсыз жеке қосымша сияқты ашыңыз.",
+    heroBannerInstallText: "Сайтты басты экранға сақтап, оны қолданба сияқты ашыңыз.",
     heroBannerInstallStep1: "Сайтты Safari-де ашыңыз",
     heroBannerInstallStep2: "«Бөлісу» батырмасын басыңыз",
     heroBannerInstallStep3: "«Басты экранға» тармағын таңдаңыз",
@@ -257,15 +247,10 @@ const UI_TRANSLATIONS = {
     heroBannerClassicBadgeFresh: "Fresh dishes",
     heroBannerClassicBadgeFast: "Fast delivery",
     heroBannerClassicBadgeFree: "No registration",
-    heroBannerClassicMetricLabel: "Average checkout",
-    heroBannerClassicMetricValue: "1 minute",
     heroBannerInfoKicker: "Info",
-    heroBannerInstallChipPhone: "iPhone",
-    heroBannerInstallChipPwa: "PWA",
-    heroBannerInstallChipSafari: "Safari",
     heroBannerInstallKicker: "Add to home screen",
     heroBannerInstallTitle: "How to install the app on iPhone",
-    heroBannerInstallText: "Save the site to your home screen and launch it like a real app without the browser interface.",
+    heroBannerInstallText: "Save the site to your home screen and open it like an app.",
     heroBannerInstallStep1: "Open the site in Safari",
     heroBannerInstallStep2: "Tap the Share button",
     heroBannerInstallStep3: "Choose Add to Home Screen",
@@ -340,6 +325,10 @@ let heroBannerTranslations = { kk: {}, en: {} };
 let heroBannerTranslationPromises = {};
 let translationCache = loadTranslationCache();
 const systemThemeMedia = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+function isDesktopHeroBannerLane() {
+  return window.matchMedia ? window.matchMedia("(min-width: 861px)").matches : false;
+}
 function parseCsvLine(line) {
   const result = [];
   let current = "";
@@ -665,10 +654,36 @@ function splitHeroBannerCopy(source) {
   return { title: rawText, body: "" };
 }
 
+function isHeroBannerImageSource(value) {
+  const source = String(value || "").trim();
+  if (!source) return false;
+  if (!/^https?:\/\//i.test(source)) return false;
+
+  if (/drive\.google\.com/i.test(source)) return true;
+  if (/\.(png|jpe?g|webp|gif|avif|svg)(?:[?#].*)?$/i.test(source)) return true;
+
+  try {
+    const url = new URL(source);
+    const pathname = url.pathname.toLowerCase();
+    if (/\.(png|jpe?g|webp|gif|avif|svg)$/.test(pathname)) return true;
+  } catch {}
+
+  return false;
+}
+
 function createHeroBanner(rawValue, index) {
   const value = String(rawValue || "").trim();
   if (!value) return null;
   const bannerKey = encodeURIComponent(value.toLowerCase()).replace(/%/g, "").slice(0, 72) || String(index);
+
+  if (isHeroBannerImageSource(value)) {
+    return {
+      id: `hero-banner-image-${bannerKey}-${index}`,
+      type: "image",
+      raw: value,
+      imageUrl: normalizePhotoUrl(value)
+    };
+  }
 
   const normalized = value.toLowerCase().replace(/\s+/g, " ");
   if (
@@ -700,6 +715,7 @@ function getHeroBannerSignature(banner) {
   if (!banner) return "";
   if (banner.type === "classic") return "classic";
   if (banner.type === "ios-install") return "ios-install";
+  if (banner.type === "image") return `image::${banner.imageUrl || banner.raw || ""}`;
   return `${banner.type || "text"}::${banner.title || ""}::${banner.body || ""}`;
 }
 
@@ -767,14 +783,19 @@ async function ensureHeroBannerTranslations(lang) {
 function getDisplayHeroBanner(banner, lang = currentLanguage) {
   if (!banner) return null;
 
+  if (banner.type === "image") {
+    return {
+      ...banner,
+      displayTitle: ""
+    };
+  }
+
   if (banner.type === "classic") {
     return {
       ...banner,
       displayKicker: t("heroBannerClassicKicker"),
       displayTitle: t("heroBannerClassicTitle"),
       displayBody: t("heroBannerClassicSubtitle"),
-      displayMetricLabel: t("heroBannerClassicMetricLabel"),
-      displayMetricValue: t("heroBannerClassicMetricValue"),
       badges: [
         t("heroBannerClassicBadgeFresh"),
         t("heroBannerClassicBadgeFast"),
@@ -790,11 +811,6 @@ function getDisplayHeroBanner(banner, lang = currentLanguage) {
       displayTitle: t("heroBannerInstallTitle"),
       displayBody: t("heroBannerInstallText"),
       displayNote: t("heroBannerInstallNote"),
-      chips: [
-        t("heroBannerInstallChipPhone"),
-        t("heroBannerInstallChipPwa"),
-        t("heroBannerInstallChipSafari")
-      ],
       steps: [
         { icon: "language", text: t("heroBannerInstallStep1") },
         { icon: "ios_share", text: t("heroBannerInstallStep2") },
@@ -824,6 +840,14 @@ function getDisplayHeroBanner(banner, lang = currentLanguage) {
 function buildHeroBannerHtml(banner, index) {
   const displayBanner = getDisplayHeroBanner(banner) || banner;
 
+  if (banner.type === "image") {
+    return `<article class="hero-banner-slide" aria-roledescription="slide" aria-label="${escapeHtml(`${index + 1}`)}">
+      <div class="hero-banner hero-banner--image">
+        <img class="hero-banner-image" src="${escapeHtml(displayBanner.imageUrl || banner.raw)}" alt="" loading="lazy" decoding="async" draggable="false" />
+      </div>
+    </article>`;
+  }
+
   if (banner.type === "classic") {
     return `<article class="hero-banner-slide" aria-roledescription="slide" aria-label="${escapeHtml(`${index + 1}`)}">
       <div class="hero-banner hero-banner--classic">
@@ -835,15 +859,6 @@ function buildHeroBannerHtml(banner, index) {
             ${displayBanner.badges.map((badge) => `<span class="hero-banner-classic-badge">${escapeHtml(badge)}</span>`).join("")}
           </div>
         </div>
-        <div class="hero-banner-art hero-banner-art--classic" aria-hidden="true">
-          <div class="hero-banner-classic-card">
-            <p class="hero-banner-classic-card-label">${escapeHtml(displayBanner.displayMetricLabel)}</p>
-            <p class="hero-banner-classic-card-value">${escapeHtml(displayBanner.displayMetricValue)}</p>
-            <div class="hero-banner-classic-card-dots">
-              <span></span><span></span><span></span>
-            </div>
-          </div>
-        </div>
       </div>
     </article>`;
   }
@@ -852,9 +867,6 @@ function buildHeroBannerHtml(banner, index) {
     return `<article class="hero-banner-slide" aria-roledescription="slide" aria-label="${escapeHtml(`${index + 1}`)}">
       <div class="hero-banner hero-banner--ios">
         <div class="hero-banner-content">
-          <div class="hero-banner-chips">
-            ${displayBanner.chips.map((chip) => `<span class="hero-banner-chip">${escapeHtml(chip)}</span>`).join("")}
-          </div>
           <p class="hero-banner-kicker">${escapeHtml(displayBanner.displayKicker)}</p>
           <h2 class="hero-banner-title">${escapeHtml(displayBanner.displayTitle)}</h2>
           <p class="hero-banner-text">${escapeHtml(displayBanner.displayBody)}</p>
@@ -904,6 +916,12 @@ function syncHeroBannerTrack(options = {}) {
   const track = document.getElementById("hero-banner-track");
   if (!carousel || !track) return;
 
+  if (isDesktopHeroBannerLane()) {
+    track.style.transition = "none";
+    track.style.transform = "none";
+    return;
+  }
+
   const width = carousel.clientWidth || 1;
   const offsetX = Number(options.offsetX || 0);
   const withTransition = options.withTransition !== false;
@@ -913,10 +931,26 @@ function syncHeroBannerTrack(options = {}) {
 }
 
 function updateHeroBannerCarousel() {
+  const carousel = document.getElementById("hero-banner-carousel");
+  const track = document.getElementById("hero-banner-track");
   const dots = document.getElementById("hero-banner-dots");
-  if (!dots || !heroBanners.length) return;
+  if (!carousel || !track || !dots || !heroBanners.length) return;
 
   activeHeroBanner = ((activeHeroBanner % heroBanners.length) + heroBanners.length) % heroBanners.length;
+  const isDesktopLane = isDesktopHeroBannerLane();
+  carousel.classList.toggle("is-desktop-lane", isDesktopLane);
+  dots.classList.toggle("is-hidden", isDesktopLane || heroBanners.length <= 1);
+
+  if (isDesktopLane) {
+    activeHeroPointerId = null;
+    activeHeroDragStartX = 0;
+    activeHeroDragOffsetX = 0;
+    activeHeroIsDragging = false;
+    track.style.transition = "none";
+    track.style.transform = "none";
+    return;
+  }
+
   syncHeroBannerTrack({
     withTransition: !activeHeroIsDragging,
     offsetX: activeHeroIsDragging ? activeHeroDragOffsetX : 0
@@ -928,7 +962,6 @@ function updateHeroBannerCarousel() {
     button.setAttribute("aria-current", String(isActive));
   });
 
-  dots.classList.toggle("is-hidden", heroBanners.length <= 1);
 }
 
 function renderHeroBanners() {
@@ -956,6 +989,7 @@ function bindHeroBannerSwipeEvents() {
   carousel.dataset.swipeBound = "true";
 
   carousel.addEventListener("pointerdown", (event) => {
+    if (isDesktopHeroBannerLane()) return;
     if (heroBanners.length <= 1) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
     if (event.target.closest(".hero-banner-dot")) return;

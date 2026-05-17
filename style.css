@@ -426,11 +426,13 @@ main.container {
 .hero-banner--ios {
   background: linear-gradient(135deg, #149c99 0%, #29c5bc 42%, #8ce9dd 100%);
   color: #072a2c;
+  grid-template-columns: 1fr;
 }
 
 .hero-banner--classic {
   background: linear-gradient(135deg, rgba(20, 28, 45, .98) 0%, rgba(14, 20, 33, .96) 100%);
   color: #f4f8ff;
+  grid-template-columns: 1fr;
 }
 
 .hero-banner--classic::before {
@@ -466,6 +468,25 @@ main.container {
 .hero-banner--generic {
   background: linear-gradient(135deg, rgba(26, 35, 54, .98), rgba(17, 24, 39, .96));
   color: #eff4ff;
+}
+
+.hero-banner--image {
+  padding: 0;
+  overflow: hidden;
+  background: rgba(255,255,255,.12);
+}
+
+.hero-banner--image::before {
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(8, 16, 29, .04), rgba(8, 16, 29, .16));
+}
+
+.hero-banner--image::after {
+  inset: auto 16px 16px auto;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 72%);
 }
 
 .hero-banner--generic::before {
@@ -550,6 +571,7 @@ main.container {
 
 .hero-banner--classic .hero-banner-text {
   color: rgba(221, 229, 244, .84);
+  max-width: 34ch;
 }
 
 .hero-banner-classic-badges {
@@ -579,6 +601,28 @@ main.container {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+}
+
+.hero-banner--ios .hero-banner-kicker,
+.hero-banner--ios .hero-banner-title,
+.hero-banner--ios .hero-banner-text,
+.hero-banner--ios .hero-banner-note {
+  max-width: calc(100% - 188px);
+}
+
+.hero-banner--ios .hero-banner-steps {
+  margin-top: 18px;
+  gap: 12px;
+}
+
+.hero-banner--ios .hero-banner-step {
+  min-height: 96px;
+  padding: 14px 12px;
+}
+
+.hero-banner--ios .hero-banner-step-text {
+  font-size: 13px;
+  line-height: 1.34;
 }
 
 .hero-banner-step {
@@ -626,10 +670,25 @@ main.container {
   align-self: stretch;
 }
 
+.hero-banner--ios .hero-banner-art {
+  position: absolute;
+  top: 18px;
+  right: 16px;
+  bottom: 18px;
+  width: 176px;
+}
+
 .hero-banner-orb {
   position: absolute;
   border-radius: 999px;
   pointer-events: none;
+}
+
+.hero-banner-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .hero-banner-orb-one {
@@ -722,65 +781,6 @@ main.container {
   height: 24px;
 }
 
-.hero-banner-art--classic {
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-}
-
-.hero-banner-classic-card {
-  width: min(100%, 220px);
-  margin-left: auto;
-  padding: 16px;
-  border-radius: 26px;
-  border: 1px solid rgba(255,255,255,.12);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.14),
-    0 18px 34px rgba(0,0,0,.18);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-.hero-banner-classic-card-label {
-  margin: 0;
-  color: rgba(202, 214, 238, .70);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-}
-
-.hero-banner-classic-card-value {
-  margin: 12px 0 18px;
-  color: #ffffff;
-  font-size: clamp(30px, 4vw, 44px);
-  line-height: .95;
-  letter-spacing: -0.04em;
-  font-weight: 800;
-}
-
-.hero-banner-classic-card-dots {
-  display: flex;
-  gap: 8px;
-}
-
-.hero-banner-classic-card-dots span {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.84);
-}
-
-.hero-banner-classic-card-dots span:nth-child(2) {
-  background: rgba(224, 54, 59, .96);
-}
-
-.hero-banner-classic-card-dots span:nth-child(3) {
-  background: rgba(255,255,255,.34);
-}
-
 .hero-banner-art--generic::before,
 .hero-banner-art--generic::after {
   content: "";
@@ -850,6 +850,56 @@ main.container {
 .hero-banner-dots.is-hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+@media (min-width:861px) {
+  .hero-band {
+    max-height: 420px;
+  }
+  .hero-band .container {
+    padding-bottom: 14px;
+  }
+  .hero {
+    width: 100%;
+    margin: 0;
+    aspect-ratio: auto;
+    border: none;
+    background: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .hero::after {
+    display: none;
+  }
+  .hero-carousel {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 6px;
+    touch-action: pan-x;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hero-carousel::-webkit-scrollbar {
+    display: none;
+  }
+  .hero-banner-track {
+    width: max-content;
+    height: auto;
+    gap: 16px;
+    padding: 0 2px 6px;
+  }
+  .hero-banner-slide {
+    flex: 0 0 clamp(360px, 31vw, 456px);
+    min-width: clamp(360px, 31vw, 456px);
+    height: auto;
+  }
+  .hero-banner {
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+  .hero-banner-dots {
+    display: none;
+  }
 }
 
 .hero-title {
@@ -2221,7 +2271,6 @@ main.container {
   }
   .hero-banner {
     padding: 20px 20px 50px;
-    grid-template-columns: minmax(0, 1fr) 156px;
     gap: 14px;
   }
   .hero-banner-title {
@@ -2231,26 +2280,41 @@ main.container {
     font-size: 14px;
     line-height: 1.42;
   }
+  .hero-banner--ios .hero-banner-kicker,
+  .hero-banner--ios .hero-banner-title,
+  .hero-banner--ios .hero-banner-text,
+  .hero-banner--ios .hero-banner-note {
+    max-width: calc(100% - 156px);
+  }
   .hero-banner-classic-badge {
     min-height: 28px;
     padding: 6px 10px;
     font-size: 11px;
   }
-  .hero-banner-step {
-    min-height: 62px;
-    padding: 10px;
+  .hero-banner--ios .hero-banner-steps {
+    gap: 10px;
+  }
+  .hero-banner--ios .hero-banner-step {
+    min-height: 84px;
+    padding: 12px 10px;
     border-radius: 16px;
     gap: 8px;
   }
-  .hero-banner-step-text {
-    font-size: 11px;
+  .hero-banner--ios .hero-banner-step-text {
+    font-size: 12px;
   }
   .hero-banner-note {
     font-size: 11px;
   }
+  .hero-banner--ios .hero-banner-art {
+    width: 146px;
+    right: 8px;
+    top: 16px;
+    bottom: 16px;
+  }
   .hero-banner-device {
-    width: 142px;
-    right: 6px;
+    width: 138px;
+    right: 0;
     bottom: 0;
   }
   .hero-banner-device-screen {
@@ -2258,15 +2322,6 @@ main.container {
   }
   .hero-banner-device-card {
     height: 46px;
-  }
-  .hero-banner-classic-card {
-    width: 146px;
-    padding: 12px;
-    border-radius: 22px;
-  }
-  .hero-banner-classic-card-value {
-    margin: 10px 0 14px;
-    font-size: 30px;
   }
 }
 
@@ -2307,22 +2362,11 @@ main.container {
   }
   .hero-banner {
     padding: 16px 14px 44px;
-    grid-template-columns: minmax(0, 1fr) 112px;
     gap: 10px;
   }
-  .hero-banner-chips {
-    gap: 6px;
-    margin-bottom: 8px;
-  }
-  .hero-banner--ios .hero-banner-chips,
   .hero-banner--ios .hero-banner-kicker,
   .hero-banner--classic .hero-banner-kicker {
     display: none;
-  }
-  .hero-banner-chip {
-    min-height: 24px;
-    padding: 5px 8px;
-    font-size: 9px;
   }
   .hero-banner-kicker {
     font-size: 9px;
@@ -2336,6 +2380,10 @@ main.container {
     font-size: 12px;
     line-height: 1.34;
   }
+  .hero-banner--ios .hero-banner-title,
+  .hero-banner--ios .hero-banner-text {
+    max-width: calc(100% - 98px);
+  }
   .hero-banner-classic-badges {
     gap: 6px;
   }
@@ -2345,33 +2393,40 @@ main.container {
     font-size: 9px;
   }
   .hero-banner-steps {
-    margin-top: auto;
-    gap: 6px;
+    margin-top: 12px;
+    gap: 8px;
   }
-  .hero-banner-step {
-    min-height: 48px;
-    padding: 7px;
-    border-radius: 13px;
-    gap: 6px;
+  .hero-banner--ios .hero-banner-step {
+    min-height: 58px;
+    padding: 8px;
+    border-radius: 14px;
+    gap: 7px;
   }
   .hero-banner-step-icon {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     border-radius: 8px;
     font-size: 15px;
   }
-  .hero-banner-step-text {
-    font-size: 9px;
-    line-height: 1.18;
+  .hero-banner--ios .hero-banner-step-text {
+    font-size: 10px;
+    line-height: 1.22;
   }
-  .hero-banner-note {
+  .hero-banner--ios .hero-banner-note {
     display: none;
   }
   .hero-banner-art {
     min-height: 0;
   }
+  .hero-banner--ios .hero-banner-art {
+    width: 96px;
+    top: 16px;
+    right: 8px;
+    bottom: auto;
+    height: 116px;
+  }
   .hero-banner-device {
-    width: 104px;
+    width: 96px;
     padding: 6px;
     border-radius: 22px;
     right: 0;
@@ -2396,25 +2451,6 @@ main.container {
   .hero-banner-device-pill {
     width: 32px;
     height: 16px;
-  }
-  .hero-banner-classic-card {
-    width: 102px;
-    padding: 10px;
-    border-radius: 18px;
-  }
-  .hero-banner-classic-card-label {
-    font-size: 8px;
-  }
-  .hero-banner-classic-card-value {
-    margin: 8px 0 10px;
-    font-size: 22px;
-  }
-  .hero-banner-classic-card-dots {
-    gap: 5px;
-  }
-  .hero-banner-classic-card-dots span {
-    width: 7px;
-    height: 7px;
   }
   .hero-banner-dots {
     bottom: 10px;
@@ -2797,6 +2833,17 @@ html[data-theme="dark"] .hero-banner-dot {
 
 html[data-theme="dark"] .hero-banner-dot.is-active {
   background: rgba(255,255,255,.98);
+}
+
+@media (min-width:861px) {
+  html[data-theme="dark"] .hero {
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+  html[data-theme="dark"] .hero::after {
+    display: none;
+  }
 }
 
 html[data-theme="dark"] .status-card {
