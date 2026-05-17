@@ -16,6 +16,7 @@ let activeDishIsDragging = false;
 const CART_KEY = "pervoe-vtoroe-cart";
 const PROMO_KEY = "pervoe-vtoroe-promo";
 const LANGUAGE_KEY = "pervoe-vtoroe-language";
+const THEME_KEY = "pervoe-vtoroe-theme";
 const TRANSLATION_CACHE_KEY = "pervoe-vtoroe-translation-cache-v1";
 const DISH_CAROUSEL_TRANSITION = "transform .34s cubic-bezier(.22, 1, .36, 1)";
 const ALL_CATEGORY = "__all__";
@@ -36,6 +37,12 @@ const UI_TRANSLATIONS = {
     languageRu: "Русский",
     languageKk: "Казахский",
     languageEn: "Английский",
+    settingsThemeTitle: "Тема",
+    settingsThemeText: "Авто повторяет тему устройства.",
+    settingsThemeGroupAria: "Выбор темы",
+    themeAuto: "Авто",
+    themeLight: "Светлая",
+    themeDark: "Тёмная",
     heroTitle: "Выберите блюда, добавьте в корзину и отправьте заказ в WhatsApp за 1 минуту.",
     heroSubtitle: "Доставка работает ежедневно с 9:00 до 18:00.",
     heroBadgeFresh: "Свежие блюда",
@@ -111,6 +118,12 @@ const UI_TRANSLATIONS = {
     languageRu: "Орысша",
     languageKk: "Қазақша",
     languageEn: "Ағылшынша",
+    settingsThemeTitle: "Тақырып",
+    settingsThemeText: "Авто құрылғы тақырыбын қайталайды.",
+    settingsThemeGroupAria: "Тақырыпты таңдау",
+    themeAuto: "Авто",
+    themeLight: "Ашық",
+    themeDark: "Қараңғы",
     heroTitle: "Тағамдарды таңдаңыз, себетке қосыңыз және тапсырысты WhatsApp арқылы 1 минутта жіберіңіз.",
     heroSubtitle: "Жеткізу күн сайын 9:00-ден 18:00-ге дейін жұмыс істейді.",
     heroBadgeFresh: "Жаңа тағамдар",
@@ -186,6 +199,12 @@ const UI_TRANSLATIONS = {
     languageRu: "Russian",
     languageKk: "Kazakh",
     languageEn: "English",
+    settingsThemeTitle: "Theme",
+    settingsThemeText: "Auto follows your device theme.",
+    settingsThemeGroupAria: "Theme selection",
+    themeAuto: "Auto",
+    themeLight: "Light",
+    themeDark: "Dark",
     heroTitle: "Choose your dishes, add them to the cart, and send your order via WhatsApp in 1 minute.",
     heroSubtitle: "Delivery is available daily from 9:00 to 18:00.",
     heroBadgeFresh: "Fresh dishes",
@@ -252,9 +271,11 @@ const UI_TRANSLATIONS = {
   }
 };
 let currentLanguage = loadSavedLanguage();
+let currentThemeMode = loadSavedThemeMode();
 let menuTranslations = { kk: {}, en: {} };
 let menuTranslationPromises = {};
 let translationCache = loadTranslationCache();
+const systemThemeMedia = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
 function parseCsvLine(line) {
   const result = [];
   let current = "";
@@ -283,6 +304,51 @@ function parseCsvLine(line) {
 function loadSavedLanguage() {
   const saved = localStorage.getItem(LANGUAGE_KEY);
   return LANGUAGE_META[saved] ? saved : "ru";
+}
+
+function loadSavedThemeMode() {
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    return ["auto", "light", "dark"].includes(saved) ? saved : "auto";
+  } catch {
+    return "auto";
+  }
+}
+
+function resolveThemeMode(mode = currentThemeMode) {
+  if (mode === "light" || mode === "dark") return mode;
+  return systemThemeMedia?.matches ? "dark" : "light";
+}
+
+function getThemeColor(theme = resolveThemeMode()) {
+  return theme === "dark" ? "#101722" : "#abb4bf";
+}
+
+function updateThemeMeta(theme = resolveThemeMode()) {
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeColorMeta) themeColorMeta.setAttribute("content", getThemeColor(theme));
+
+  const appleStatusMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+  if (appleStatusMeta) appleStatusMeta.setAttribute("content", theme === "dark" ? "black-translucent" : "default");
+}
+
+function applyTheme(mode = currentThemeMode, options = {}) {
+  const persist = Boolean(options.persist);
+  currentThemeMode = ["auto", "light", "dark"].includes(mode) ? mode : "auto";
+  const effectiveTheme = resolveThemeMode(currentThemeMode);
+
+  document.documentElement.dataset.themeMode = currentThemeMode;
+  document.documentElement.dataset.theme = effectiveTheme;
+  document.documentElement.style.colorScheme = effectiveTheme;
+  updateThemeMeta(effectiveTheme);
+
+  if (persist) {
+    try {
+      localStorage.setItem(THEME_KEY, currentThemeMode);
+    } catch {}
+  }
+
+  updateThemeButtons(false);
 }
 
 function loadTranslationCache() {
@@ -1137,6 +1203,15 @@ function updateSettingsLanguageButtons(isBusy = false) {
   });
 }
 
+function updateThemeButtons(isBusy = false) {
+  document.querySelectorAll(".settings-theme-btn").forEach((button) => {
+    const isActive = button.dataset.themeMode === currentThemeMode;
+    button.classList.toggle("is-active", isActive);
+    button.disabled = isBusy;
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+}
+
 function applyStaticTranslations() {
   document.documentElement.lang = currentLanguage;
   document.title = t("siteTitle");
@@ -1163,6 +1238,13 @@ function applyStaticTranslations() {
   setText('.settings-language-btn[data-lang="ru"]', t("languageRu"));
   setText('.settings-language-btn[data-lang="kk"]', t("languageKk"));
   setText('.settings-language-btn[data-lang="en"]', t("languageEn"));
+  setText("#settings-theme-title", t("settingsThemeTitle"));
+  setText("#settings-theme-text", t("settingsThemeText"));
+  const themeGroup = document.querySelector(".settings-theme-list");
+  if (themeGroup) themeGroup.setAttribute("aria-label", t("settingsThemeGroupAria"));
+  setText('.settings-theme-btn[data-theme-mode="auto"]', t("themeAuto"));
+  setText('.settings-theme-btn[data-theme-mode="light"]', t("themeLight"));
+  setText('.settings-theme-btn[data-theme-mode="dark"]', t("themeDark"));
   const logo = document.querySelector("[data-logo-src]");
   if (logo) logo.alt = t("logoAlt");
 
@@ -1243,6 +1325,12 @@ async function setLanguage(lang) {
   }
 
   updateSettingsLanguageButtons(false);
+  updateThemeButtons(false);
+}
+
+function setThemeMode(mode) {
+  if (!["auto", "light", "dark"].includes(mode) || mode === currentThemeMode) return;
+  applyTheme(mode, { persist: true });
 }
 
 function openSettingsPopover() {
@@ -1434,6 +1522,13 @@ document.querySelectorAll(".settings-language-btn").forEach((button) => {
     closeSettingsPopover();
   });
 });
+document.querySelectorAll(".settings-theme-btn").forEach((button) => {
+  button.addEventListener("click", () => {
+    const nextThemeMode = button.dataset.themeMode;
+    if (!nextThemeMode) return;
+    setThemeMode(nextThemeMode);
+  });
+});
 
 const searchInput = document.getElementById("menu-search");
 const searchClear = document.getElementById("search-clear");
@@ -1544,6 +1639,7 @@ document.getElementById("order-form").addEventListener("submit", (e) => {
 
 loadCart();
 loadPromo();
+applyTheme(currentThemeMode);
 applyStaticTranslations();
 updateSettingsLanguageButtons(false);
 loadMenu();
@@ -1557,6 +1653,18 @@ if (promo.code) {
 
 if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(syncStickyOffsets);
+}
+
+if (systemThemeMedia) {
+  const handleSystemThemeChange = () => {
+    if (currentThemeMode === "auto") applyTheme("auto");
+  };
+
+  if (typeof systemThemeMedia.addEventListener === "function") {
+    systemThemeMedia.addEventListener("change", handleSystemThemeChange);
+  } else if (typeof systemThemeMedia.addListener === "function") {
+    systemThemeMedia.addListener(handleSystemThemeChange);
+  }
 }
 
 if ("serviceWorker" in navigator) {

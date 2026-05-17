@@ -9,6 +9,18 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Первое Второе" />
   <meta name="format-detection" content="telephone=no" />
+  <script>
+    (() => {
+      try {
+        const savedThemeMode = localStorage.getItem("pervoe-vtoroe-theme") || "auto";
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const effectiveTheme = savedThemeMode === "dark" || (savedThemeMode === "auto" && prefersDark) ? "dark" : "light";
+        document.documentElement.dataset.themeMode = savedThemeMode;
+        document.documentElement.dataset.theme = effectiveTheme;
+        document.documentElement.style.colorScheme = effectiveTheme;
+      } catch {}
+    })();
+  </script>
   <title>Первое-Второе</title>
   <link rel="icon" type="image/svg+xml" href="icon%20site.svg" />
   <link rel="icon" type="image/png" sizes="1200x1200" href="icons/icon.png" />
@@ -20,7 +32,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=53" />
+  <link rel="stylesheet" href="style.css?v=54" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -47,6 +59,20 @@
                 <button class="settings-language-btn" type="button" data-lang="ru">Русский</button>
                 <button class="settings-language-btn" type="button" data-lang="kk">Қазақша</button>
                 <button class="settings-language-btn" type="button" data-lang="en">English</button>
+              </div>
+
+              <div class="settings-divider" aria-hidden="true"></div>
+
+              <div class="settings-theme-section">
+                <div class="settings-theme-header">
+                  <p id="settings-theme-title" class="settings-theme-title">Тема</p>
+                  <p id="settings-theme-text" class="settings-theme-text">Авто повторяет тему устройства.</p>
+                </div>
+                <div class="settings-theme-list" role="group" aria-label="Выбор темы">
+                  <button class="settings-theme-btn" type="button" data-theme-mode="auto">Авто</button>
+                  <button class="settings-theme-btn" type="button" data-theme-mode="light">Светлая</button>
+                  <button class="settings-theme-btn" type="button" data-theme-mode="dark">Тёмная</button>
+                </div>
               </div>
             </div>
           </div>
@@ -214,7 +240,7 @@
   </div>
 
   <script src="config.js?v=30"></script>
-  <script src="script.js?v=40"></script>
+  <script src="script.js?v=41"></script>
   <script>
     const siteLogo = document.querySelector("[data-logo-src]");
     if (siteLogo) {
