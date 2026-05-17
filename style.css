@@ -100,6 +100,7 @@ main.container {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
 }
 
 .brand-logo {
@@ -107,6 +108,114 @@ main.container {
   height: 50px;
   width: auto;
   max-width: 100%;
+}
+
+.settings-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.settings-toggle {
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 16px;
+  background: rgba(255,255,255,.74);
+  color: #141c35;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.settings-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 28px rgba(15, 23, 42, 0.10);
+}
+
+.settings-toggle .material-symbols-outlined {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.settings-popover {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: min(320px, calc(100vw - 28px));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-8px) scale(.96);
+  transform-origin: top right;
+  transition: opacity .22s ease, transform .22s ease, visibility .22s ease;
+  z-index: 55;
+}
+
+.settings-popover.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.settings-popover-inner {
+  position: relative;
+  overflow: hidden;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.28);
+  background:
+    radial-gradient(circle at top right, rgba(255,255,255,.28), transparent 34%),
+    linear-gradient(180deg, rgba(248, 249, 252, 0.98), rgba(231, 235, 242, 0.96));
+  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.16);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.settings-popover-inner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .05;
+  background-image: url("pattern.svg");
+  background-size: 160px;
+  background-repeat: repeat;
+}
+
+.settings-popover-kicker,
+.settings-popover-title,
+.settings-popover-text {
+  position: relative;
+  z-index: 1;
+}
+
+.settings-popover-kicker {
+  margin: 0 0 8px;
+  color: #6c7690;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+}
+
+.settings-popover-title {
+  margin: 0;
+  color: #111a2d;
+  font-size: 22px;
+  line-height: 1.05;
+}
+
+.settings-popover-text {
+  margin: 10px 0 0;
+  color: #51607a;
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 .hero-band {
@@ -1406,6 +1515,22 @@ main.container {
 
 @media (max-width:700px) {
   .brand-logo { height: 48px; }
+  .settings-toggle {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+  }
+  .settings-popover {
+    width: min(300px, calc(100vw - 20px));
+    top: calc(100% + 10px);
+  }
+  .settings-popover-inner {
+    padding: 16px;
+    border-radius: 20px;
+  }
+  .settings-popover-title {
+    font-size: 20px;
+  }
   .hero-title { font-size: 20px; }
   .search-wrap { margin-top: 10px; }
   .menu-grid {

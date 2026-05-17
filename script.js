@@ -649,6 +649,31 @@ function updateHeroSearchState() {
   heroBand.classList.toggle("is-hidden", shouldHide);
 }
 
+function openSettingsPopover() {
+  const popover = document.getElementById("settings-popover");
+  const toggle = document.getElementById("settings-toggle");
+  if (!popover || !toggle) return;
+  popover.classList.add("show");
+  popover.setAttribute("aria-hidden", "false");
+  toggle.setAttribute("aria-expanded", "true");
+}
+
+function closeSettingsPopover() {
+  const popover = document.getElementById("settings-popover");
+  const toggle = document.getElementById("settings-toggle");
+  if (!popover || !toggle) return;
+  popover.classList.remove("show");
+  popover.setAttribute("aria-hidden", "true");
+  toggle.setAttribute("aria-expanded", "false");
+}
+
+function toggleSettingsPopover() {
+  const popover = document.getElementById("settings-popover");
+  if (!popover) return;
+  if (popover.classList.contains("show")) closeSettingsPopover();
+  else openSettingsPopover();
+}
+
 async function loadMenu() {
   const grid = document.getElementById("menu-grid");
   document.body.classList.add("menu-loading");
@@ -792,6 +817,13 @@ document.getElementById("promo-code").addEventListener("keydown", (e) => {
     applyPromoCode();
   }
 });
+document.getElementById("settings-toggle").addEventListener("click", (e) => {
+  e.stopPropagation();
+  toggleSettingsPopover();
+});
+document.getElementById("settings-popover").addEventListener("click", (e) => {
+  e.stopPropagation();
+});
 
 const searchInput = document.getElementById("menu-search");
 const searchClear = document.getElementById("search-clear");
@@ -837,6 +869,7 @@ window.addEventListener("load", syncStickyOffsets);
 window.addEventListener("keydown", (event) => {
   const dishModal = document.getElementById("dish-modal");
   const cartModal = document.getElementById("cart-modal");
+  const settingsPopover = document.getElementById("settings-popover");
   if (dishModal && dishModal.classList.contains("show") && event.key === "ArrowLeft") {
     const item = getItemByName(activeDishName);
     if (!item) return;
@@ -854,11 +887,21 @@ window.addEventListener("keydown", (event) => {
     return;
   }
   if (event.key !== "Escape") return;
+  if (settingsPopover && settingsPopover.classList.contains("show")) {
+    closeSettingsPopover();
+    return;
+  }
   if (dishModal && dishModal.classList.contains("show")) {
     closeDishModal();
     return;
   }
   if (cartModal && cartModal.classList.contains("show")) closeCart();
+});
+document.addEventListener("click", (event) => {
+  const wrap = document.querySelector(".settings-wrap");
+  const popover = document.getElementById("settings-popover");
+  if (!wrap || !popover || !popover.classList.contains("show")) return;
+  if (!wrap.contains(event.target)) closeSettingsPopover();
 });
 
 document.getElementById("order-form").addEventListener("submit", (e) => {

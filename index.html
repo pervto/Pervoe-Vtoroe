@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=41" />
+  <link rel="stylesheet" href="style.css?v=42" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -22,6 +22,19 @@
           data-logo-src="logo.svg"
           alt="Первое-Второе"
         />
+        <div class="settings-wrap">
+          <button id="settings-toggle" class="settings-toggle" type="button" aria-label="Открыть настройки" aria-expanded="false" aria-controls="settings-popover">
+            <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+          </button>
+
+          <div id="settings-popover" class="settings-popover" aria-hidden="true">
+            <div class="settings-popover-inner">
+              <p class="settings-popover-kicker">Настройки</p>
+              <h3 class="settings-popover-title">Панель скоро наполнится</h3>
+              <p class="settings-popover-text">Я подготовил красивое мини-окно для будущих настроек. Функциональные элементы можно добавить следующим шагом.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -185,7 +198,7 @@
   </div>
 
   <script src="config.js?v=30"></script>
-  <script src="script.js?v=36"></script>
+  <script src="script.js?v=37"></script>
   <script>
     const siteLogo = document.querySelector("[data-logo-src]");
     if (siteLogo) {
