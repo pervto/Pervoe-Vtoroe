@@ -2,6 +2,12 @@ document.getElementById("cart-button").addEventListener("click", openCart);
 document.getElementById("to-top").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 document.getElementById("thanks-close").addEventListener("click", hideThanksModal);
 document.getElementById("thanks-modal").addEventListener("click", (e) => { if (e.target.id === "thanks-modal") hideThanksModal(); });
+document.getElementById("order-confirm-close").addEventListener("click", () => dismissPendingOrderConfirmation({ reopenCart: true }));
+document.getElementById("order-confirm-no").addEventListener("click", () => dismissPendingOrderConfirmation({ reopenCart: true }));
+document.getElementById("order-confirm-yes").addEventListener("click", confirmPendingOrderCompletion);
+document.getElementById("order-confirm-modal").addEventListener("click", (e) => {
+  if (e.target.id === "order-confirm-modal") dismissPendingOrderConfirmation({ reopenCart: true });
+});
 document.getElementById("close-modal").addEventListener("click", closeCart);
 document.getElementById("cart-modal").addEventListener("click", (e) => { if (e.target.id === "cart-modal") closeCart(); });
 document.getElementById("dish-modal-close").addEventListener("click", closeDishModal);
@@ -116,6 +122,7 @@ window.addEventListener("load", syncStickyOffsets);
 window.addEventListener("keydown", (event) => {
   const dishModal = document.getElementById("dish-modal");
   const cartModal = document.getElementById("cart-modal");
+  const orderConfirmModal = document.getElementById("order-confirm-modal");
   const settingsPopover = document.getElementById("settings-popover");
   if (dishModal && dishModal.classList.contains("show") && event.key === "ArrowLeft") {
     const item = getItemByName(activeDishName);
@@ -136,6 +143,10 @@ window.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
   if (settingsPopover && settingsPopover.classList.contains("show")) {
     closeSettingsPopover();
+    return;
+  }
+  if (orderConfirmModal && orderConfirmModal.classList.contains("show")) {
+    dismissPendingOrderConfirmation({ reopenCart: true });
     return;
   }
   if (dishModal && dishModal.classList.contains("show")) {
@@ -164,22 +175,21 @@ document.getElementById("order-form").addEventListener("submit", (e) => {
   const message = createWhatsAppMessage(userName, userPhone, userAddress, orderComment);
   const encoded = encodeURIComponent(message);
   const whatsappNumber = cleanPhone(CONFIG.whatsappNumber);
-  const whatsappWindow = window.open(`https://wa.me/${whatsappNumber}?text=${encoded}`, "_blank", "noopener");
-  if (!whatsappWindow) {
-    alert(t("alertWhatsAppBlocked"));
-    return;
-  }
-
-  const isOrderSent = window.confirm(t("confirmWhatsAppSent"));
-  if (!isOrderSent) return;
-
-  resetOrderStateAfterSubmit();
+  savePendingOrder(createPendingOrderSnapshot(userName, userPhone, userAddress, orderComment));
   closeCart();
-  showThanksModal();
+  window.location.href = `https://wa.me/${whatsappNumber}?text=${encoded}`;
+});
+
+window.addEventListener("pageshow", promptPendingOrderConfirmation);
+window.addEventListener("focus", promptPendingOrderConfirmation);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") promptPendingOrderConfirmation();
 });
 
 loadCart();
 loadPromo();
+loadPendingOrder();
+restorePendingOrderDraft();
 heroBanners = getDefaultHeroBanners();
 applyTheme(currentThemeMode);
 applyStaticTranslations();
@@ -192,6 +202,7 @@ updateHeroSearchState();
 if (promo.code) {
   document.getElementById("promo-code").value = promo.code;
 }
+promptPendingOrderConfirmation();
 
 if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(syncStickyOffsets);

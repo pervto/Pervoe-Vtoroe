@@ -92,6 +92,51 @@ function showToast(text) {
   toastTimer = setTimeout(() => toast.classList.remove("show"), 1400);
 }
 
+const PENDING_ORDER_KEY = "pervoe-vtoroe-pending-order-v2";
+const ORDER_FLOW_TEXT = {
+  ru: {
+    confirmTitle: "Подтвердите заказ",
+    confirmText: "Мы сохранили ваш заказ и подготовили сообщение для WhatsApp. Подскажите, удалось ли отправить его?",
+    summaryTitle: "Состав заказа",
+    confirmQuestion: "Удалось оформить именно этот заказ?",
+    confirmYes: "Да, заказ оформлен",
+    confirmNo: "Нет, вернуться в корзину",
+    successTitle: "Спасибо, заказ подтвержден",
+    successText: "Приятного аппетита и спасибо, что выбрали «Первое-Второе». Будем рады вашему следующему заказу.",
+    successButton: "Понятно"
+  },
+  kk: {
+    confirmTitle: "Тапсырысты растаңыз",
+    confirmText: "Біз тапсырысыңызды сақтап, WhatsApp үшін хабарламаны дайындадық. Оны жіберу сәтті болды ма?",
+    summaryTitle: "Тапсырыс құрамы",
+    confirmQuestion: "Дәл осы тапсырысты рәсімдей алдыңыз ба?",
+    confirmYes: "Иә, тапсырыс рәсімделді",
+    confirmNo: "Жоқ, себетке оралу",
+    successTitle: "Рақмет, тапсырыс расталды",
+    successText: "Асыңыз дәмді болсын. «Бірінші-Екінші» таңдағаныңыз үшін рақмет. Қайта күтеміз.",
+    successButton: "Түсінікті"
+  },
+  en: {
+    confirmTitle: "Confirm your order",
+    confirmText: "We saved your order and prepared the WhatsApp message. Were you able to send it?",
+    summaryTitle: "Order summary",
+    confirmQuestion: "Were you able to place this exact order?",
+    confirmYes: "Yes, the order was placed",
+    confirmNo: "No, return to cart",
+    successTitle: "Thank you, your order is confirmed",
+    successText: "Enjoy your meal, and thank you for choosing First-Second. We will be happy to see you again.",
+    successButton: "Understood"
+  }
+};
+
+let pendingOrder = null;
+let pageScrollLockY = 0;
+
+function orderFlowText(key) {
+  const table = ORDER_FLOW_TEXT[currentLanguage] || ORDER_FLOW_TEXT.ru;
+  return table[key] || ORDER_FLOW_TEXT.ru[key] || key;
+}
+
 function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
 function loadCart() {
   try {
@@ -113,6 +158,58 @@ function loadPromo() {
   } catch {
     promo = { code: "", discount: 0 };
   }
+}
+
+function savePendingOrder(order) {
+  pendingOrder = order && Array.isArray(order.items) && order.items.length ? order : null;
+  if (!pendingOrder) {
+    localStorage.removeItem(PENDING_ORDER_KEY);
+    return;
+  }
+
+  localStorage.setItem(PENDING_ORDER_KEY, JSON.stringify(pendingOrder));
+}
+
+function loadPendingOrder() {
+  try {
+    const raw = localStorage.getItem(PENDING_ORDER_KEY);
+    if (!raw) {
+      pendingOrder = null;
+      return null;
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || !Array.isArray(parsed.items) || !parsed.items.length) {
+      pendingOrder = null;
+      localStorage.removeItem(PENDING_ORDER_KEY);
+      return null;
+    }
+
+    pendingOrder = parsed;
+    return pendingOrder;
+  } catch {
+    pendingOrder = null;
+    localStorage.removeItem(PENDING_ORDER_KEY);
+    return null;
+  }
+}
+
+function clearPendingOrder() {
+  pendingOrder = null;
+  localStorage.removeItem(PENDING_ORDER_KEY);
+}
+
+function restorePendingOrderDraft(order = pendingOrder) {
+  if (!order || !order.customer) return;
+
+  const nameInput = document.getElementById("user-name");
+  const phoneInput = document.getElementById("user-phone");
+  const addressInput = document.getElementById("user-address");
+  const commentInput = document.getElementById("order-comment");
+  if (nameInput) nameInput.value = order.customer.name || "";
+  if (phoneInput) phoneInput.value = order.customer.phone || "";
+  if (addressInput) addressInput.value = order.customer.address || "";
+  if (commentInput) commentInput.value = order.customer.comment || "";
 }
 
 function applyPromoCode() {
@@ -148,9 +245,33 @@ function getCartQty(name) {
   return found ? found.qty : 0;
 }
 
+function setPageScrollLock(locked) {
+  if (locked) {
+    if (!document.body.classList.contains("no-scroll")) {
+      pageScrollLockY = window.scrollY || window.pageYOffset || 0;
+      document.body.style.top = `-${pageScrollLockY}px`;
+    }
+
+    document.documentElement.classList.add("no-scroll");
+    document.body.classList.add("no-scroll");
+    return;
+  }
+
+  const shouldRestoreScroll = document.body.classList.contains("no-scroll");
+  document.documentElement.classList.remove("no-scroll");
+  document.body.classList.remove("no-scroll");
+  document.body.style.top = "";
+
+  if (shouldRestoreScroll) {
+    window.scrollTo(0, pageScrollLockY);
+  }
+}
+
 function syncOverlayState() {
   const cartModal = document.getElementById("cart-modal");
   const dishModal = document.getElementById("dish-modal");
+  const orderConfirmModal = document.getElementById("order-confirm-modal");
+  const thanksModal = document.getElementById("thanks-modal");
 
   const isOverlayActive = (element) => Boolean(
     element &&
@@ -159,10 +280,12 @@ function syncOverlayState() {
 
   const hasOverlayOpen = Boolean(
     isOverlayActive(cartModal) ||
-    isOverlayActive(dishModal)
+    isOverlayActive(dishModal) ||
+    isOverlayActive(orderConfirmModal) ||
+    isOverlayActive(thanksModal)
   );
 
-  document.body.classList.toggle("no-scroll", hasOverlayOpen);
+  setPageScrollLock(hasOverlayOpen);
 
   const cartButton = document.getElementById("cart-button");
   if (cartButton) cartButton.classList.toggle("is-hidden", hasOverlayOpen);
@@ -179,9 +302,9 @@ function openOverlay(element) {
 
   element.classList.remove("is-closing");
   element.setAttribute("aria-hidden", "false");
-  syncOverlayState();
   requestAnimationFrame(() => {
     element.classList.add("show");
+    syncOverlayState();
   });
 }
 
@@ -215,12 +338,18 @@ function closeCart() {
 
 function showThanksModal() {
   const el = document.getElementById("thanks-modal");
-  if (el) el.classList.add("show");
+  if (!el) return;
+  el.setAttribute("aria-hidden", "false");
+  el.classList.add("show");
+  syncOverlayState();
 }
 
 function hideThanksModal() {
   const el = document.getElementById("thanks-modal");
-  if (el) el.classList.remove("show");
+  if (!el) return;
+  el.classList.remove("show");
+  el.setAttribute("aria-hidden", "true");
+  syncOverlayState();
 }
 
 function updateDishModalCarousel(item) {
@@ -643,6 +772,22 @@ function createWhatsAppMessage(userName, userPhone, userAddress, orderComment) {
   return buildSection("ru");
 }
 
+function createPendingOrderSnapshot(userName, userPhone, userAddress, orderComment) {
+  const { finalTotal } = updateTotals();
+  return {
+    items: cart.map((item) => ({ ...item })),
+    promo: { ...promo },
+    total: finalTotal,
+    customer: {
+      name: userName,
+      phone: userPhone,
+      address: userAddress,
+      comment: orderComment
+    },
+    createdAt: Date.now()
+  };
+}
+
 function resetOrderStateAfterSubmit() {
   cart = [];
   promo = { code: "", discount: 0 };
@@ -653,6 +798,82 @@ function resetOrderStateAfterSubmit() {
   document.getElementById("promo-code").value = "";
   document.getElementById("promo-hint").textContent = "";
   document.getElementById("order-form").reset();
+}
+
+function hasPendingOrder() {
+  return Boolean(pendingOrder && Array.isArray(pendingOrder.items) && pendingOrder.items.length);
+}
+
+function renderPendingOrderConfirmation() {
+  const itemsWrap = document.getElementById("order-confirm-items");
+  const totalAmount = document.getElementById("order-confirm-total-amount");
+  if (!itemsWrap || !totalAmount || !hasPendingOrder()) return;
+
+  itemsWrap.innerHTML = pendingOrder.items.map((item) => {
+    const menuItem = getItemByName(item.name) || findItemByAnyName(item.name);
+    const displayItem = menuItem
+      ? getDisplayItemForLanguage(menuItem, currentLanguage)
+      : { displayName: item.name, displayWeight: getLocalizedWeight(item.weight, currentLanguage) };
+    const sum = Number(item.price || 0) * Number(item.qty || 0);
+    const weightText = displayItem.displayWeight ? ` (${displayItem.displayWeight})` : "";
+
+    return `<div class="cart-item">
+      <div class="cart-item-top">
+        <span class="cart-item-name">${escapeHtml(`${displayItem.displayName || item.name}${weightText}`)}</span>
+        <strong>${money(sum)}</strong>
+      </div>
+      <div class="cart-controls">
+        <span>${escapeHtml(`x${item.qty}`)}</span>
+      </div>
+    </div>`;
+  }).join("");
+
+  totalAmount.textContent = Number(pendingOrder.total || 0).toLocaleString(getLocale());
+}
+
+function showPendingOrderConfirmation() {
+  if (!hasPendingOrder()) return;
+  restorePendingOrderDraft();
+  renderPendingOrderConfirmation();
+  openOverlay(document.getElementById("order-confirm-modal"));
+}
+
+function dismissPendingOrderConfirmation(options = {}) {
+  const reopenCart = options.reopenCart === true;
+  const draftOrder = pendingOrder;
+  clearPendingOrder();
+  restorePendingOrderDraft(draftOrder);
+  closeOverlay(document.getElementById("order-confirm-modal"));
+
+  if (reopenCart) {
+    window.setTimeout(() => {
+      restorePendingOrderDraft(draftOrder);
+      openCart();
+    }, OVERLAY_CLOSE_DURATION);
+  }
+}
+
+function confirmPendingOrderCompletion() {
+  clearPendingOrder();
+  resetOrderStateAfterSubmit();
+
+  const modal = document.getElementById("order-confirm-modal");
+  if (modal && (modal.classList.contains("show") || modal.classList.contains("is-closing"))) {
+    closeOverlay(modal);
+    window.setTimeout(showThanksModal, OVERLAY_CLOSE_DURATION);
+    return;
+  }
+
+  showThanksModal();
+}
+
+function promptPendingOrderConfirmation() {
+  if (!hasPendingOrder()) return;
+  if (document.visibilityState === "hidden") return;
+
+  const modal = document.getElementById("order-confirm-modal");
+  if (!modal || modal.classList.contains("show") || modal.classList.contains("is-closing")) return;
+  showPendingOrderConfirmation();
 }
 
 function cleanPhone(phone) {
@@ -759,15 +980,28 @@ function applyStaticTranslations() {
   setAriaLabel("#dish-modal-next", t("dishNextPhotoAria"));
   setText("#dish-modal-copy-label", t("dishAbout"));
 
-  setText("#thanks-title", t("thanksTitle"));
-  setText("#thanks-text", t("thanksText"));
-  setText("#thanks-close", t("thanksButton"));
+  setText("#thanks-title", orderFlowText("successTitle"));
+  setText("#thanks-text", orderFlowText("successText"));
+  setText("#thanks-close", orderFlowText("successButton"));
+  setText("#order-confirm-title", orderFlowText("confirmTitle"));
+  setAriaLabel("#order-confirm-close", t("closeAria"));
+  setText("#order-confirm-text", orderFlowText("confirmText"));
+  setText("#order-confirm-list-title", orderFlowText("summaryTitle"));
+  setText("#order-confirm-total-label", t("total"));
+  setText("#order-confirm-question", orderFlowText("confirmQuestion"));
+  setText("#order-confirm-no", orderFlowText("confirmNo"));
+  setText("#order-confirm-yes", orderFlowText("confirmYes"));
 
   const promoHint = document.getElementById("promo-hint");
   if (promoHint) {
     if (!promo.code) promoHint.textContent = "";
     else if (promo.code === "SKIDKA10") promoHint.textContent = t("promoAppliedPercent");
     else if (promo.code === "FIRST200") promoHint.textContent = t("promoAppliedFixed");
+  }
+
+  if (hasPendingOrder()) {
+    restorePendingOrderDraft();
+    renderPendingOrderConfirmation();
   }
 
   renderHeroBanners();
@@ -971,6 +1205,7 @@ async function loadMenu() {
 
     renderCategories();
     renderMenu();
+    if (hasPendingOrder()) renderPendingOrderConfirmation();
   } catch (error) {
     renderMenuErrorState(error.message);
   } finally {

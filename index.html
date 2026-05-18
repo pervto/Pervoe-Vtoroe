@@ -32,7 +32,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=68" />
+  <link rel="stylesheet" href="style.css?v=69" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -235,11 +235,41 @@
     </div>
   </div>
 
+  <div id="order-confirm-modal" class="modal order-confirm-modal" aria-hidden="true">
+    <div class="modal-content order-confirm-content">
+      <div class="modal-header">
+        <h2 id="order-confirm-title">Подтвердите заказ</h2>
+        <button id="order-confirm-close" class="close" type="button" aria-label="Закрыть">×</button>
+      </div>
+
+      <p id="order-confirm-text" class="order-confirm-text">Мы сохранили ваш заказ. Подскажите, удалось ли отправить его через WhatsApp?</p>
+
+      <div class="order-confirm-summary">
+        <p id="order-confirm-list-title" class="order-confirm-list-title">Состав заказа</p>
+        <div id="order-confirm-items" class="cart-items order-confirm-items"></div>
+      </div>
+
+      <div class="totals-box order-confirm-totals">
+        <div class="cart-total-row">
+          <span id="order-confirm-total-label" class="cart-total-label">Итого</span>
+          <strong class="cart-total-value"><span id="order-confirm-total-amount">0</span> ₸</strong>
+        </div>
+      </div>
+
+      <p id="order-confirm-question" class="order-confirm-question">Удалось оформить этот заказ в WhatsApp?</p>
+
+      <div class="order-confirm-actions">
+        <button id="order-confirm-no" class="order-confirm-secondary" type="button">Нет, вернуться в корзину</button>
+        <button id="order-confirm-yes" class="order-confirm-primary" type="button">Да, заказ оформлен</button>
+      </div>
+    </div>
+  </div>
+
   <script src="config.js?v=30"></script>
   <script src="js/app-state.js?v=1"></script>
   <script src="js/app-hero.js?v=1"></script>
-  <script src="js/app-ui.js?v=1"></script>
-  <script src="js/app-main.js?v=1"></script>
+  <script src="js/app-ui.js?v=2"></script>
+  <script src="js/app-main.js?v=2"></script>
   <script>
     const siteLogo = document.querySelector("[data-logo-src-light]");
     if (siteLogo) {

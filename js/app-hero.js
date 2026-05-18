@@ -201,7 +201,7 @@ function buildHeroBannerHtml(banner, index) {
   const displayBanner = getDisplayHeroBanner(banner) || banner;
 
   if (banner.type === "image") {
-    return `<article class="hero-banner-slide" aria-roledescription="slide" aria-label="${escapeHtml(`${index + 1}`)}">
+    return `<article class="hero-banner-slide hero-banner-slide--image" aria-roledescription="slide" aria-label="${escapeHtml(`${index + 1}`)}">
       <div class="hero-banner hero-banner--image">
         <img class="hero-banner-image" src="${escapeHtml(displayBanner.imageUrl || banner.raw)}" alt="" loading="lazy" decoding="async" draggable="false" />
       </div>
@@ -254,6 +254,14 @@ function buildHeroBannerHtml(banner, index) {
   </article>`;
 }
 
+function syncHeroBannerFrameState() {
+  const hero = document.getElementById("hero");
+  if (!hero) return;
+
+  const activeBanner = heroBanners[activeHeroBanner] || null;
+  hero.classList.toggle("hero--image-mode", Boolean(activeBanner && activeBanner.type === "image"));
+}
+
 function syncHeroBannerTrack(options = {}) {
   const carousel = document.getElementById("hero-banner-carousel");
   const track = document.getElementById("hero-banner-track");
@@ -280,6 +288,7 @@ function updateHeroBannerCarousel() {
   if (!carousel || !track || !dots || !heroBanners.length) return;
 
   activeHeroBanner = ((activeHeroBanner % heroBanners.length) + heroBanners.length) % heroBanners.length;
+  syncHeroBannerFrameState();
   const isDesktopLane = isDesktopHeroBannerLane();
   carousel.classList.toggle("is-desktop-lane", isDesktopLane);
   dots.classList.toggle("is-hidden", isDesktopLane || heroBanners.length <= 1);
@@ -319,6 +328,7 @@ function renderHeroBanners() {
   if (!banners.length) {
     heroBanners = [];
     activeHeroBanner = 0;
+    syncHeroBannerFrameState();
     track.innerHTML = "";
     dots.innerHTML = "";
     return;
