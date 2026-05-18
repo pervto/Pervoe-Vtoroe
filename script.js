@@ -118,6 +118,8 @@ const UI_TRANSLATIONS = {
     toastAdded: "{name} добавлено в корзину",
     alertCartEmpty: "Корзина пустая. Добавьте блюда.",
     alertFillRequired: "Заполните имя, телефон и адрес.",
+    alertWhatsAppBlocked: "Не удалось открыть WhatsApp. Разрешите всплывающие окна и попробуйте снова.",
+    confirmWhatsAppSent: "WhatsApp открыт. Нажмите OK только после того, как действительно отправите сообщение с заказом.",
     waGreeting: "Здравствуйте!",
     waIntro: "Хочу оформить заказ.",
     waName: "Имя",
@@ -212,6 +214,8 @@ const UI_TRANSLATIONS = {
     toastAdded: "{name} себетке қосылды",
     alertCartEmpty: "Себет бос. Тағам қосыңыз.",
     alertFillRequired: "Атыңызды, телефоныңызды және мекенжайыңызды толтырыңыз.",
+    alertWhatsAppBlocked: "WhatsApp ашылмады. Қалқымалы терезелерге рұқсат беріп, қайта көріңіз.",
+    confirmWhatsAppSent: "WhatsApp ашылды. Тапсырыс хабарламасын шынымен жібергеннен кейін ғана OK батырмасын басыңыз.",
     waGreeting: "Сәлеметсіз бе!",
     waIntro: "Тапсырыс бергім келеді.",
     waName: "Аты",
@@ -306,6 +310,8 @@ const UI_TRANSLATIONS = {
     toastAdded: "{name} added to cart",
     alertCartEmpty: "Your cart is empty. Add some dishes first.",
     alertFillRequired: "Please fill in your name, phone number, and address.",
+    alertWhatsAppBlocked: "Unable to open WhatsApp. Please allow pop-ups and try again.",
+    confirmWhatsAppSent: "WhatsApp is open. Press OK only after you actually send the order message.",
     waGreeting: "Hello!",
     waIntro: "I would like to place an order.",
     waName: "Name",
@@ -1672,6 +1678,18 @@ function createWhatsAppMessage(userName, userPhone, userAddress, orderComment) {
   return buildSection("ru");
 }
 
+function resetOrderStateAfterSubmit() {
+  cart = [];
+  promo = { code: "", discount: 0 };
+  saveCart();
+  savePromo();
+  renderCart();
+  updateMenuControls();
+  document.getElementById("promo-code").value = "";
+  document.getElementById("promo-hint").textContent = "";
+  document.getElementById("order-form").reset();
+}
+
 function cleanPhone(phone) {
   return String(phone).replace(/\D/g, "");
 }
@@ -2162,17 +2180,16 @@ document.getElementById("order-form").addEventListener("submit", (e) => {
   const message = createWhatsAppMessage(userName, userPhone, userAddress, orderComment);
   const encoded = encodeURIComponent(message);
   const whatsappNumber = cleanPhone(CONFIG.whatsappNumber);
-  window.open(`https://wa.me/${whatsappNumber}?text=${encoded}`, "_blank");
+  const whatsappWindow = window.open(`https://wa.me/${whatsappNumber}?text=${encoded}`, "_blank", "noopener");
+  if (!whatsappWindow) {
+    alert(t("alertWhatsAppBlocked"));
+    return;
+  }
 
-  cart = [];
-  promo = { code: "", discount: 0 };
-  saveCart();
-  savePromo();
-  renderCart();
-  updateMenuControls();
-  document.getElementById("promo-code").value = "";
-  document.getElementById("promo-hint").textContent = "";
-  document.getElementById("order-form").reset();
+  const isOrderSent = window.confirm(t("confirmWhatsAppSent"));
+  if (!isOrderSent) return;
+
+  resetOrderStateAfterSubmit();
   closeCart();
   showThanksModal();
 });
