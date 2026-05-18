@@ -292,9 +292,6 @@ function syncOverlayState() {
 
   const cartButton = document.getElementById("cart-button");
   if (cartButton) cartButton.classList.toggle("is-hidden", hasVisibleOverlay);
-
-  const menuDock = document.getElementById("menu-dock");
-  if (menuDock) menuDock.classList.toggle("overlay-obscured", hasOverlayOpen);
 }
 
 const OVERLAY_CLOSE_DURATION = 340;
