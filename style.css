@@ -711,13 +711,14 @@ main.container {
   border-radius: inherit;
 }
 
-.hero--image-mode {
+.hero.hero--image-mode {
   border: none;
+  border-color: transparent;
   background: none;
   box-shadow: none;
 }
 
-.hero--image-mode::after {
+.hero.hero--image-mode::after {
   display: none;
 }
 
@@ -735,6 +736,7 @@ main.container {
 .hero--image-mode .hero-banner--image,
 .hero--image-mode .hero-banner-image {
   height: 100%;
+  border-radius: inherit;
 }
 
 .hero--image-mode .hero-banner-slide--image {
@@ -1017,6 +1019,9 @@ main.container {
   backdrop-filter: blur(22px) saturate(1.12);
   -webkit-backdrop-filter: blur(22px) saturate(1.12);
   transition: .2s ease;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
 }
 
 .menu-dock {
@@ -1029,6 +1034,11 @@ main.container {
   backdrop-filter: blur(32px) saturate(1.12);
   -webkit-backdrop-filter: blur(32px) saturate(1.12);
   overflow: hidden;
+  isolation: isolate;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  transition: opacity .18s ease, transform .18s ease;
 }
 
 .menu-dock::before {
@@ -1050,6 +1060,8 @@ main.container {
   padding-top: 0;
   padding-bottom: 8px;
   transition: padding-top .18s ease, padding-bottom .18s ease;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .menu-dock .search-wrap {
@@ -1117,6 +1129,12 @@ main.container {
   padding: 12px 0 3px;
   min-height: 48px;
   align-items: center;
+  position: relative;
+  z-index: 1;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  transition: opacity .18s ease, transform .18s ease;
 }
 
 .category-skeleton {
@@ -2970,6 +2988,16 @@ html[data-theme="dark"] .hero::after {
   opacity: 0.04;
   filter: invert(1) brightness(1.2) saturate(0.52);
   mix-blend-mode: screen;
+}
+
+html[data-theme="dark"] .hero.hero--image-mode {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+html[data-theme="dark"] .hero.hero--image-mode::after {
+  display: none;
 }
 
 html[data-theme="dark"] .hero-subtitle {

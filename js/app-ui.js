@@ -938,9 +938,6 @@ function applyStaticTranslations() {
   setText("#settings-popover-text", t("settingsText"));
   const languageGroup = document.querySelector(".settings-language-list");
   if (languageGroup) languageGroup.setAttribute("aria-label", t("settingsGroupAria"));
-  setText('.settings-language-btn[data-lang="ru"]', t("languageRu"));
-  setText('.settings-language-btn[data-lang="kk"]', t("languageKk"));
-  setText('.settings-language-btn[data-lang="en"]', t("languageEn"));
   setText("#settings-theme-title", t("settingsThemeTitle"));
   setText("#settings-theme-text", t("settingsThemeText"));
   const themeGroup = document.querySelector(".settings-theme-list");
