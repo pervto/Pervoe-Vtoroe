@@ -130,7 +130,7 @@ const ORDER_FLOW_TEXT = {
 };
 
 let pendingOrder = null;
-let pageScrollLockY = 0;
+const OVERLAY_SCROLL_CONTAINER_SELECTOR = ".modal-content, .dish-modal-shell, .thanks-card";
 
 function orderFlowText(key) {
   const table = ORDER_FLOW_TEXT[currentLanguage] || ORDER_FLOW_TEXT.ru;
@@ -245,26 +245,22 @@ function getCartQty(name) {
   return found ? found.qty : 0;
 }
 
+function isInsideOverlayScrollContainer(target) {
+  return target instanceof Element && Boolean(target.closest(OVERLAY_SCROLL_CONTAINER_SELECTOR));
+}
+
+function preventBackgroundOverlayScroll(event) {
+  if (!document.body.classList.contains("no-scroll")) return;
+  if (isInsideOverlayScrollContainer(event.target)) return;
+  event.preventDefault();
+}
+
+document.addEventListener("wheel", preventBackgroundOverlayScroll, { passive: false });
+document.addEventListener("touchmove", preventBackgroundOverlayScroll, { passive: false });
+
 function setPageScrollLock(locked) {
-  if (locked) {
-    if (!document.body.classList.contains("no-scroll")) {
-      pageScrollLockY = window.scrollY || window.pageYOffset || 0;
-      document.body.style.top = `-${pageScrollLockY}px`;
-    }
-
-    document.documentElement.classList.add("no-scroll");
-    document.body.classList.add("no-scroll");
-    return;
-  }
-
-  const shouldRestoreScroll = document.body.classList.contains("no-scroll");
-  document.documentElement.classList.remove("no-scroll");
-  document.body.classList.remove("no-scroll");
-  document.body.style.top = "";
-
-  if (shouldRestoreScroll) {
-    window.scrollTo(0, pageScrollLockY);
-  }
+  document.documentElement.classList.toggle("no-scroll", locked);
+  document.body.classList.toggle("no-scroll", locked);
 }
 
 function syncOverlayState() {
@@ -277,6 +273,7 @@ function syncOverlayState() {
     element &&
     (element.classList.contains("show") || element.classList.contains("is-closing"))
   );
+  const isOverlayShown = (element) => Boolean(element && element.classList.contains("show"));
 
   const hasOverlayOpen = Boolean(
     isOverlayActive(cartModal) ||
@@ -284,11 +281,17 @@ function syncOverlayState() {
     isOverlayActive(orderConfirmModal) ||
     isOverlayActive(thanksModal)
   );
+  const hasVisibleOverlay = Boolean(
+    isOverlayShown(cartModal) ||
+    isOverlayShown(dishModal) ||
+    isOverlayShown(orderConfirmModal) ||
+    isOverlayShown(thanksModal)
+  );
 
   setPageScrollLock(hasOverlayOpen);
 
   const cartButton = document.getElementById("cart-button");
-  if (cartButton) cartButton.classList.toggle("is-hidden", hasOverlayOpen);
+  if (cartButton) cartButton.classList.toggle("is-hidden", hasVisibleOverlay);
 }
 
 const OVERLAY_CLOSE_DURATION = 340;

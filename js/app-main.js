@@ -47,6 +47,27 @@ document.getElementById("hero-banner-dots").addEventListener("click", (e) => {
 });
 bindHeroBannerSwipeEvents();
 
+let whatsappReturnPending = false;
+let whatsappPageBackgrounded = false;
+
+function resetWhatsAppReturnState() {
+  whatsappReturnPending = false;
+  whatsappPageBackgrounded = false;
+}
+
+function tryShowPendingOrderConfirmation() {
+  if (!hasPendingOrder()) {
+    resetWhatsAppReturnState();
+    return;
+  }
+
+  if (document.visibilityState === "hidden") return;
+  if (whatsappReturnPending && !whatsappPageBackgrounded) return;
+
+  promptPendingOrderConfirmation();
+  whatsappReturnPending = false;
+}
+
 document.getElementById("promo-apply").addEventListener("click", applyPromoCode);
 document.getElementById("promo-code").addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
@@ -175,15 +196,34 @@ document.getElementById("order-form").addEventListener("submit", (e) => {
   const message = createWhatsAppMessage(userName, userPhone, userAddress, orderComment);
   const encoded = encodeURIComponent(message);
   const whatsappNumber = cleanPhone(CONFIG.whatsappNumber);
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encoded}`;
+
   savePendingOrder(createPendingOrderSnapshot(userName, userPhone, userAddress, orderComment));
+  whatsappReturnPending = true;
+  whatsappPageBackgrounded = false;
   closeCart();
-  window.location.href = `https://wa.me/${whatsappNumber}?text=${encoded}`;
+  window.open(whatsappUrl, "_blank");
 });
 
-window.addEventListener("pageshow", promptPendingOrderConfirmation);
-window.addEventListener("focus", promptPendingOrderConfirmation);
+window.addEventListener("pageshow", tryShowPendingOrderConfirmation);
+window.addEventListener("focus", tryShowPendingOrderConfirmation);
+window.addEventListener("blur", () => {
+  if (whatsappReturnPending && hasPendingOrder()) {
+    whatsappPageBackgrounded = true;
+  }
+});
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") promptPendingOrderConfirmation();
+  if (!hasPendingOrder()) {
+    resetWhatsAppReturnState();
+    return;
+  }
+
+  if (document.visibilityState === "hidden") {
+    whatsappPageBackgrounded = true;
+    return;
+  }
+
+  tryShowPendingOrderConfirmation();
 });
 
 loadCart();
@@ -202,7 +242,7 @@ updateHeroSearchState();
 if (promo.code) {
   document.getElementById("promo-code").value = promo.code;
 }
-promptPendingOrderConfirmation();
+tryShowPendingOrderConfirmation();
 
 if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(syncStickyOffsets);

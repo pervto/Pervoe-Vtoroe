@@ -45,10 +45,7 @@ body.no-scroll {
 }
 
 body.no-scroll {
-  position: fixed;
-  left: 0;
-  right: 0;
-  width: 100%;
+  height: 100dvh;
 }
 
 body {
@@ -728,6 +725,10 @@ main.container {
   border-radius: inherit;
 }
 
+.hero--image-mode .hero-banner-track {
+  background: transparent;
+}
+
 .hero--image-mode .hero-banner-track,
 .hero--image-mode .hero-banner-slide,
 .hero--image-mode .hero-banner-slide--image,
@@ -737,10 +738,14 @@ main.container {
 }
 
 .hero--image-mode .hero-banner-slide--image {
-  background: #0b111c;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
 }
 
 .hero--image-mode .hero-banner--image {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   border-radius: inherit;
@@ -750,6 +755,10 @@ main.container {
   width: 100%;
   height: 100%;
   border-radius: inherit;
+}
+
+.hero--image-mode .hero-banner-dots {
+  z-index: 3;
 }
 
 .hero-banner-orb-one {
@@ -1543,7 +1552,7 @@ main.container {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity .22s ease, transform .22s ease, visibility .22s ease;
+  transition: opacity .12s cubic-bezier(.2, .8, .2, 1), transform .12s cubic-bezier(.2, .8, .2, 1), visibility .12s linear;
 }
 
 .cart-button.visible { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 0) scale(1); }
@@ -1666,6 +1675,7 @@ main.container {
   margin:0;
   max-height:calc(100dvh - 24px);
   overflow:auto;
+  overscroll-behavior: contain;
   background: linear-gradient(180deg, #f8f9fb 0%, #eceff4 100%);
   border: 1px solid rgba(17, 24, 39, 0.08);
   border-radius:24px;
@@ -1739,6 +1749,7 @@ main.container {
   max-height: calc(100dvh - 24px);
   margin: 0 auto;
   overflow: hidden;
+  overscroll-behavior: contain;
   display: grid;
   grid-template-rows: minmax(300px, 48vh) minmax(0, 1fr);
   border-radius: 30px;
@@ -2225,6 +2236,7 @@ main.container {
 .thanks-card {
   width:100%;
   max-width:420px;
+  overscroll-behavior: contain;
   background: rgba(255,255,255,.96);
   border:1px solid rgba(17, 24, 39, 0.08);
   border-radius:24px;
