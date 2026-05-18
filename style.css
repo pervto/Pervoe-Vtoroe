@@ -2403,7 +2403,7 @@ main.container {
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
 }
 
-@media (min-width:700px) {
+@media (min-width:700px) and (max-width:860px) {
   .menu-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 16px;
@@ -2964,12 +2964,11 @@ main.container {
 
 .hero-banner--skeleton {
   display: grid;
-  grid-template-rows: 1fr auto;
-  gap: 0;
-  padding: 0;
+  gap: 14px;
+  padding: 18px;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(235, 239, 245, 0.96), rgba(224, 230, 239, 0.98));
-  border: 1px solid rgba(255,255,255,.26);
+  background: rgba(238, 242, 247, 0.94);
+  border: 1px solid rgba(255,255,255,.24);
   border-radius: inherit;
 }
 
@@ -2979,29 +2978,20 @@ main.container {
 }
 
 .hero-banner-skeleton-media,
-.hero-banner-skeleton-pill,
-.hero-banner-skeleton-line,
-.hero-banner-skeleton-dot {
-  background: linear-gradient(90deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.68) 50%, rgba(255,255,255,0.30) 100%);
+.hero-banner-skeleton-line {
+  background: linear-gradient(90deg, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.62) 50%, rgba(255,255,255,0.26) 100%);
   background-size: 220% 100%;
-  animation: skeletonPulse 1.35s ease-in-out infinite;
+  animation: skeletonPulse 1.15s ease-in-out infinite;
+  border-radius: 18px;
 }
 
 .hero-banner-skeleton-media {
-  min-height: 0;
+  min-height: 180px;
 }
 
 .hero-banner-skeleton-copy {
   display: grid;
   gap: 10px;
-  padding: 16px 18px 18px;
-  background: linear-gradient(180deg, rgba(18, 24, 38, 0.03), rgba(18, 24, 38, 0.07));
-}
-
-.hero-banner-skeleton-pill {
-  width: 92px;
-  height: 18px;
-  border-radius: 999px;
 }
 
 .hero-banner-skeleton-line {
@@ -3011,28 +3001,12 @@ main.container {
 }
 
 .hero-banner-skeleton-line--title {
-  width: 78%;
-  height: 22px;
-  border-radius: 14px;
+  width: 72%;
+  height: 20px;
 }
 
 .hero-banner-skeleton-line--short {
-  width: 54%;
-}
-
-.hero-banner-dots.is-skeleton {
-  pointer-events: none;
-}
-
-.hero-banner-skeleton-dot {
-  display: block;
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-}
-
-.hero-banner-skeleton-dot.is-active {
-  width: 22px;
+  width: 48%;
 }
 
 .food-card .btn-add,
@@ -3148,20 +3122,14 @@ html[data-theme="dark"] .hero-banner-dots {
 }
 
 html[data-theme="dark"] .hero-banner--skeleton {
-  background: linear-gradient(180deg, rgba(28, 38, 54, 0.96), rgba(18, 26, 39, 0.98));
+  background: rgba(22, 30, 42, 0.96);
   border-color: rgba(255,255,255,.08);
 }
 
 html[data-theme="dark"] .hero-banner-skeleton-media,
-html[data-theme="dark"] .hero-banner-skeleton-pill,
-html[data-theme="dark"] .hero-banner-skeleton-line,
-html[data-theme="dark"] .hero-banner-skeleton-dot {
+html[data-theme="dark"] .hero-banner-skeleton-line {
   background: linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0.06) 100%);
   background-size: 220% 100%;
-}
-
-html[data-theme="dark"] .hero-banner-skeleton-copy {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.05));
 }
 
 html[data-theme="dark"] .hero-banner-dot {
@@ -3540,4 +3508,110 @@ body.menu-loading .to-top {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
+}
+
+@media (min-width:861px) {
+  .hero-band {
+    max-height: 420px;
+  }
+  .hero-band .container {
+    padding-bottom: 14px;
+  }
+  .hero {
+    width: 100%;
+    margin: 0;
+    aspect-ratio: auto;
+    border: none;
+    background: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .hero::after {
+    display: none;
+  }
+  .hero-carousel {
+    display: block;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 6px;
+    touch-action: pan-x;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hero-carousel::-webkit-scrollbar {
+    display: none;
+  }
+  .hero-banner-track {
+    display: flex;
+    width: max-content;
+    min-width: 100%;
+    height: auto;
+    gap: 14px;
+    padding: 0 0 6px;
+  }
+  .hero-banner-slide {
+    flex: 0 0 clamp(250px, 22vw, 270px);
+    min-width: clamp(250px, 22vw, 270px);
+    height: auto;
+  }
+  .hero-banner {
+    height: auto;
+    aspect-ratio: 4 / 4.6;
+    padding: 18px 18px 22px;
+    gap: 12px;
+  }
+  .hero-banner-title {
+    font-size: clamp(20px, 1.7vw, 24px);
+  }
+  .hero-banner-text {
+    font-size: 13px;
+    line-height: 1.42;
+  }
+  .hero-banner-classic-badges {
+    gap: 8px;
+  }
+  .hero-banner-classic-badge {
+    min-height: 32px;
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+  .hero-banner-steps {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .hero-banner-step {
+    min-height: 0;
+    padding: 12px 10px;
+    gap: 8px;
+  }
+  .hero-banner-step-icon {
+    width: 32px;
+    height: 32px;
+  }
+  .hero-banner-step-text {
+    font-size: 12px;
+  }
+  .hero-banner--ios .hero-banner-content {
+    padding-right: 0;
+  }
+  .hero-banner--ios .hero-banner-art {
+    display: none;
+  }
+  .hero-banner-dots {
+    display: none;
+  }
+  .hero-banner-skeleton-media {
+    min-height: 150px;
+  }
+  .menu-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .food-image,
+  .food-image-placeholder {
+    height: clamp(168px, 14vw, 190px);
+  }
+  .food-card .item-controls {
+    max-width: none;
+  }
 }

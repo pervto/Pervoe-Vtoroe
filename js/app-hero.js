@@ -202,7 +202,6 @@ function buildHeroBannerSkeletonHtml() {
     <div class="hero-banner hero-banner--skeleton">
       <div class="hero-banner-skeleton-media"></div>
       <div class="hero-banner-skeleton-copy">
-        <span class="hero-banner-skeleton-pill"></span>
         <span class="hero-banner-skeleton-line hero-banner-skeleton-line--title"></span>
         <span class="hero-banner-skeleton-line"></span>
         <span class="hero-banner-skeleton-line hero-banner-skeleton-line--short"></span>
@@ -225,12 +224,11 @@ function renderHeroBannerSkeleton() {
   carousel.classList.remove("is-desktop-lane");
   carousel.dataset.loading = "true";
 
-  track.innerHTML = Array.from({ length: 4 }, () => buildHeroBannerSkeletonHtml()).join("");
-  dots.classList.remove("is-hidden");
-  dots.classList.add("is-skeleton");
-  dots.innerHTML = Array.from({ length: 3 }, (_, index) => (
-    `<span class="hero-banner-skeleton-dot${index === 0 ? " is-active" : ""}" aria-hidden="true"></span>`
-  )).join("");
+  const skeletonCount = isDesktopHeroBannerLane() ? 4 : 1;
+  track.innerHTML = Array.from({ length: skeletonCount }, () => buildHeroBannerSkeletonHtml()).join("");
+  dots.classList.add("is-hidden");
+  dots.classList.remove("is-skeleton");
+  dots.innerHTML = "";
 }
 
 function buildHeroBannerHtml(banner, index) {
