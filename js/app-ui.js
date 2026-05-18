@@ -1099,6 +1099,7 @@ async function loadMenu() {
   const grid = document.getElementById("menu-grid");
   lastMenuLoadError = "";
   document.body.classList.add("menu-loading");
+  renderHeroBannerSkeleton();
   renderCategoriesSkeleton();
   grid.innerHTML = `<div class="ios-loader-wrap"><div class="ios-loader"></div><p class="status">${escapeHtml(t("loadingMenu"))}</p></div>`;
   try {
@@ -1207,6 +1208,7 @@ async function loadMenu() {
     renderMenu();
     if (hasPendingOrder()) renderPendingOrderConfirmation();
   } catch (error) {
+    renderHeroBanners();
     renderMenuErrorState(error.message);
   } finally {
     document.body.classList.remove("menu-loading");

@@ -197,6 +197,42 @@ function buildHeroBannerStepIconMarkup(iconName) {
   return icons[iconName] || icons.add_box;
 }
 
+function buildHeroBannerSkeletonHtml() {
+  return `<article class="hero-banner-slide hero-banner-slide--skeleton" aria-hidden="true">
+    <div class="hero-banner hero-banner--skeleton">
+      <div class="hero-banner-skeleton-media"></div>
+      <div class="hero-banner-skeleton-copy">
+        <span class="hero-banner-skeleton-pill"></span>
+        <span class="hero-banner-skeleton-line hero-banner-skeleton-line--title"></span>
+        <span class="hero-banner-skeleton-line"></span>
+        <span class="hero-banner-skeleton-line hero-banner-skeleton-line--short"></span>
+      </div>
+    </div>
+  </article>`;
+}
+
+function renderHeroBannerSkeleton() {
+  const heroBand = document.getElementById("hero-band");
+  const hero = document.getElementById("hero");
+  const carousel = document.getElementById("hero-banner-carousel");
+  const track = document.getElementById("hero-banner-track");
+  const dots = document.getElementById("hero-banner-dots");
+  if (!heroBand || !hero || !carousel || !track || !dots) return;
+
+  heroBand.hidden = false;
+  heroBand.classList.remove("is-hidden");
+  hero.classList.remove("hero--image-mode");
+  carousel.classList.remove("is-desktop-lane");
+  carousel.dataset.loading = "true";
+
+  track.innerHTML = Array.from({ length: 4 }, () => buildHeroBannerSkeletonHtml()).join("");
+  dots.classList.remove("is-hidden");
+  dots.classList.add("is-skeleton");
+  dots.innerHTML = Array.from({ length: 3 }, (_, index) => (
+    `<span class="hero-banner-skeleton-dot${index === 0 ? " is-active" : ""}" aria-hidden="true"></span>`
+  )).join("");
+}
+
 function buildHeroBannerHtml(banner, index) {
   const displayBanner = getDisplayHeroBanner(banner) || banner;
 
@@ -328,6 +364,8 @@ function renderHeroBanners() {
   if (!banners.length) {
     heroBanners = [];
     activeHeroBanner = 0;
+    carousel.dataset.loading = "false";
+    dots.classList.remove("is-skeleton");
     syncHeroBannerFrameState();
     track.innerHTML = "";
     dots.innerHTML = "";
@@ -337,7 +375,9 @@ function renderHeroBanners() {
   activeHeroBanner = Math.min(Math.max(activeHeroBanner, 0), banners.length - 1);
 
   carousel.setAttribute("aria-label", t("heroBannerCarouselAria"));
+  carousel.dataset.loading = "false";
   track.innerHTML = banners.map((banner, index) => buildHeroBannerHtml(banner, index)).join("");
+  dots.classList.remove("is-skeleton");
   dots.innerHTML = banners.map((banner, index) => (
     `<button class="hero-banner-dot${index === activeHeroBanner ? " is-active" : ""}" type="button" data-hero-slide-index="${index}" aria-label="${escapeHtml(t("heroBannerDotAria", { index: index + 1 }))}" aria-current="${index === activeHeroBanner ? "true" : "false"}"></button>`
   )).join("");

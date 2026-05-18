@@ -233,6 +233,7 @@ restorePendingOrderDraft();
 heroBanners = getDefaultHeroBanners();
 applyTheme(currentThemeMode);
 applyStaticTranslations();
+renderHeroBannerSkeleton();
 updateSettingsLanguageButtons(false);
 loadMenu();
 renderCart();

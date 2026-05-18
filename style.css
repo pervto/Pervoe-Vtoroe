@@ -952,20 +952,70 @@ main.container {
   .hero-banner-track {
     width: max-content;
     height: auto;
-    gap: 16px;
-    padding: 0 2px 6px;
+    gap: 14px;
+    padding: 0 0 6px;
   }
   .hero-banner-slide {
-    flex: 0 0 clamp(360px, 31vw, 456px);
-    min-width: clamp(360px, 31vw, 456px);
+    flex: 0 0 clamp(248px, 23vw, 274px);
+    min-width: clamp(248px, 23vw, 274px);
     height: auto;
   }
   .hero-banner {
     height: auto;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 4 / 4.6;
+    padding: 18px 18px 22px;
+    gap: 12px;
+  }
+  .hero-banner-title {
+    font-size: clamp(20px, 1.7vw, 24px);
+  }
+  .hero-banner-text {
+    font-size: 13px;
+    line-height: 1.42;
+  }
+  .hero-banner-classic-badges {
+    gap: 8px;
+  }
+  .hero-banner-classic-badge {
+    min-height: 32px;
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+  .hero-banner-steps {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .hero-banner-step {
+    min-height: 0;
+    padding: 12px 10px;
+    gap: 8px;
+  }
+  .hero-banner-step-icon {
+    width: 32px;
+    height: 32px;
+  }
+  .hero-banner-step-text {
+    font-size: 12px;
+  }
+  .hero-banner--ios .hero-banner-content {
+    padding-right: 0;
+  }
+  .hero-banner--ios .hero-banner-art {
+    display: none;
   }
   .hero-banner-dots {
     display: none;
+  }
+  .menu-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .food-image,
+  .food-image-placeholder {
+    height: clamp(168px, 14vw, 190px);
+  }
+  .food-card .item-controls {
+    max-width: none;
   }
 }
 
@@ -2051,10 +2101,20 @@ main.container {
 }
 
 .dish-modal-controls .btn-add {
-  padding: 7px 7px 7px 22px;
+  justify-content: center;
+  padding: 7px 22px;
   font-size: 19px;
   font-weight: 800;
   letter-spacing: -0.02em;
+}
+
+.dish-modal-controls .btn-add::after {
+  content: none;
+}
+
+.dish-modal-controls .btn-add-main {
+  width: 100%;
+  justify-content: center;
 }
 
 .dish-modal-controls .btn-add-label {
@@ -2062,7 +2122,6 @@ main.container {
   font-weight: 800;
 }
 
-.dish-modal-controls .btn-add::after,
 .dish-modal-controls .qty-inline button {
   width: 50px;
   height: 50px;
@@ -2834,13 +2893,17 @@ main.container {
     min-height: 54px;
   }
   .dish-modal-controls .btn-add {
-    padding: 6px 6px 6px 16px;
+    justify-content: center;
+    padding: 6px 16px;
     font-size: 16px;
+  }
+  .dish-modal-controls .btn-add-main {
+    width: 100%;
+    justify-content: center;
   }
   .dish-modal-controls .btn-add-label {
     font-size: 16px;
   }
-  .dish-modal-controls .btn-add::after,
   .dish-modal-controls .qty-inline button {
     width: 42px;
     height: 42px;
@@ -2897,6 +2960,79 @@ main.container {
   width: 100%;
   max-width: 172px;
   align-self: flex-start;
+}
+
+.hero-banner--skeleton {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(235, 239, 245, 0.96), rgba(224, 230, 239, 0.98));
+  border: 1px solid rgba(255,255,255,.26);
+  border-radius: inherit;
+}
+
+.hero-banner--skeleton::before,
+.hero-banner--skeleton::after {
+  content: none;
+}
+
+.hero-banner-skeleton-media,
+.hero-banner-skeleton-pill,
+.hero-banner-skeleton-line,
+.hero-banner-skeleton-dot {
+  background: linear-gradient(90deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.68) 50%, rgba(255,255,255,0.30) 100%);
+  background-size: 220% 100%;
+  animation: skeletonPulse 1.35s ease-in-out infinite;
+}
+
+.hero-banner-skeleton-media {
+  min-height: 0;
+}
+
+.hero-banner-skeleton-copy {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px 18px;
+  background: linear-gradient(180deg, rgba(18, 24, 38, 0.03), rgba(18, 24, 38, 0.07));
+}
+
+.hero-banner-skeleton-pill {
+  width: 92px;
+  height: 18px;
+  border-radius: 999px;
+}
+
+.hero-banner-skeleton-line {
+  display: block;
+  height: 14px;
+  border-radius: 999px;
+}
+
+.hero-banner-skeleton-line--title {
+  width: 78%;
+  height: 22px;
+  border-radius: 14px;
+}
+
+.hero-banner-skeleton-line--short {
+  width: 54%;
+}
+
+.hero-banner-dots.is-skeleton {
+  pointer-events: none;
+}
+
+.hero-banner-skeleton-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.hero-banner-skeleton-dot.is-active {
+  width: 22px;
 }
 
 .food-card .btn-add,
@@ -3009,6 +3145,23 @@ html[data-theme="dark"] .hero-banner-dots {
   background: rgba(7, 14, 24, .28);
   border-color: rgba(255,255,255,.12);
   box-shadow: 0 16px 34px rgba(0, 0, 0, .22);
+}
+
+html[data-theme="dark"] .hero-banner--skeleton {
+  background: linear-gradient(180deg, rgba(28, 38, 54, 0.96), rgba(18, 26, 39, 0.98));
+  border-color: rgba(255,255,255,.08);
+}
+
+html[data-theme="dark"] .hero-banner-skeleton-media,
+html[data-theme="dark"] .hero-banner-skeleton-pill,
+html[data-theme="dark"] .hero-banner-skeleton-line,
+html[data-theme="dark"] .hero-banner-skeleton-dot {
+  background: linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0.06) 100%);
+  background-size: 220% 100%;
+}
+
+html[data-theme="dark"] .hero-banner-skeleton-copy {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.05));
 }
 
 html[data-theme="dark"] .hero-banner-dot {
