@@ -199,14 +199,7 @@ function buildHeroBannerStepIconMarkup(iconName) {
 
 function buildHeroBannerSkeletonHtml() {
   return `<article class="hero-banner-slide hero-banner-slide--skeleton" aria-hidden="true">
-    <div class="hero-banner hero-banner--skeleton">
-      <div class="hero-banner-skeleton-media"></div>
-      <div class="hero-banner-skeleton-copy">
-        <span class="hero-banner-skeleton-line hero-banner-skeleton-line--title"></span>
-        <span class="hero-banner-skeleton-line"></span>
-        <span class="hero-banner-skeleton-line hero-banner-skeleton-line--short"></span>
-      </div>
-    </div>
+    <div class="hero-banner hero-banner--skeleton"></div>
   </article>`;
 }
 
@@ -291,6 +284,11 @@ function buildHeroBannerHtml(banner, index) {
 function syncHeroBannerFrameState() {
   const hero = document.getElementById("hero");
   if (!hero) return;
+
+  if (isDesktopHeroBannerLane()) {
+    hero.classList.remove("hero--image-mode");
+    return;
+  }
 
   const activeBanner = heroBanners[activeHeroBanner] || null;
   hero.classList.toggle("hero--image-mode", Boolean(activeBanner && activeBanner.type === "image"));
