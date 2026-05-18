@@ -1,0 +1,74 @@
+<svg width="1600" height="1200" viewBox="0 0 1600 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="184" y1="120" x2="1416" y2="1080" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#141C2D"/>
+      <stop offset="1" stop-color="#0E1421"/>
+    </linearGradient>
+    <radialGradient id="glowRed" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(370 260) rotate(51.61) scale(286.226)">
+      <stop stop-color="#E0363B" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#E0363B" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowBlue" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1280 960) rotate(51.61) scale(286.226)">
+      <stop stop-color="#4766FF" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#4766FF" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#FFFFFF" fill-opacity="0.08"/>
+      <circle cx="16" cy="16" r="1.2" fill="#FFFFFF" fill-opacity="0.05"/>
+    </pattern>
+    <filter id="shadow" x="0" y="0" width="1600" height="1200" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="20" stdDeviation="32" flood-color="#000000" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1200" rx="80" fill="#0B111C"/>
+  <g filter="url(#shadow)">
+    <rect x="40" y="40" width="1520" height="1120" rx="72" fill="url(#bg)"/>
+    <rect x="40.5" y="40.5" width="1519" height="1119" rx="71.5" stroke="#FFFFFF" stroke-opacity="0.12"/>
+  </g>
+  <rect x="40" y="40" width="1520" height="1120" rx="72" fill="url(#dots)"/>
+  <circle cx="370" cy="260" r="286" fill="url(#glowRed)"/>
+  <circle cx="1280" cy="960" r="286" fill="url(#glowBlue)"/>
+
+  <g opacity="0.9">
+    <rect x="1120" y="220" width="250" height="250" rx="36" fill="#FFFFFF" fill-opacity="0.04" stroke="#FFFFFF" stroke-opacity="0.06"/>
+    <rect x="960" y="350" width="360" height="190" rx="42" fill="#FFFFFF" fill-opacity="0.05" stroke="#FFFFFF" stroke-opacity="0.06"/>
+    <rect x="1050" y="580" width="250" height="250" rx="125" fill="#FFFFFF" fill-opacity="0.04" stroke="#FFFFFF" stroke-opacity="0.05"/>
+    <path d="M1110 310C1162 254 1232 226 1300 226" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="2"/>
+    <path d="M1010 435H1260" stroke="#FFFFFF" stroke-opacity="0.07" stroke-width="2"/>
+    <path d="M1100 705C1176 660 1238 652 1304 670" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="2"/>
+  </g>
+
+  <text x="140" y="180" fill="#CCD8F6" fill-opacity="0.68" font-size="34" font-weight="800" letter-spacing="0.18em" font-family="Sora, Manrope, Arial, sans-serif">
+    ДОСТАВКА КАЖДЫЙ ДЕНЬ
+  </text>
+
+  <text fill="#F4F8FF" font-size="88" font-weight="800" letter-spacing="-0.035em" font-family="Sora, Manrope, Arial, sans-serif">
+    <tspan x="140" y="320">Выберите блюда,</tspan>
+    <tspan x="140" y="418">добавьте в корзину</tspan>
+    <tspan x="140" y="516">и отправьте заказ</tspan>
+    <tspan x="140" y="614">в WhatsApp за 1 минуту.</tspan>
+  </text>
+
+  <text fill="#DDE5F4" fill-opacity="0.84" font-size="42" font-weight="500" font-family="Manrope, Arial, sans-serif">
+    <tspan x="140" y="712">Доставка работает ежедневно с 9:00 до 18:00.</tspan>
+  </text>
+
+  <g>
+    <rect x="140" y="940" width="288" height="76" rx="38" fill="#FFFFFF" fill-opacity="0.08" stroke="#FFFFFF" stroke-opacity="0.14"/>
+    <text x="284" y="989" text-anchor="middle" fill="#F1F5FF" font-size="30" font-weight="700" font-family="Manrope, Arial, sans-serif">Свежие блюда</text>
+
+    <rect x="450" y="940" width="304" height="76" rx="38" fill="#FFFFFF" fill-opacity="0.08" stroke="#FFFFFF" stroke-opacity="0.14"/>
+    <text x="602" y="989" text-anchor="middle" fill="#F1F5FF" font-size="30" font-weight="700" font-family="Manrope, Arial, sans-serif">Быстрая доставка</text>
+
+    <rect x="776" y="940" width="284" height="76" rx="38" fill="#FFFFFF" fill-opacity="0.08" stroke="#FFFFFF" stroke-opacity="0.14"/>
+    <text x="918" y="989" text-anchor="middle" fill="#F1F5FF" font-size="30" font-weight="700" font-family="Manrope, Arial, sans-serif">Без регистрации</text>
+  </g>
+
+  <g opacity="0.95">
+    <circle cx="1236" cy="870" r="144" fill="#FFFFFF" fill-opacity="0.04"/>
+    <path d="M1178 870C1178 838 1204 812 1236 812C1268 812 1294 838 1294 870C1294 902 1268 928 1236 928C1204 928 1178 902 1178 870Z" fill="#FFFFFF" fill-opacity="0.08"/>
+    <path d="M1214 870H1258" stroke="#F4F8FF" stroke-width="18" stroke-linecap="round"/>
+    <path d="M1236 848V892" stroke="#F4F8FF" stroke-width="18" stroke-linecap="round"/>
+  </g>
+</svg>

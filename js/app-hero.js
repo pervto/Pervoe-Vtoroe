@@ -2,7 +2,7 @@ function splitHeroBannerCopy(source) {
   const rawText = String(source || "").trim().replace(/\s+/g, " ");
   if (!rawText) return { title: "", body: "" };
 
-  const separators = [" || ", " | ", " — ", " - ", ": "];
+  const separators = [" || ", " | ", " вЂ” ", " - ", ": "];
   for (const separator of separators) {
     if (!rawText.includes(separator)) continue;
     const [title, ...rest] = rawText.split(separator);
@@ -48,10 +48,10 @@ function createHeroBanner(rawValue, index) {
 
   const normalized = value.toLowerCase().replace(/\s+/g, " ");
   if (
-    normalized.includes("как скачать приложение на ios") ||
-    normalized.includes("как скачать приложение на iphone") ||
-    normalized.includes("скачать приложение на ios") ||
-    normalized.includes("скачать приложение на iphone")
+    normalized.includes("РєР°Рє СЃРєР°С‡Р°С‚СЊ РїСЂРёР»РѕР¶РµРЅРёРµ РЅР° ios") ||
+    normalized.includes("РєР°Рє СЃРєР°С‡Р°С‚СЊ РїСЂРёР»РѕР¶РµРЅРёРµ РЅР° iphone") ||
+    normalized.includes("СЃРєР°С‡Р°С‚СЊ РїСЂРёР»РѕР¶РµРЅРёРµ РЅР° ios") ||
+    normalized.includes("СЃРєР°С‡Р°С‚СЊ РїСЂРёР»РѕР¶РµРЅРёРµ РЅР° iphone")
   ) {
     return {
       id: `hero-banner-ios-${index}`,
@@ -81,18 +81,7 @@ function getHeroBannerSignature(banner) {
 }
 
 function getDefaultHeroBanners() {
-  return [
-    {
-      id: "hero-banner-classic-default",
-      type: "classic",
-      raw: "__classic__"
-    },
-    {
-      id: "hero-banner-ios-default",
-      type: "ios-install",
-      raw: "Как скачать приложение на IOS"
-    }
-  ];
+  return [];
 }
 
 function buildHeroBannersFromRows(rows, bannerColumnIndex) {
@@ -319,12 +308,21 @@ function updateHeroBannerCarousel() {
 }
 
 function renderHeroBanners() {
+  const heroBand = document.getElementById("hero-band");
   const carousel = document.getElementById("hero-banner-carousel");
   const track = document.getElementById("hero-banner-track");
   const dots = document.getElementById("hero-banner-dots");
   if (!carousel || !track || !dots) return;
 
   const banners = heroBanners.length ? heroBanners : getDefaultHeroBanners();
+  if (heroBand) heroBand.hidden = banners.length === 0;
+  if (!banners.length) {
+    heroBanners = [];
+    activeHeroBanner = 0;
+    track.innerHTML = "";
+    dots.innerHTML = "";
+    return;
+  }
   heroBanners = banners;
   activeHeroBanner = Math.min(Math.max(activeHeroBanner, 0), banners.length - 1);
 
