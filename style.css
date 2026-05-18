@@ -962,7 +962,7 @@ main.container {
   }
   .hero-banner {
     height: auto;
-    aspect-ratio: 4 / 4.6;
+    aspect-ratio: 4 / 3;
     padding: 18px 18px 22px;
     gap: 12px;
   }
@@ -2970,7 +2970,7 @@ main.container {
   background: linear-gradient(90deg, rgba(233, 238, 244, 0.94) 0%, rgba(245, 247, 251, 0.98) 50%, rgba(233, 238, 244, 0.94) 100%);
   background-size: 220% 100%;
   border: 1px solid rgba(255,255,255,.24);
-  border-radius: inherit;
+  border-radius: 20px;
   animation: skeletonPulse 1.1s ease-in-out infinite;
 }
 
@@ -3521,7 +3521,7 @@ body.menu-loading .to-top {
   }
   .hero-banner {
     height: auto;
-    aspect-ratio: 4 / 4.6;
+    aspect-ratio: 4 / 3;
     padding: 18px 18px 22px;
     gap: 12px;
   }
