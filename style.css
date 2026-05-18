@@ -478,7 +478,7 @@ main.container {
   color: #eff4ff;
 }
 
-.hero-banner--image {
+.hero-banner.hero-banner--image {
   display: block;
   grid-template-columns: 1fr;
   gap: 0;
@@ -1059,13 +1059,24 @@ main.container {
   z-index: 1;
   padding-top: 0;
   padding-bottom: 8px;
-  transition: padding-top .18s ease, padding-bottom .18s ease;
+  opacity: 1;
+  transition:
+    padding-top .18s ease,
+    padding-bottom .18s ease,
+    opacity .18s ease,
+    transform .18s ease;
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
 .menu-dock .search-wrap {
   margin-top: 0;
+}
+
+.menu-dock.overlay-obscured .container {
+  opacity: 0;
+  transform: translate3d(0, -8px, 0);
+  pointer-events: none;
 }
 
 .hero-band.is-hidden + .menu-dock .container {
