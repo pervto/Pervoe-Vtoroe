@@ -237,9 +237,7 @@ applyStaticTranslations();
 startWorkingHoursMonitoring();
 renderHeroBannerSkeleton();
 updateSettingsLanguageButtons(false);
-loadMenu().finally(() => {
-  startMenuSyncMonitoring();
-});
+loadMenu();
 renderCart();
 updateSearchClearVisibility();
 syncStickyOffsets();

@@ -1880,21 +1880,10 @@ function handleMenuSyncRefreshTrigger(forceFull = false) {
 }
 
 function startMenuSyncMonitoring() {
-  if (menuSyncMonitoringStarted) return;
-  menuSyncMonitoringStarted = true;
-
   if (menuSyncTimer) {
     window.clearInterval(menuSyncTimer);
+    menuSyncTimer = null;
   }
-
-  menuSyncTimer = window.setInterval(() => {
-    handleMenuSyncRefreshTrigger(false);
-  }, MENU_SYNC.intervalMs);
-
-  window.addEventListener("focus", () => handleMenuSyncRefreshTrigger(false));
-  window.addEventListener("pageshow", () => handleMenuSyncRefreshTrigger(false));
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") handleMenuSyncRefreshTrigger(false);
-  });
+  menuSyncMonitoringStarted = false;
 }
 
