@@ -262,6 +262,7 @@ let menuLastAvailabilitySnapshot = "";
 let backgroundTranslationToken = 0;
 let menuRenderToken = 0;
 let menuRenderFrameId = 0;
+let menuRenderTimeoutId = 0;
 let scheduledBackgroundTranslationId = 0;
 const OVERLAY_SCROLL_CONTAINER_SELECTOR = ".modal-content, .dish-modal-shell, .thanks-card";
 
@@ -1101,6 +1102,10 @@ function cancelPendingMenuRender() {
     window.cancelAnimationFrame(menuRenderFrameId);
     menuRenderFrameId = 0;
   }
+  if (menuRenderTimeoutId) {
+    window.clearTimeout(menuRenderTimeoutId);
+    menuRenderTimeoutId = 0;
+  }
   document.body.classList.remove("menu-rendering");
 }
 
@@ -1136,18 +1141,20 @@ function renderMenu() {
   }
 
   const renderToken = ++menuRenderToken;
-  const chunkSize = window.matchMedia && window.matchMedia("(max-width: 860px)").matches ? 8 : 12;
+  const isMobileMenu = window.matchMedia && window.matchMedia("(max-width: 860px)").matches;
+  const firstChunkSize = isMobileMenu ? 4 : 8;
+  const deferredChunkSize = isMobileMenu ? 3 : 6;
   let cursor = 0;
 
   grid.innerHTML = "";
   bindMenuControlEvents();
   bindMenuCardEvents();
 
-  if (filtered.length > chunkSize) {
+  if (filtered.length > firstChunkSize) {
     document.body.classList.add("menu-rendering");
   }
 
-  const appendChunk = () => {
+  const appendChunk = (chunkSize) => {
     if (renderToken !== menuRenderToken) return;
 
     const html = filtered
@@ -1159,15 +1166,22 @@ function renderMenu() {
     cursor += chunkSize;
 
     if (cursor < filtered.length) {
-      menuRenderFrameId = window.requestAnimationFrame(appendChunk);
+      menuRenderTimeoutId = window.setTimeout(() => {
+        menuRenderTimeoutId = 0;
+        menuRenderFrameId = window.requestAnimationFrame(() => {
+          menuRenderFrameId = 0;
+          appendChunk(deferredChunkSize);
+        });
+      }, 24);
       return;
     }
 
     menuRenderFrameId = 0;
+    menuRenderTimeoutId = 0;
     document.body.classList.remove("menu-rendering");
   };
 
-  appendChunk();
+  appendChunk(firstChunkSize);
 }
 
 function renderCart() {

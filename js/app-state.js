@@ -24,7 +24,8 @@ const CART_KEY = "pervoe-vtoroe-cart";
 const PROMO_KEY = "pervoe-vtoroe-promo";
 const LANGUAGE_KEY = "pervoe-vtoroe-language";
 const THEME_KEY = "pervoe-vtoroe-theme";
-const TRANSLATION_CACHE_KEY = "pervoe-vtoroe-translation-cache-v1";
+const TRANSLATION_CACHE_KEY = "pervoe-vtoroe-translation-cache-v2";
+const MAX_TRANSLATION_CACHE_ENTRIES = 1200;
 const DISH_CAROUSEL_TRANSITION = "transform .34s cubic-bezier(.22, 1, .36, 1)";
 const HERO_CAROUSEL_TRANSITION = "transform .34s cubic-bezier(.22, 1, .36, 1)";
 const ALL_CATEGORY = "__all__";
@@ -329,7 +330,8 @@ let menuTranslations = { kk: {}, en: {} };
 let menuTranslationPromises = {};
 let heroBannerTranslations = { kk: {}, en: {} };
 let heroBannerTranslationPromises = {};
-let translationCache = loadTranslationCache();
+let translationCache = {};
+let translationCacheLoaded = false;
 const systemThemeMedia = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
 
 function isDesktopHeroBannerLane() {
@@ -430,7 +432,7 @@ function loadTranslationCache() {
   try {
     const raw = localStorage.getItem(TRANSLATION_CACHE_KEY);
     const parsed = raw ? JSON.parse(raw) : {};
-    return parsed && typeof parsed === "object" ? parsed : {};
+    return parsed && typeof parsed === "object" ? trimTranslationCache(parsed) : {};
   } catch {
     return {};
   }
@@ -438,12 +440,28 @@ function loadTranslationCache() {
 
 let translationCacheSaveTimer = null;
 
+function trimTranslationCache(source) {
+  const entries = Object.entries(source || {});
+  if (entries.length <= MAX_TRANSLATION_CACHE_ENTRIES) {
+    return Object.fromEntries(entries);
+  }
+
+  return Object.fromEntries(entries.slice(-MAX_TRANSLATION_CACHE_ENTRIES));
+}
+
+function ensureTranslationCacheLoaded() {
+  if (translationCacheLoaded) return;
+  translationCache = loadTranslationCache();
+  translationCacheLoaded = true;
+}
+
 function saveTranslationCache() {
   if (translationCacheSaveTimer) return;
 
   translationCacheSaveTimer = window.setTimeout(() => {
     translationCacheSaveTimer = null;
     try {
+      translationCache = trimTranslationCache(translationCache);
       localStorage.setItem(TRANSLATION_CACHE_KEY, JSON.stringify(translationCache));
     } catch {}
   }, 180);
@@ -456,6 +474,7 @@ function flushTranslationCache() {
   }
 
   try {
+    translationCache = trimTranslationCache(translationCache);
     localStorage.setItem(TRANSLATION_CACHE_KEY, JSON.stringify(translationCache));
   } catch {}
 }
@@ -568,6 +587,7 @@ async function translateText(text, lang) {
   const source = String(text || "").trim();
   if (!source || lang === "ru") return source;
 
+  ensureTranslationCacheLoaded();
   const cacheKey = getTranslationCacheKey(source, lang);
   if (translationCache[cacheKey]) return translationCache[cacheKey];
 
