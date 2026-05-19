@@ -129,12 +129,380 @@ const ORDER_FLOW_TEXT = {
   }
 };
 
+const WORK_SCHEDULE = {
+  timezone: "Asia/Almaty",
+  startMinutes: 9 * 60,
+  endMinutes: 18 * 60,
+  refreshMs: 5 * 60 * 1000,
+  requestTimeoutMs: 5000
+};
+
+const WORK_SCHEDULE_TEXT = {
+  ru: {
+    closedBanner: "Сейчас мы не работаем. Заказы принимаем ежедневно с 9:00 до 18:00 (UTC+5).",
+    closedNote: "Меню и корзина доступны в любое время. Отправить заказ можно только с 9:00 до 18:00 (UTC+5).",
+    closedButton: "Заказы с 9:00 до 18:00",
+    closedAlert: "Сейчас мы не работаем. Отправить заказ можно с 9:00 до 18:00 (UTC+5).",
+    checkingNote: "Проверяем рабочее время. Кнопка заказа откроется автоматически.",
+    checkingButton: "Проверяем время...",
+    checkingAlert: "Сейчас проверяем рабочее время. Попробуйте еще раз через пару секунд.",
+    errorNote: "Не удалось проверить рабочее время. Отправка заказа временно недоступна, попробуйте чуть позже.",
+    errorButton: "Временная проверка времени",
+    errorAlert: "Не удалось проверить рабочее время. Попробуйте отправить заказ чуть позже."
+  },
+  kk: {
+    closedBanner: "Қазір біз жұмыс істемейміз. Тапсырыстар күн сайын 9:00-ден 18:00-ге дейін қабылданады (UTC+5).",
+    closedNote: "Мәзір мен себет әрқашан қолжетімді. Тапсырысты тек 9:00-ден 18:00-ге дейін жіберуге болады (UTC+5).",
+    closedButton: "Тапсырыс 9:00-ден 18:00-ге дейін",
+    closedAlert: "Қазір біз жұмыс істемейміз. Тапсырысты 9:00-ден 18:00-ге дейін жіберуге болады (UTC+5).",
+    checkingNote: "Жұмыс уақытын тексеріп жатырмыз. Тапсырыс батырмасы автоматты түрде ашылады.",
+    checkingButton: "Уақыт тексерілуде...",
+    checkingAlert: "Қазір жұмыс уақытын тексеріп жатырмыз. Бірнеше секундтан кейін қайталап көріңіз.",
+    errorNote: "Жұмыс уақытын тексеру мүмкін болмады. Тапсырыс жіберу уақытша қолжетімсіз, кейінірек қайталап көріңіз.",
+    errorButton: "Уақыт тексерілуде",
+    errorAlert: "Жұмыс уақытын тексеру мүмкін болмады. Тапсырысты сәл кейінірек жіберіп көріңіз."
+  },
+  en: {
+    closedBanner: "We are currently closed. Orders are accepted daily from 9:00 to 18:00 (UTC+5).",
+    closedNote: "You can browse the menu and build your cart at any time. Orders can be sent only from 9:00 to 18:00 (UTC+5).",
+    closedButton: "Orders from 9:00 to 18:00",
+    closedAlert: "We are currently closed. Orders can be sent from 9:00 to 18:00 (UTC+5).",
+    checkingNote: "Checking business hours. The order button will unlock automatically.",
+    checkingButton: "Checking time...",
+    checkingAlert: "We are checking business hours now. Please try again in a couple of seconds.",
+    errorNote: "We could not verify business hours right now. Order sending is temporarily unavailable, please try again later.",
+    errorButton: "Time check in progress",
+    errorAlert: "We could not verify business hours right now. Please try sending the order a little later."
+  }
+};
+
+const WORK_SCHEDULE_SOURCES = [
+  {
+    name: "timeapi.io",
+    url: `https://timeapi.io/api/Time/current/zone?timeZone=${encodeURIComponent(WORK_SCHEDULE.timezone)}`,
+    parse(data) {
+      const hour = Number(data?.hour);
+      const minute = Number(data?.minute);
+      if (!Number.isFinite(hour) || !Number.isFinite(minute)) throw new Error("Invalid timeapi.io response");
+      return { hour, minute };
+    }
+  },
+  {
+    name: "worldtimeapi.org",
+    url: `https://worldtimeapi.org/api/timezone/${WORK_SCHEDULE.timezone}`,
+    parse(data) {
+      const match = String(data?.datetime || "").match(/T(\d{2}):(\d{2})/);
+      if (!match) throw new Error("Invalid worldtimeapi.org response");
+      return { hour: Number(match[1]), minute: Number(match[2]) };
+    }
+  }
+];
+
+const MENU_SYNC = {
+  intervalMs: 8000,
+  focusThrottleMs: 2000,
+  fullReloadMs: 20000,
+  cacheBucketMs: 4000,
+  requestTimeoutMs: 6000
+};
+
+const MENU_HEADER_ALIASES = {
+  name: ["name", "\u043d\u0430\u0438\u043c\u0435\u043d\u043e\u0432\u0430\u043d\u0438\u0435", "\u043d\u0430\u0437\u0432\u0430\u043d\u0438\u0435"],
+  price: ["price", "\u0446\u0435\u043d\u0430"],
+  category: ["category", "\u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u044f"],
+  available: ["available", "\u043d\u0430\u043b\u0438\u0447\u0438\u0435 (\u0434\u0430/\u043d\u0435\u0442)", "\u043d\u0430\u043b\u0438\u0447\u0438\u0435"],
+  photo: ["photo", "photo 1", "photo 2", "\u0444\u043e\u0442\u043e", "\u0444\u043e\u0442\u043e 1", "\u0444\u043e\u0442\u043e 2", "image", "image 1", "image 2", "\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430", "\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430 1", "\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430 2"],
+  banner: ["banner", "banners", "\u0431\u0430\u043d\u043d\u0435\u0440", "\u0431\u0430\u043d\u043d\u0435\u0440\u044b"],
+  description: ["description", "\u043e\u043f\u0438\u0441\u0430\u043d\u0438\u0435"],
+  weight: ["weight", "\u0433\u0440\u0430\u043c\u043c\u043e\u0432\u043a\u0430", "\u0432\u0435\u0441", "\u0433\u0440\u0430\u043c\u043c\u044b"],
+  calories: ["calories", "\u043a\u0430\u043b\u043e\u0440\u0438\u0438", "\u043a\u043a\u0430\u043b"],
+  categoryOrder: ["category order", "category_order", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438"]
+};
+
+const MENU_PHOTO_HEADER_RE = /^(photo|image|\u0444\u043e\u0442\u043e|\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430)(\s*\d+)?$/i;
+const MENU_AVAILABLE_TRUE_VALUES = new Set([
+  "true",
+  "yes",
+  "1",
+  "\u0434\u0430",
+  "\u0435\u0441\u0442\u044c",
+  "\u0432 \u043d\u0430\u043b\u0438\u0447\u0438\u0438"
+]);
+
+const MENU_SYNC_TEXT = {
+  ru: {
+    unavailableRemoved: "Некоторые блюда закончились и были убраны из корзины."
+  },
+  kk: {
+    unavailableRemoved: "Кейбір тағамдар бітіп қалды және себеттен алынып тасталды."
+  },
+  en: {
+    unavailableRemoved: "Some dishes are no longer available and were removed from the cart."
+  }
+};
+
 let pendingOrder = null;
+let workScheduleState = {
+  status: "checking",
+  isOpen: false,
+  source: "",
+  checkedAt: 0,
+  error: ""
+};
+let workScheduleRefreshTimer = null;
+let workScheduleRequestToken = 0;
+let workScheduleMonitoringStarted = false;
+let menuSyncTimer = null;
+let menuSyncMonitoringStarted = false;
+let menuSyncInFlight = null;
+let menuLastSyncAt = 0;
+let menuLastFullLoadAt = 0;
+let menuLastCsvSnapshot = "";
+let menuLastAvailabilitySnapshot = "";
 const OVERLAY_SCROLL_CONTAINER_SELECTOR = ".modal-content, .dish-modal-shell, .thanks-card";
 
 function orderFlowText(key) {
   const table = ORDER_FLOW_TEXT[currentLanguage] || ORDER_FLOW_TEXT.ru;
   return table[key] || ORDER_FLOW_TEXT.ru[key] || key;
+}
+
+function scheduleText(key) {
+  const table = WORK_SCHEDULE_TEXT[currentLanguage] || WORK_SCHEDULE_TEXT.ru;
+  return table[key] || WORK_SCHEDULE_TEXT.ru[key] || key;
+}
+
+function menuSyncText(key) {
+  const table = MENU_SYNC_TEXT[currentLanguage] || MENU_SYNC_TEXT.ru;
+  return table[key] || MENU_SYNC_TEXT.ru[key] || key;
+}
+
+function normalizeMenuHeader(value) {
+  return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function findMenuHeaderIndex(headers, key) {
+  return headers.findIndex((header) => MENU_HEADER_ALIASES[key].includes(header));
+}
+
+function isAvailableMenuValue(value) {
+  return MENU_AVAILABLE_TRUE_VALUES.has(normalizeMenuHeader(value));
+}
+
+function getConfiguredSheetId() {
+  const explicitId = String(CONFIG.sheetId || "").trim();
+  if (explicitId) return explicitId;
+
+  const sheetUrl = String(CONFIG.sheetUrl || "").trim();
+  const match = sheetUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/i);
+  return match ? match[1] : "";
+}
+
+function getConfiguredSheetGid() {
+  const explicitGid = String(CONFIG.sheetGid || "").trim();
+  if (explicitGid) return explicitGid;
+
+  const sheetUrl = String(CONFIG.sheetUrl || "").trim();
+  if (!sheetUrl) return "0";
+
+  const hashMatch = sheetUrl.match(/gid=(\d+)/i);
+  if (hashMatch && hashMatch[1]) return hashMatch[1];
+
+  try {
+    const url = new URL(sheetUrl);
+    return url.searchParams.get("gid") || "0";
+  } catch {
+    return "0";
+  }
+}
+
+function buildDirectSheetCsvUrl(options = {}) {
+  const sheetId = getConfiguredSheetId();
+  if (!sheetId) return "";
+
+  const gid = getConfiguredSheetGid();
+  const query = String(options.query || "").trim();
+  const url = new URL(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq`);
+  url.searchParams.set("tqx", "out:csv");
+  if (gid) url.searchParams.set("gid", gid);
+  if (query) url.searchParams.set("tq", query);
+  return url.toString();
+}
+
+function getMenuRequestUrls(options = {}) {
+  const urls = [];
+  const directUrl = buildDirectSheetCsvUrl(options);
+  const csvUrl = String(CONFIG.csvUrl || "").trim();
+
+  if (directUrl) urls.push(directUrl);
+  if (csvUrl) urls.push(csvUrl);
+
+  return [...new Set(urls.filter(Boolean))];
+}
+
+function buildFreshMenuRequestUrl(url) {
+  try {
+    const nextUrl = new URL(url);
+    nextUrl.searchParams.set("_menuSync", String(Math.floor(Date.now() / MENU_SYNC.cacheBucketMs)));
+    return nextUrl.toString();
+  } catch {
+    const separator = String(url).includes("?") ? "&" : "?";
+    return `${url}${separator}_menuSync=${Math.floor(Date.now() / MENU_SYNC.cacheBucketMs)}`;
+  }
+}
+
+async function fetchCsvTextFromUrl(url) {
+  const controller = typeof AbortController === "function" ? new AbortController() : null;
+  const timeoutId = controller
+    ? window.setTimeout(() => controller.abort(), MENU_SYNC.requestTimeoutMs)
+    : null;
+
+  try {
+    const response = await fetch(buildFreshMenuRequestUrl(url), {
+      redirect: "follow",
+      cache: "no-store",
+      signal: controller ? controller.signal : undefined
+    });
+    if (!response.ok) throw new Error(`CSV load failed (${response.status})`);
+    return await response.text();
+  } finally {
+    if (timeoutId) window.clearTimeout(timeoutId);
+  }
+}
+
+async function fetchMenuCsvText(options = {}) {
+  const urls = getMenuRequestUrls(options);
+  let lastError = new Error("CSV load failed");
+
+  for (const url of urls) {
+    try {
+      return await fetchCsvTextFromUrl(url);
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+    }
+  }
+
+  throw lastError;
+}
+
+function parseMenuCsvDataset(text) {
+  const lines = String(text || "").split(/\r?\n/).filter((line) => line.trim() !== "");
+  if (lines.length < 2) throw new Error("CSV empty");
+
+  const parsedRows = lines.map((line) => parseCsvLine(line));
+  const headers = parsedRows[0].map(normalizeMenuHeader);
+  const photoIndexes = headers.reduce((acc, header, index) => {
+    const isPhotoColumn = MENU_HEADER_ALIASES.photo.includes(header) || MENU_PHOTO_HEADER_RE.test(header);
+    if (isPhotoColumn) acc.push(index);
+    return acc;
+  }, []);
+
+  const indexes = {
+    name: findMenuHeaderIndex(headers, "name"),
+    price: findMenuHeaderIndex(headers, "price"),
+    category: findMenuHeaderIndex(headers, "category"),
+    available: findMenuHeaderIndex(headers, "available"),
+    photo: findMenuHeaderIndex(headers, "photo"),
+    banner: findMenuHeaderIndex(headers, "banner"),
+    description: findMenuHeaderIndex(headers, "description"),
+    weight: findMenuHeaderIndex(headers, "weight"),
+    calories: findMenuHeaderIndex(headers, "calories"),
+    categoryOrder: findMenuHeaderIndex(headers, "categoryOrder")
+  };
+
+  if ([indexes.name, indexes.price, indexes.category, indexes.available].some((index) => index === -1)) {
+    throw new Error("Missing required CSV columns");
+  }
+
+  const dataRows = parsedRows.slice(1);
+  const nextCategoryOrderList = indexes.categoryOrder >= 0
+    ? dataRows
+      .map((cols) => String(cols[indexes.categoryOrder] || "").trim())
+      .filter(Boolean)
+      .filter((value, index, list) => list.indexOf(value) === index)
+    : [];
+
+  const nextHeroBanners = buildHeroBannersFromRows(parsedRows, indexes.banner);
+  const nextMenuData = dataRows
+    .map((cols, index) => {
+      const photos = photoIndexes
+        .map((photoIndex) => cols[photoIndex] || "")
+        .map((value) => normalizePhotoUrl(value))
+        .filter(Boolean);
+
+      return {
+        id: `item-${index}`,
+        name: String(cols[indexes.name] || "").trim(),
+        price: Number(cols[indexes.price]) || 0,
+        category: String(cols[indexes.category] || "").trim(),
+        available: isAvailableMenuValue(cols[indexes.available]),
+        photo: photos[0] || (indexes.photo >= 0 ? normalizePhotoUrl(cols[indexes.photo]) : ""),
+        photos,
+        description: indexes.description >= 0 ? cols[indexes.description] : "",
+        weight: indexes.weight >= 0 ? cols[indexes.weight] : "",
+        calories: indexes.calories >= 0 ? cols[indexes.calories] : ""
+      };
+    })
+    .filter((item) => item.name && item.available);
+
+  return {
+    rawText: String(text || ""),
+    menuItems: nextMenuData,
+    categoryOrderList: nextCategoryOrderList,
+    heroBanners: nextHeroBanners
+  };
+}
+
+function parseMenuAvailabilitySnapshot(text) {
+  const lines = String(text || "").split(/\r?\n/).filter((line) => line.trim() !== "");
+  if (lines.length < 2) throw new Error("CSV empty");
+
+  const parsedRows = lines.map((line) => parseCsvLine(line));
+  const headers = parsedRows[0].map(normalizeMenuHeader);
+  const iName = findMenuHeaderIndex(headers, "name");
+  const iAvailable = findMenuHeaderIndex(headers, "available");
+
+  if (iName === -1 || iAvailable === -1) {
+    throw new Error("Missing required CSV columns");
+  }
+
+  return parsedRows
+    .slice(1)
+    .map((cols) => ({
+      name: String(cols[iName] || "").trim(),
+      available: isAvailableMenuValue(cols[iAvailable])
+    }))
+    .filter((row) => row.name);
+}
+
+function syncCartWithAvailableMenu(showNotice = false) {
+  const availableNames = new Set(menuData.map((item) => item.name));
+  const nextCart = cart.filter((item) => availableNames.has(item.name));
+
+  if (nextCart.length === cart.length) return false;
+
+  cart = nextCart;
+  saveCart();
+  if (showNotice) showToast(menuSyncText("unavailableRemoved"));
+  return true;
+}
+
+function applyMenuDataset(dataset, options = {}) {
+  categoryOrderList = Array.isArray(dataset.categoryOrderList) ? dataset.categoryOrderList : [];
+  heroBanners = Array.isArray(dataset.heroBanners) ? dataset.heroBanners : [];
+  menuData = Array.isArray(dataset.menuItems) ? dataset.menuItems : [];
+  menuLastCsvSnapshot = String(dataset.rawText || "");
+  menuLastFullLoadAt = Date.now();
+  menuLastAvailabilitySnapshot = "";
+
+  if (activeHeroBanner >= heroBanners.length) activeHeroBanner = 0;
+  if (activeCategory !== ALL_CATEGORY && !menuData.some((item) => item.category === activeCategory)) {
+    activeCategory = ALL_CATEGORY;
+  }
+  if (activeDishName && !getItemByName(activeDishName)) {
+    closeDishModal();
+  }
+
+  return syncCartWithAvailableMenu(options.showRemovedToast === true);
 }
 
 function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
@@ -720,6 +1088,7 @@ function renderCart() {
     document.getElementById("discount-amount").textContent = money(0);
     document.getElementById("total-amount").textContent = "0";
     updateCartButton();
+    updateOrderAvailabilityUi();
     return;
   }
 
@@ -743,6 +1112,7 @@ function renderCart() {
 
   updateTotals();
   updateCartButton();
+  updateOrderAvailabilityUi();
 }
 
 function createWhatsAppMessage(userName, userPhone, userAddress, orderComment) {
@@ -883,6 +1253,165 @@ function cleanPhone(phone) {
   return String(phone).replace(/\D/g, "");
 }
 
+function setWorkScheduleState(nextState) {
+  workScheduleState = { ...workScheduleState, ...nextState };
+  updateOrderAvailabilityUi();
+}
+
+function isWithinWorkingHours(hour, minute) {
+  const totalMinutes = (Number(hour) * 60) + Number(minute);
+  return totalMinutes >= WORK_SCHEDULE.startMinutes && totalMinutes < WORK_SCHEDULE.endMinutes;
+}
+
+async function fetchTimePayload(url) {
+  const controller = typeof AbortController === "function" ? new AbortController() : null;
+  const timeoutId = controller
+    ? window.setTimeout(() => controller.abort(), WORK_SCHEDULE.requestTimeoutMs)
+    : null;
+
+  try {
+    const response = await fetch(url, {
+      cache: "no-store",
+      signal: controller ? controller.signal : undefined
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } finally {
+    if (timeoutId) window.clearTimeout(timeoutId);
+  }
+}
+
+async function refreshWorkingHoursStatus(options = {}) {
+  const requestToken = ++workScheduleRequestToken;
+  const silent = options.silent === true;
+
+  if (!silent) {
+    setWorkScheduleState({
+      status: "checking",
+      isOpen: false,
+      source: "",
+      error: ""
+    });
+  }
+
+  let lastError = new Error("Working hours check failed");
+
+  for (const source of WORK_SCHEDULE_SOURCES) {
+    try {
+      const payload = await fetchTimePayload(source.url);
+      const parsed = source.parse(payload);
+      const isOpen = isWithinWorkingHours(parsed.hour, parsed.minute);
+
+      if (requestToken !== workScheduleRequestToken) return false;
+
+      setWorkScheduleState({
+        status: isOpen ? "open" : "closed",
+        isOpen,
+        source: source.name,
+        checkedAt: Date.now(),
+        error: ""
+      });
+      return true;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+    }
+  }
+
+  if (requestToken !== workScheduleRequestToken) return false;
+
+  setWorkScheduleState({
+    status: "error",
+    isOpen: false,
+    source: "",
+    checkedAt: Date.now(),
+    error: lastError.message || "Working hours check failed"
+  });
+  return false;
+}
+
+function getOrderAvailabilityTextState() {
+  if (workScheduleState.status === "closed") return "closed";
+  if (workScheduleState.status === "error") return "error";
+  if (workScheduleState.status === "open") return "open";
+  return "checking";
+}
+
+function updateOrderAvailabilityUi() {
+  const banner = document.getElementById("schedule-status-banner");
+  const bannerText = document.getElementById("schedule-status-text");
+  const orderButton = document.getElementById("order-submit-button");
+  const orderButtonText = document.getElementById("btn-order-text");
+  const orderNote = document.getElementById("order-availability-note");
+  const state = getOrderAvailabilityTextState();
+  const isOpen = state === "open";
+
+  if (banner && bannerText) {
+    const showBanner = state === "closed";
+    bannerText.textContent = showBanner ? scheduleText("closedBanner") : "";
+    banner.classList.toggle("is-hidden", !showBanner);
+    banner.setAttribute("aria-hidden", String(!showBanner));
+  }
+
+  if (orderButton) {
+    orderButton.disabled = !isOpen;
+    orderButton.classList.toggle("is-disabled", !isOpen);
+  }
+
+  if (orderButtonText) {
+    if (state === "closed") orderButtonText.textContent = scheduleText("closedButton");
+    else if (state === "error") orderButtonText.textContent = scheduleText("errorButton");
+    else if (state === "checking") orderButtonText.textContent = scheduleText("checkingButton");
+    else orderButtonText.textContent = t("orderButton");
+  }
+
+  if (orderNote) {
+    let noteText = "";
+    if (state === "closed") noteText = scheduleText("closedNote");
+    else if (state === "error") noteText = scheduleText("errorNote");
+    else if (state === "checking") noteText = scheduleText("checkingNote");
+    orderNote.textContent = noteText;
+    orderNote.hidden = !noteText;
+  }
+
+  syncStickyOffsets();
+}
+
+function canSubmitOrderNow() {
+  return workScheduleState.status === "open" && workScheduleState.isOpen === true;
+}
+
+function getOrderAvailabilityAlertText() {
+  if (workScheduleState.status === "closed") return scheduleText("closedAlert");
+  if (workScheduleState.status === "error") return scheduleText("errorAlert");
+  return scheduleText("checkingAlert");
+}
+
+function handleWorkingHoursRefreshTrigger() {
+  if (document.visibilityState === "hidden") return;
+  const justChecked = workScheduleState.checkedAt && (Date.now() - workScheduleState.checkedAt) < 60 * 1000;
+  if (justChecked) return;
+  refreshWorkingHoursStatus({ silent: true });
+}
+
+function startWorkingHoursMonitoring() {
+  if (workScheduleMonitoringStarted) return;
+  workScheduleMonitoringStarted = true;
+  refreshWorkingHoursStatus();
+
+  if (workScheduleRefreshTimer) {
+    window.clearInterval(workScheduleRefreshTimer);
+  }
+  workScheduleRefreshTimer = window.setInterval(() => {
+    refreshWorkingHoursStatus({ silent: true });
+  }, WORK_SCHEDULE.refreshMs);
+
+  window.addEventListener("focus", handleWorkingHoursRefreshTrigger);
+  window.addEventListener("pageshow", handleWorkingHoursRefreshTrigger);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") handleWorkingHoursRefreshTrigger();
+  });
+}
+
 function syncStickyOffsets() {
   const header = document.getElementById("site-header");
   if (!header) return;
@@ -956,6 +1485,7 @@ function applyStaticTranslations() {
 
   setText("#address-link", t("address"));
   setText("#review-link-text", t("footerReview"));
+  setText("#thanks-review-text", t("footerReview"));
   setAriaLabel("#to-top", t("toTopAria"));
   setText("#cart-button-label", t("cartButton"));
 
@@ -974,6 +1504,7 @@ function applyStaticTranslations() {
   setPlaceholder("#order-comment", t("commentPlaceholder"));
   setText("#btn-order-text", t("orderButton"));
   setText("#payment-note", t("paymentNote"));
+  updateOrderAvailabilityUi();
 
   setAriaLabel("#dish-modal-close", t("dishCloseAria"));
   setAriaLabel("#dish-modal-prev", t("dishPrevPhotoAria"));
@@ -1214,5 +1745,156 @@ async function loadMenu() {
     document.body.classList.remove("menu-loading");
     updateCartButton();
   }
+}
+
+async function loadMenu(options = {}) {
+  const silent = options.silent === true;
+  const grid = document.getElementById("menu-grid");
+
+  if (!silent) {
+    lastMenuLoadError = "";
+    document.body.classList.add("menu-loading");
+    renderHeroBannerSkeleton();
+    renderCategoriesSkeleton();
+    grid.innerHTML = `<div class="ios-loader-wrap"><div class="ios-loader"></div><p class="status">${escapeHtml(t("loadingMenu"))}</p></div>`;
+  }
+
+  try {
+    const text = options.csvText || await fetchMenuCsvText();
+    if (silent && menuLastCsvSnapshot && text === menuLastCsvSnapshot) {
+      menuLastSyncAt = Date.now();
+      return false;
+    }
+
+    const dataset = parseMenuCsvDataset(text);
+    lastMenuLoadError = "";
+    const removedFromCart = applyMenuDataset(dataset, { showRemovedToast: silent });
+
+    renderHeroBanners();
+
+    if (!menuData.length) {
+      renderCategories();
+      grid.innerHTML = `<p class="status">${escapeHtml(t("noAvailable"))}</p>`;
+      renderCart();
+      if (hasPendingOrder()) renderPendingOrderConfirmation();
+      menuLastSyncAt = Date.now();
+      return true;
+    }
+
+    if (currentLanguage !== "ru") {
+      if (!silent) showMenuTranslatingState();
+      await Promise.all([
+        ensureMenuTranslations(currentLanguage),
+        ensureHeroBannerTranslations(currentLanguage)
+      ]);
+    }
+
+    renderHeroBanners();
+    renderCategories();
+    renderMenu();
+    renderCart();
+    if (!silent && removedFromCart) updateTotals();
+    if (hasPendingOrder()) renderPendingOrderConfirmation();
+    menuLastSyncAt = Date.now();
+    return true;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    lastMenuLoadError = message;
+    if (!silent || !menuData.length) {
+      renderHeroBanners();
+      renderMenuErrorState(message);
+    }
+    return false;
+  } finally {
+    if (!silent) {
+      document.body.classList.remove("menu-loading");
+    }
+    updateCartButton();
+  }
+}
+
+async function syncMenuAvailability() {
+  const availabilityText = await fetchMenuCsvText({ query: "select A, D" });
+  if (availabilityText === menuLastAvailabilitySnapshot) return false;
+
+  const rows = parseMenuAvailabilitySnapshot(availabilityText);
+  const availableNames = new Set(rows.filter((row) => row.available).map((row) => row.name));
+  const currentNames = new Set(menuData.map((item) => item.name));
+  const hasRemovedItems = menuData.some((item) => !availableNames.has(item.name));
+  const hasNewItems = [...availableNames].some((name) => !currentNames.has(name));
+
+  menuLastAvailabilitySnapshot = availabilityText;
+
+  if (!hasRemovedItems && !hasNewItems) return false;
+  if (hasNewItems || availableNames.size === 0) {
+    return loadMenu({ silent: true });
+  }
+
+  menuData = menuData.filter((item) => availableNames.has(item.name));
+  if (activeCategory !== ALL_CATEGORY && !menuData.some((item) => item.category === activeCategory)) {
+    activeCategory = ALL_CATEGORY;
+  }
+  if (activeDishName && !getItemByName(activeDishName)) {
+    closeDishModal();
+  }
+
+  syncCartWithAvailableMenu(true);
+  renderCategories();
+  renderMenu();
+  renderCart();
+  if (hasPendingOrder()) renderPendingOrderConfirmation();
+  return true;
+}
+
+async function refreshMenuSync(options = {}) {
+  if (menuSyncInFlight) return menuSyncInFlight;
+
+  menuSyncInFlight = (async () => {
+    try {
+      const needsFullReload =
+        options.forceFull === true ||
+        !menuLastFullLoadAt ||
+        (Date.now() - menuLastFullLoadAt) >= MENU_SYNC.fullReloadMs;
+
+      const result = needsFullReload
+        ? await loadMenu({ silent: true })
+        : await syncMenuAvailability();
+
+      menuLastSyncAt = Date.now();
+      return result;
+    } finally {
+      menuSyncInFlight = null;
+    }
+  })();
+
+  return menuSyncInFlight;
+}
+
+function handleMenuSyncRefreshTrigger(forceFull = false) {
+  if (document.visibilityState === "hidden") return;
+
+  const justSynced = menuLastSyncAt && (Date.now() - menuLastSyncAt) < MENU_SYNC.focusThrottleMs;
+  if (!forceFull && justSynced) return;
+
+  refreshMenuSync({ forceFull });
+}
+
+function startMenuSyncMonitoring() {
+  if (menuSyncMonitoringStarted) return;
+  menuSyncMonitoringStarted = true;
+
+  if (menuSyncTimer) {
+    window.clearInterval(menuSyncTimer);
+  }
+
+  menuSyncTimer = window.setInterval(() => {
+    handleMenuSyncRefreshTrigger(false);
+  }, MENU_SYNC.intervalMs);
+
+  window.addEventListener("focus", () => handleMenuSyncRefreshTrigger(false));
+  window.addEventListener("pageshow", () => handleMenuSyncRefreshTrigger(false));
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") handleMenuSyncRefreshTrigger(false);
+  });
 }
 

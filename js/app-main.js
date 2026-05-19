@@ -186,6 +186,7 @@ document.addEventListener("click", (event) => {
 document.getElementById("order-form").addEventListener("submit", (e) => {
   e.preventDefault();
   if (!cart.length) return alert(t("alertCartEmpty"));
+  if (!canSubmitOrderNow()) return alert(getOrderAvailabilityAlertText());
 
   const userName = document.getElementById("user-name").value.trim();
   const userPhone = document.getElementById("user-phone").value.trim();
@@ -233,9 +234,12 @@ restorePendingOrderDraft();
 heroBanners = getDefaultHeroBanners();
 applyTheme(currentThemeMode);
 applyStaticTranslations();
+startWorkingHoursMonitoring();
 renderHeroBannerSkeleton();
 updateSettingsLanguageButtons(false);
-loadMenu();
+loadMenu().finally(() => {
+  startMenuSyncMonitoring();
+});
 renderCart();
 updateSearchClearVisibility();
 syncStickyOffsets();

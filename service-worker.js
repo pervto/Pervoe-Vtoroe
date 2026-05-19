@@ -1,14 +1,14 @@
-const APP_CACHE = "pervoe-vtoroe-app-v29";
-const DATA_CACHE = "pervoe-vtoroe-data-v1";
+const APP_CACHE = "pervoe-vtoroe-app-v33";
+const DATA_CACHE = "pervoe-vtoroe-data-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./style.css?v=80",
-  "./config.js?v=30",
+  "./style.css?v=83",
+  "./config.js?v=32",
   "./js/app-state.js?v=1",
   "./js/app-hero.js?v=4",
-  "./js/app-ui.js?v=7",
-  "./js/app-main.js?v=4",
+  "./js/app-ui.js?v=12",
+  "./js/app-main.js?v=7",
   "./manifest.webmanifest",
   "./icons/logo.svg",
   "./icons/logo-dark.svg",
@@ -104,13 +104,18 @@ self.addEventListener("fetch", (event) => {
   const isMenuCsvRequest =
     url.hostname === "docs.google.com" &&
     url.pathname.includes("/spreadsheets/") &&
-    url.searchParams.get("output") === "csv";
+    (url.searchParams.get("output") === "csv" || url.pathname.includes("/gviz/tq"));
 
   const isFontRequest =
     url.hostname === "fonts.googleapis.com" ||
     url.hostname === "fonts.gstatic.com";
 
-  if (isMenuCsvRequest || isFontRequest) {
+  if (isMenuCsvRequest) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  if (isFontRequest) {
     event.respondWith(networkFirst(DATA_CACHE, request));
   }
 });

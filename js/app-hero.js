@@ -91,7 +91,10 @@ function buildHeroBannersFromRows(rows, bannerColumnIndex) {
   const seen = new Set(builtInBanners.map(getHeroBannerSignature));
   const banners = rows
     .slice(1)
-    .map((line, index) => createHeroBanner(parseCsvLine(line)[bannerColumnIndex], index))
+    .map((line, index) => {
+      const columns = Array.isArray(line) ? line : parseCsvLine(line);
+      return createHeroBanner(columns[bannerColumnIndex], index);
+    })
     .filter(Boolean)
     .filter((banner) => {
       const dedupeKey = getHeroBannerSignature(banner);

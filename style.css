@@ -99,6 +99,37 @@ main.container {
   padding-bottom: 10px;
 }
 
+.schedule-status-banner {
+  overflow: hidden;
+  margin-bottom: 10px;
+  padding: 10px 14px;
+  border: 1px solid rgba(224, 54, 59, .18);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 247, 235, 0.98), rgba(255, 238, 241, 0.98));
+  color: #6a2327;
+  box-shadow: 0 10px 22px rgba(224, 54, 59, .08);
+  max-height: 120px;
+  opacity: 1;
+  transition: max-height .2s ease, opacity .2s ease, margin .2s ease, padding .2s ease, border-width .2s ease;
+}
+
+.schedule-status-banner.is-hidden {
+  max-height: 0;
+  opacity: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-width: 0;
+  pointer-events: none;
+}
+
+.schedule-status-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
 .brand-row {
   display: flex;
   align-items: center;
@@ -1567,13 +1598,13 @@ main.container {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   color: #fff;
   text-decoration: none;
   font-weight: 800;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   border: 1px solid rgba(255,255,255,.34);
-  padding: 8px 16px 8px 8px;
+  padding: 8px 18px 8px 8px;
   border-radius: 999px;
   position: relative;
   z-index: 1;
@@ -1581,13 +1612,18 @@ main.container {
 }
 
 .logo-2gis {
-  width: 38px;
-  height: 38px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   flex: 0 0 auto;
   object-fit: cover;
   background: rgba(255,255,255,.16);
-  padding: 6px;
+  padding: 5px;
+}
+
+.review-link--modal {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .cart-button {
@@ -2287,6 +2323,15 @@ main.container {
   justify-self: stretch;
 }
 
+.btn-order:disabled,
+.btn-order.is-disabled {
+  border-color: rgba(145, 155, 170, .22);
+  background: linear-gradient(135deg, #b8c1cc, #9ea8b5);
+  color: rgba(255,255,255,.96);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
 .payment-note {
   border: 1px solid rgba(224, 54, 59, .14);
   background: linear-gradient(135deg, rgba(255, 245, 245, 0.98), rgba(245, 236, 237, 0.98));
@@ -2296,6 +2341,20 @@ main.container {
   font-size: 14px;
   line-height: 1.35;
   box-shadow: 0 8px 18px rgba(224, 54, 59, .05);
+}
+
+.order-availability-note {
+  border: 1px solid rgba(74, 94, 124, .12);
+  background: rgba(236, 240, 245, 0.96);
+  color: #445066;
+  border-radius: 16px;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.order-availability-note[hidden] {
+  display: none !important;
 }
 
 .wa-icon { width:26px; height:26px; display:inline-flex; flex: 0 0 26px; }
@@ -2317,7 +2376,28 @@ main.container {
 
 .thanks-card h3 { margin:0; font-size:24px; }
 .thanks-card p { margin:10px 0 0; color:#555f7a; }
-.thanks-card button { margin-top:16px; border:none; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; border-radius:10px; padding:11px 16px; font-family:inherit; font-weight:800; cursor:pointer; }
+.thanks-actions {
+  margin-top: 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.thanks-actions .review-link {
+  min-height: 62px;
+}
+
+.thanks-card button {
+  width: 100%;
+  margin-top: 0;
+  border: none;
+  background: linear-gradient(135deg,var(--accent),var(--accent-2));
+  color: #fff;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-family: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
 
 .order-confirm-content {
   max-width: 560px;
@@ -3472,6 +3552,26 @@ html[data-theme="dark"] .payment-note {
   background: linear-gradient(135deg, rgba(84, 18, 24, 0.84), rgba(48, 13, 18, 0.88));
   color: #ffd7d9;
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.16);
+}
+
+html[data-theme="dark"] .schedule-status-banner {
+  border-color: rgba(255, 154, 160, .18);
+  background: linear-gradient(135deg, rgba(70, 23, 28, 0.92), rgba(52, 18, 22, 0.96));
+  color: #ffd5d8;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+}
+
+html[data-theme="dark"] .btn-order:disabled,
+html[data-theme="dark"] .btn-order.is-disabled {
+  border-color: rgba(255,255,255,.08);
+  background: linear-gradient(135deg, #465261, #394351);
+  color: rgba(236, 242, 255, .94);
+}
+
+html[data-theme="dark"] .order-availability-note {
+  border-color: rgba(255,255,255,.08);
+  background: rgba(255,255,255,.05);
+  color: #b5c1d8;
 }
 
 body.menu-loading .menu-grid {
