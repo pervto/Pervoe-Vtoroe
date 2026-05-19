@@ -956,13 +956,14 @@ main.container {
     padding: 0 0 6px;
   }
   .hero-banner-slide {
-    flex: 0 0 clamp(248px, 23vw, 274px);
-    min-width: clamp(248px, 23vw, 274px);
+    flex: 0 0 clamp(298px, 27vw, 328px);
+    min-width: clamp(298px, 27vw, 328px);
     height: auto;
   }
   .hero-banner {
     height: auto;
     aspect-ratio: 4 / 3;
+    border-radius: 24px;
     padding: 18px 18px 22px;
     gap: 12px;
   }
@@ -1943,37 +1944,34 @@ main.container {
   left: 50%;
   bottom: 18px;
   transform: translateX(-50%);
-  z-index: 3;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 7px 11px;
+  gap: 8px;
+  padding: 8px 12px;
   border-radius: 999px;
-  background: rgba(15, 22, 36, 0.28);
-  border: 1px solid rgba(255,255,255,.14);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.22));
+  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(12, 24, 40, .18);
+  box-shadow: 0 14px 30px rgba(7, 18, 31, .14);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 3;
+  transition: opacity .18s ease;
 }
 
 .dish-modal-dot {
-  width: 10px;
-  height: 10px;
-  border: none;
-  border-radius: 50%;
+  width: 8px;
+  height: 8px;
   padding: 0;
-  background: rgba(255,255,255,.34);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.26);
+  border: none;
+  border-radius: 999px;
+  background: rgba(255,255,255,.44);
   cursor: pointer;
-  transition: transform .2s ease, background .2s ease, box-shadow .2s ease, opacity .2s ease;
+  transition: width .22s ease, background .22s ease, opacity .22s ease;
 }
 
 .dish-modal-dot.is-active {
-  background: #ffffff;
-  box-shadow:
-    0 0 0 4px rgba(255,255,255,.14),
-    0 6px 16px rgba(255,255,255,.18);
-  transform: scale(1.08);
+  width: 22px;
+  background: rgba(255,255,255,.96);
 }
 
 .dish-modal-body {
@@ -3091,6 +3089,20 @@ html[data-theme="dark"] .hero-banner-dots {
   box-shadow: 0 16px 34px rgba(0, 0, 0, .22);
 }
 
+html[data-theme="dark"] .dish-modal-dots {
+  background: rgba(7, 14, 24, .28);
+  border-color: rgba(255,255,255,.12);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, .22);
+}
+
+html[data-theme="dark"] .dish-modal-dot {
+  background: rgba(255,255,255,.38);
+}
+
+html[data-theme="dark"] .dish-modal-dot.is-active {
+  background: rgba(255,255,255,.98);
+}
+
 html[data-theme="dark"] .hero-banner--skeleton {
   background: linear-gradient(90deg, rgba(22, 30, 42, 0.96) 0%, rgba(33, 43, 58, 0.98) 50%, rgba(22, 30, 42, 0.96) 100%);
   background-size: 220% 100%;
@@ -3515,13 +3527,14 @@ body.menu-loading .to-top {
     padding: 0 0 6px;
   }
   .hero-banner-slide {
-    flex: 0 0 clamp(250px, 22vw, 270px);
-    min-width: clamp(250px, 22vw, 270px);
+    flex: 0 0 clamp(300px, 27vw, 324px);
+    min-width: clamp(300px, 27vw, 324px);
     height: auto;
   }
   .hero-banner {
     height: auto;
     aspect-ratio: 4 / 3;
+    border-radius: 24px;
     padding: 18px 18px 22px;
     gap: 12px;
   }
