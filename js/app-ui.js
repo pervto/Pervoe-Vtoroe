@@ -1128,14 +1128,15 @@ function buildMenuCardHtml(item, index) {
   const categoryHtml = `<p class="food-category${displayItem.displayCategory ? "" : " is-empty"}">${displayItem.displayCategory ? escapeHtml(displayItem.displayCategory) : "&nbsp;"}</p>`;
   const weightHtml = `<span class="food-weight${displayItem.displayWeight ? "" : " is-empty"}">${displayItem.displayWeight ? escapeHtml(displayItem.displayWeight) : "&nbsp;"}</span>`;
   const imageHtml = buildDishPhotoHtml(item, "food-image", displayItem.displayName || item.name);
+  const animationDelay = Math.min(index, 4) * 0.04;
 
-  return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" data-cart-state="${getCartQty(item.name) > 0 ? "qty" : "add"}" tabindex="0" role="button" aria-label="${escapeHtml(t("dishOpenAria", { name: displayItem.displayName || item.name }))}" style="animation-delay:${index * 0.06}s">${imageHtml}<div class="food-copy"><div class="food-topline"><div class="food-price">${money(item.price)}</div>${weightHtml}</div><h3 class="food-title">${escapeHtml(displayItem.displayName || item.name)}</h3><div class="food-details">${categoryHtml}</div></div><div class="food-footer"><div class="item-controls" data-state="${getCartQty(item.name) > 0 ? "qty" : "add"}">${buildControlsHtml(item.name)}</div></div></article>`;
+  return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" data-cart-state="${getCartQty(item.name) > 0 ? "qty" : "add"}" tabindex="0" role="button" aria-label="${escapeHtml(t("dishOpenAria", { name: displayItem.displayName || item.name }))}" style="animation-delay:${animationDelay}s">${imageHtml}<div class="food-copy"><div class="food-topline"><div class="food-price">${money(item.price)}</div>${weightHtml}</div><h3 class="food-title">${escapeHtml(displayItem.displayName || item.name)}</h3><div class="food-details">${categoryHtml}</div></div><div class="food-footer"><div class="item-controls" data-state="${getCartQty(item.name) > 0 ? "qty" : "add"}">${buildControlsHtml(item.name)}</div></div></article>`;
 }
 
 function getMenuChunkSize(isInitialChunk = false) {
   const isMobileMenu = window.matchMedia && window.matchMedia("(max-width: 860px)").matches;
   if (isInitialChunk) return isMobileMenu ? 6 : 12;
-  return isMobileMenu ? 4 : 8;
+  return isMobileMenu ? 6 : 10;
 }
 
 function observeMenuRenderSentinel(sentinel, renderToken) {
@@ -1156,7 +1157,7 @@ function observeMenuRenderSentinel(sentinel, renderToken) {
     renderNextMenuChunk(renderToken);
   }, {
     root: null,
-    rootMargin: "320px 0px"
+    rootMargin: "900px 0px"
   });
 
   menuRenderObserver.observe(sentinel);
