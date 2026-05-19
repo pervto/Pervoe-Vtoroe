@@ -3046,7 +3046,23 @@ main.container {
   .promo-row button { width:100%; }
   .order-form h3 { font-size:23px; }
   .btn-order { min-height:54px; }
-  .footer-inner { justify-content:flex-start; }
+  .footer-inner {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .footer-link,
+  .review-link {
+    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 100%;
+  }
+  .footer-link {
+    width: fit-content;
+    text-align: center;
+  }
   .site-footer { padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
 }
 
