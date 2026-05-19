@@ -436,8 +436,28 @@ function loadTranslationCache() {
   }
 }
 
+let translationCacheSaveTimer = null;
+
 function saveTranslationCache() {
-  localStorage.setItem(TRANSLATION_CACHE_KEY, JSON.stringify(translationCache));
+  if (translationCacheSaveTimer) return;
+
+  translationCacheSaveTimer = window.setTimeout(() => {
+    translationCacheSaveTimer = null;
+    try {
+      localStorage.setItem(TRANSLATION_CACHE_KEY, JSON.stringify(translationCache));
+    } catch {}
+  }, 180);
+}
+
+function flushTranslationCache() {
+  if (translationCacheSaveTimer) {
+    window.clearTimeout(translationCacheSaveTimer);
+    translationCacheSaveTimer = null;
+  }
+
+  try {
+    localStorage.setItem(TRANSLATION_CACHE_KEY, JSON.stringify(translationCache));
+  } catch {}
 }
 
 function getLocale() {

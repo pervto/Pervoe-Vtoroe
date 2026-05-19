@@ -19,7 +19,7 @@ function buildDishPhotoHtml(item, className = "food-image") {
   const [photoUrl] = getItemPhotos(item);
   const displayItem = getDisplayItem(item) || item;
   if (photoUrl) {
-    return `<img class="${className}" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(displayItem.displayName || item.name)}" loading="lazy" />`;
+    return `<img class="${className}" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(displayItem.displayName || item.name)}" loading="lazy" decoding="async" />`;
   }
   return `<div class="food-image-placeholder">${escapeHtml(t("dishPhotoSoon"))}</div>`;
 }
@@ -259,6 +259,10 @@ let menuLastSyncAt = 0;
 let menuLastFullLoadAt = 0;
 let menuLastCsvSnapshot = "";
 let menuLastAvailabilitySnapshot = "";
+let backgroundTranslationToken = 0;
+let menuRenderToken = 0;
+let menuRenderFrameId = 0;
+let scheduledBackgroundTranslationId = 0;
 const OVERLAY_SCROLL_CONTAINER_SELECTOR = ".modal-content, .dish-modal-shell, .thanks-card";
 
 function orderFlowText(key) {
@@ -919,23 +923,6 @@ function renderCategories() {
       return `<button class="category-btn ${cat === activeCategory ? "active" : ""}" data-category="${cat}">${escapeHtml(translatedCategory)}</button>`;
     })
     .join("");
-
-  categoriesEl.querySelectorAll(".category-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      activeCategory = btn.dataset.category;
-      renderCategories();
-      renderMenu();
-      const menuGrid = document.getElementById("menu-grid");
-      const header = document.getElementById("site-header");
-      const menuDock = document.getElementById("menu-dock");
-      if (menuGrid) {
-        const headerHeight = header ? header.offsetHeight : 0;
-        const dockHeight = menuDock ? menuDock.offsetHeight : 0;
-        const top = menuGrid.getBoundingClientRect().top + window.scrollY - headerHeight - 8;
-        window.scrollTo({ top: Math.max(top - dockHeight, 0), behavior: "smooth" });
-      }
-    });
-  });
 }
 
 function renderCategoriesSkeleton() {
@@ -957,41 +944,99 @@ function buildControlsHtml(name, options = {}) {
 }
 
 function bindMenuControlEvents() {
-  document.querySelectorAll(".btn-add").forEach((btn) => {
-    btn.onclick = (event) => {
-      event.stopPropagation();
-      const item = menuData.find((x) => x.name === btn.dataset.name);
+  bindMenuGridEvents();
+
+  const modalControls = document.getElementById("dish-modal-controls");
+  if (!modalControls) return;
+
+  modalControls.querySelectorAll(".btn-add").forEach((btn) => {
+    btn.onclick = () => {
+      const item = getItemByName(btn.dataset.name);
       if (item) addToCart(item);
     };
   });
 
-  document.querySelectorAll(".card-plus").forEach((btn) => {
-    btn.onclick = (event) => {
-      event.stopPropagation();
+  modalControls.querySelectorAll(".card-plus").forEach((btn) => {
+    btn.onclick = () => {
       changeQty(btn.dataset.name, 1);
     };
   });
 
-  document.querySelectorAll(".card-minus").forEach((btn) => {
-    btn.onclick = (event) => {
-      event.stopPropagation();
+  modalControls.querySelectorAll(".card-minus").forEach((btn) => {
+    btn.onclick = () => {
       changeQty(btn.dataset.name, -1);
     };
   });
 }
 
 function bindMenuCardEvents() {
-  const grid = document.getElementById("menu-grid");
-  if (!grid) return;
+  bindMenuGridEvents();
+}
 
-  grid.querySelectorAll(".food-card").forEach((card) => {
-    card.onclick = () => openDishModal(card.dataset.itemName);
-    card.onkeydown = (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        openDishModal(card.dataset.itemName);
-      }
-    };
+function bindCategoryEvents() {
+  const categoriesEl = document.getElementById("categories");
+  if (!categoriesEl || categoriesEl.dataset.bound === "true") return;
+  categoriesEl.dataset.bound = "true";
+
+  categoriesEl.addEventListener("click", (event) => {
+    const button = event.target.closest(".category-btn[data-category]");
+    if (!button || !categoriesEl.contains(button)) return;
+
+    activeCategory = button.dataset.category;
+    renderCategories();
+    renderMenu();
+
+    const menuGrid = document.getElementById("menu-grid");
+    const header = document.getElementById("site-header");
+    const menuDock = document.getElementById("menu-dock");
+    if (!menuGrid) return;
+
+    const headerHeight = header ? header.offsetHeight : 0;
+    const dockHeight = menuDock ? menuDock.offsetHeight : 0;
+    const top = menuGrid.getBoundingClientRect().top + window.scrollY - headerHeight - 8;
+    window.scrollTo({ top: Math.max(top - dockHeight, 0), behavior: "smooth" });
+  });
+}
+
+function bindMenuGridEvents() {
+  const grid = document.getElementById("menu-grid");
+  if (!grid || grid.dataset.bound === "true") return;
+  grid.dataset.bound = "true";
+
+  grid.addEventListener("click", (event) => {
+    const addButton = event.target.closest(".btn-add[data-name]");
+    if (addButton && grid.contains(addButton)) {
+      const item = getItemByName(addButton.dataset.name);
+      if (item) addToCart(item);
+      return;
+    }
+
+    const plusButton = event.target.closest(".card-plus[data-name]");
+    if (plusButton && grid.contains(plusButton)) {
+      changeQty(plusButton.dataset.name, 1);
+      return;
+    }
+
+    const minusButton = event.target.closest(".card-minus[data-name]");
+    if (minusButton && grid.contains(minusButton)) {
+      changeQty(minusButton.dataset.name, -1);
+      return;
+    }
+
+    const card = event.target.closest(".food-card[data-item-name]");
+    if (card && grid.contains(card)) {
+      openDishModal(card.dataset.itemName);
+    }
+  });
+
+  grid.addEventListener("keydown", (event) => {
+    const card = event.target.closest(".food-card[data-item-name]");
+    if (!card || event.target !== card) return;
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openDishModal(card.dataset.itemName);
+    }
   });
 }
 
@@ -1050,33 +1095,79 @@ function bindDishModalSwipeEvents() {
   });
 }
 
-function renderMenu() {
-  const grid = document.getElementById("menu-grid");
+function cancelPendingMenuRender() {
+  menuRenderToken += 1;
+  if (menuRenderFrameId) {
+    window.cancelAnimationFrame(menuRenderFrameId);
+    menuRenderFrameId = 0;
+  }
+  document.body.classList.remove("menu-rendering");
+}
+
+function getFilteredMenuItems() {
   const byCategory = activeCategory === ALL_CATEGORY ? menuData : menuData.filter((item) => item.category === activeCategory);
-  const filtered = byCategory.filter((item) => {
+  const query = searchQuery.toLowerCase();
+
+  return byCategory.filter((item) => {
     const displayItem = getDisplayItem(item);
-    const query = searchQuery.toLowerCase();
     return !query || item.name.toLowerCase().includes(query) || String(displayItem.displayName || "").toLowerCase().includes(query);
   });
+}
+
+function buildMenuCardHtml(item, index) {
+  const displayItem = getDisplayItem(item);
+  const categoryHtml = `<p class="food-category${displayItem.displayCategory ? "" : " is-empty"}">${displayItem.displayCategory ? escapeHtml(displayItem.displayCategory) : "&nbsp;"}</p>`;
+  const weightHtml = `<span class="food-weight${displayItem.displayWeight ? "" : " is-empty"}">${displayItem.displayWeight ? escapeHtml(displayItem.displayWeight) : "&nbsp;"}</span>`;
+  const imageHtml = buildDishPhotoHtml(item);
+
+  return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" data-cart-state="${getCartQty(item.name) > 0 ? "qty" : "add"}" tabindex="0" role="button" aria-label="${escapeHtml(t("dishOpenAria", { name: displayItem.displayName || item.name }))}" style="animation-delay:${index * 0.06}s">${imageHtml}<div class="food-copy"><div class="food-topline"><div class="food-price">${money(item.price)}</div>${weightHtml}</div><h3 class="food-title">${escapeHtml(displayItem.displayName || item.name)}</h3><div class="food-details">${categoryHtml}</div></div><div class="food-footer"><div class="item-controls" data-state="${getCartQty(item.name) > 0 ? "qty" : "add"}">${buildControlsHtml(item.name)}</div></div></article>`;
+}
+
+function renderMenu() {
+  const grid = document.getElementById("menu-grid");
+  if (!grid) return;
+
+  cancelPendingMenuRender();
+  const filtered = getFilteredMenuItems();
 
   if (filtered.length === 0) {
     grid.innerHTML = `<p class="status">${escapeHtml(t("noResults"))}</p>`;
     return;
   }
 
-  grid.innerHTML = filtered
-    .map((item, index) => {
-      const displayItem = getDisplayItem(item);
-      const categoryHtml = `<p class="food-category${displayItem.displayCategory ? "" : " is-empty"}">${displayItem.displayCategory ? escapeHtml(displayItem.displayCategory) : "&nbsp;"}</p>`;
-      const weightHtml = `<span class="food-weight${displayItem.displayWeight ? "" : " is-empty"}">${displayItem.displayWeight ? escapeHtml(displayItem.displayWeight) : "&nbsp;"}</span>`;
-      const imageHtml = buildDishPhotoHtml(item);
+  const renderToken = ++menuRenderToken;
+  const chunkSize = window.matchMedia && window.matchMedia("(max-width: 860px)").matches ? 8 : 12;
+  let cursor = 0;
 
-      return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" data-cart-state="${getCartQty(item.name) > 0 ? "qty" : "add"}" tabindex="0" role="button" aria-label="${escapeHtml(t("dishOpenAria", { name: displayItem.displayName || item.name }))}" style="animation-delay:${index * 0.06}s">${imageHtml}<div class="food-copy"><div class="food-topline"><div class="food-price">${money(item.price)}</div>${weightHtml}</div><h3 class="food-title">${escapeHtml(displayItem.displayName || item.name)}</h3><div class="food-details">${categoryHtml}</div></div><div class="food-footer"><div class="item-controls" data-state="${getCartQty(item.name) > 0 ? "qty" : "add"}">${buildControlsHtml(item.name)}</div></div></article>`;
-    })
-    .join("");
-
+  grid.innerHTML = "";
   bindMenuControlEvents();
   bindMenuCardEvents();
+
+  if (filtered.length > chunkSize) {
+    document.body.classList.add("menu-rendering");
+  }
+
+  const appendChunk = () => {
+    if (renderToken !== menuRenderToken) return;
+
+    const html = filtered
+      .slice(cursor, cursor + chunkSize)
+      .map((item, index) => buildMenuCardHtml(item, cursor + index))
+      .join("");
+
+    grid.insertAdjacentHTML("beforeend", html);
+    cursor += chunkSize;
+
+    if (cursor < filtered.length) {
+      menuRenderFrameId = window.requestAnimationFrame(appendChunk);
+      return;
+    }
+
+    menuRenderFrameId = 0;
+    document.body.classList.remove("menu-rendering");
+  };
+
+  appendChunk();
 }
 
 function renderCart() {
@@ -1542,12 +1633,14 @@ function applyStaticTranslations() {
 function showMenuTranslatingState() {
   const grid = document.getElementById("menu-grid");
   if (!grid) return;
+  cancelPendingMenuRender();
   grid.innerHTML = `<div class="ios-loader-wrap"><div class="ios-loader"></div><p class="status">${t("translatingMenu")}</p></div>`;
 }
 
 function renderMenuErrorState(errorMessage) {
   const grid = document.getElementById("menu-grid");
   if (!grid) return;
+  cancelPendingMenuRender();
   lastMenuLoadError = String(errorMessage || "");
 
   grid.innerHTML = `<div class="status-card">
@@ -1564,32 +1657,94 @@ function renderMenuErrorState(errorMessage) {
   }
 }
 
-async function setLanguage(lang) {
-  if (!LANGUAGE_META[lang] || lang === currentLanguage) return;
-  currentLanguage = lang;
-  localStorage.setItem(LANGUAGE_KEY, currentLanguage);
-  applyStaticTranslations();
-  updateSettingsLanguageButtons(true);
-
-  if (menuData.length && currentLanguage !== "ru") {
-    showMenuTranslatingState();
-    await Promise.all([
-      ensureMenuTranslations(currentLanguage),
-      ensureHeroBannerTranslations(currentLanguage)
-    ]);
-  }
-
+function rerenderMenuSurface() {
   renderHeroBanners();
   renderCategories();
   renderMenu();
   renderCart();
   updateTotals();
   updateCartButton();
+
   const retryButton = document.getElementById("menu-retry-button");
   if (retryButton) retryButton.textContent = t("retryLoadButton");
+
   if (activeDishName) {
     const item = getItemByName(activeDishName);
     if (item) renderDishModal(item);
+  }
+
+  if (hasPendingOrder()) {
+    renderPendingOrderConfirmation();
+  }
+}
+
+function clearScheduledBackgroundTranslations() {
+  if (!scheduledBackgroundTranslationId) return;
+
+  if (typeof window.cancelIdleCallback === "function") {
+    window.cancelIdleCallback(scheduledBackgroundTranslationId);
+  } else {
+    window.clearTimeout(scheduledBackgroundTranslationId);
+  }
+
+  scheduledBackgroundTranslationId = 0;
+}
+
+function scheduleBackgroundTranslations(lang = currentLanguage) {
+  if (lang === "ru" || !menuData.length) return Promise.resolve(false);
+
+  clearScheduledBackgroundTranslations();
+
+  return new Promise((resolve) => {
+    const runTranslations = () => {
+      scheduledBackgroundTranslationId = 0;
+      startBackgroundTranslations(lang).then(resolve);
+    };
+
+    if (typeof window.requestIdleCallback === "function") {
+      scheduledBackgroundTranslationId = window.requestIdleCallback(runTranslations, { timeout: 1800 });
+    } else {
+      scheduledBackgroundTranslationId = window.setTimeout(runTranslations, 400);
+    }
+  });
+}
+
+function startBackgroundTranslations(lang = currentLanguage) {
+  if (lang === "ru" || !menuData.length) return Promise.resolve(false);
+
+  const translationToken = ++backgroundTranslationToken;
+
+  return Promise.all([
+    ensureMenuTranslations(lang),
+    ensureHeroBannerTranslations(lang)
+  ])
+    .then(() => {
+      flushTranslationCache();
+
+      if (translationToken !== backgroundTranslationToken) return false;
+      if (currentLanguage !== lang) return false;
+
+      rerenderMenuSurface();
+      return true;
+    })
+    .catch(() => false);
+}
+
+async function setLanguage(lang) {
+  if (!LANGUAGE_META[lang] || lang === currentLanguage) return;
+  clearScheduledBackgroundTranslations();
+  currentLanguage = lang;
+  localStorage.setItem(LANGUAGE_KEY, currentLanguage);
+  applyStaticTranslations();
+  updateSettingsLanguageButtons(true);
+  rerenderMenuSurface();
+
+  if (menuData.length && currentLanguage !== "ru") {
+    startBackgroundTranslations(currentLanguage).finally(() => {
+      updateSettingsLanguageButtons(false);
+      updateThemeButtons(false);
+    });
+    return;
   }
 
   updateSettingsLanguageButtons(false);
@@ -1752,6 +1907,8 @@ async function loadMenu(options = {}) {
   const grid = document.getElementById("menu-grid");
 
   if (!silent) {
+    cancelPendingMenuRender();
+    clearScheduledBackgroundTranslations();
     lastMenuLoadError = "";
     document.body.classList.add("menu-loading");
     renderHeroBannerSkeleton();
@@ -1770,9 +1927,9 @@ async function loadMenu(options = {}) {
     lastMenuLoadError = "";
     const removedFromCart = applyMenuDataset(dataset, { showRemovedToast: silent });
 
-    renderHeroBanners();
-
     if (!menuData.length) {
+      cancelPendingMenuRender();
+      renderHeroBanners();
       renderCategories();
       grid.innerHTML = `<p class="status">${escapeHtml(t("noAvailable"))}</p>`;
       renderCart();
@@ -1781,20 +1938,13 @@ async function loadMenu(options = {}) {
       return true;
     }
 
+    rerenderMenuSurface();
+
     if (currentLanguage !== "ru") {
-      if (!silent) showMenuTranslatingState();
-      await Promise.all([
-        ensureMenuTranslations(currentLanguage),
-        ensureHeroBannerTranslations(currentLanguage)
-      ]);
+      scheduleBackgroundTranslations(currentLanguage);
     }
 
-    renderHeroBanners();
-    renderCategories();
-    renderMenu();
-    renderCart();
     if (!silent && removedFromCart) updateTotals();
-    if (hasPendingOrder()) renderPendingOrderConfirmation();
     menuLastSyncAt = Date.now();
     return true;
   } catch (error) {
@@ -1886,4 +2036,7 @@ function startMenuSyncMonitoring() {
   }
   menuSyncMonitoringStarted = false;
 }
+
+bindCategoryEvents();
+bindMenuGridEvents();
 
