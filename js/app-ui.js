@@ -15,11 +15,11 @@ function getItemPhotos(item) {
   return [...new Set(rawPhotos.map(normalizePhotoUrl).filter(Boolean))];
 }
 
-function buildDishPhotoHtml(item, className = "food-image") {
+function buildDishPhotoHtml(item, className = "food-image", altText = "") {
   const [photoUrl] = getItemPhotos(item);
-  const displayItem = getDisplayItem(item) || item;
+  const imageAlt = altText || item?.name || "";
   if (photoUrl) {
-    return `<img class="${className}" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(displayItem.displayName || item.name)}" loading="lazy" decoding="async" />`;
+    return `<img class="${className}" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(imageAlt)}" loading="lazy" decoding="async" fetchpriority="low" />`;
   }
   return `<div class="food-image-placeholder">${escapeHtml(t("dishPhotoSoon"))}</div>`;
 }
@@ -261,8 +261,9 @@ let menuLastCsvSnapshot = "";
 let menuLastAvailabilitySnapshot = "";
 let backgroundTranslationToken = 0;
 let menuRenderToken = 0;
-let menuRenderFrameId = 0;
-let menuRenderTimeoutId = 0;
+let menuRenderItems = [];
+let menuRenderedCount = 0;
+let menuRenderObserver = null;
 let scheduledBackgroundTranslationId = 0;
 const OVERLAY_SCROLL_CONTAINER_SELECTOR = ".modal-content, .dish-modal-shell, .thanks-card";
 
@@ -1098,24 +1099,27 @@ function bindDishModalSwipeEvents() {
 
 function cancelPendingMenuRender() {
   menuRenderToken += 1;
-  if (menuRenderFrameId) {
-    window.cancelAnimationFrame(menuRenderFrameId);
-    menuRenderFrameId = 0;
-  }
-  if (menuRenderTimeoutId) {
-    window.clearTimeout(menuRenderTimeoutId);
-    menuRenderTimeoutId = 0;
+  menuRenderItems = [];
+  menuRenderedCount = 0;
+  if (menuRenderObserver) {
+    menuRenderObserver.disconnect();
+    menuRenderObserver = null;
   }
   document.body.classList.remove("menu-rendering");
 }
 
 function getFilteredMenuItems() {
   const byCategory = activeCategory === ALL_CATEGORY ? menuData : menuData.filter((item) => item.category === activeCategory);
-  const query = searchQuery.toLowerCase();
+  const query = searchQuery.trim().toLowerCase();
+
+  if (!query) return byCategory;
+  if (currentLanguage === "ru") {
+    return byCategory.filter((item) => item.name.toLowerCase().includes(query));
+  }
 
   return byCategory.filter((item) => {
     const displayItem = getDisplayItem(item);
-    return !query || item.name.toLowerCase().includes(query) || String(displayItem.displayName || "").toLowerCase().includes(query);
+    return item.name.toLowerCase().includes(query) || String(displayItem.displayName || "").toLowerCase().includes(query);
   });
 }
 
@@ -1123,9 +1127,74 @@ function buildMenuCardHtml(item, index) {
   const displayItem = getDisplayItem(item);
   const categoryHtml = `<p class="food-category${displayItem.displayCategory ? "" : " is-empty"}">${displayItem.displayCategory ? escapeHtml(displayItem.displayCategory) : "&nbsp;"}</p>`;
   const weightHtml = `<span class="food-weight${displayItem.displayWeight ? "" : " is-empty"}">${displayItem.displayWeight ? escapeHtml(displayItem.displayWeight) : "&nbsp;"}</span>`;
-  const imageHtml = buildDishPhotoHtml(item);
+  const imageHtml = buildDishPhotoHtml(item, "food-image", displayItem.displayName || item.name);
 
   return `<article class="food-card" data-item-name="${escapeHtml(item.name)}" data-cart-state="${getCartQty(item.name) > 0 ? "qty" : "add"}" tabindex="0" role="button" aria-label="${escapeHtml(t("dishOpenAria", { name: displayItem.displayName || item.name }))}" style="animation-delay:${index * 0.06}s">${imageHtml}<div class="food-copy"><div class="food-topline"><div class="food-price">${money(item.price)}</div>${weightHtml}</div><h3 class="food-title">${escapeHtml(displayItem.displayName || item.name)}</h3><div class="food-details">${categoryHtml}</div></div><div class="food-footer"><div class="item-controls" data-state="${getCartQty(item.name) > 0 ? "qty" : "add"}">${buildControlsHtml(item.name)}</div></div></article>`;
+}
+
+function getMenuChunkSize(isInitialChunk = false) {
+  const isMobileMenu = window.matchMedia && window.matchMedia("(max-width: 860px)").matches;
+  if (isInitialChunk) return isMobileMenu ? 6 : 12;
+  return isMobileMenu ? 4 : 8;
+}
+
+function observeMenuRenderSentinel(sentinel, renderToken) {
+  if (!sentinel) return;
+  if (menuRenderObserver) {
+    menuRenderObserver.disconnect();
+  }
+
+  menuRenderObserver = new IntersectionObserver((entries) => {
+    const isVisible = entries.some((entry) => entry.isIntersecting);
+    if (!isVisible) return;
+
+    if (menuRenderObserver) {
+      menuRenderObserver.disconnect();
+      menuRenderObserver = null;
+    }
+
+    renderNextMenuChunk(renderToken);
+  }, {
+    root: null,
+    rootMargin: "320px 0px"
+  });
+
+  menuRenderObserver.observe(sentinel);
+}
+
+function renderNextMenuChunk(renderToken) {
+  if (renderToken !== menuRenderToken) return;
+
+  const grid = document.getElementById("menu-grid");
+  if (!grid || !menuRenderItems.length) return;
+  if (menuRenderedCount >= menuRenderItems.length) {
+    document.body.classList.remove("menu-rendering");
+    return;
+  }
+
+  const sentinel = grid.querySelector(".menu-grid-sentinel");
+  if (sentinel) sentinel.remove();
+
+  const isInitialChunk = menuRenderedCount === 0;
+  const chunkSize = getMenuChunkSize(isInitialChunk);
+  const html = menuRenderItems
+    .slice(menuRenderedCount, menuRenderedCount + chunkSize)
+    .map((item, index) => buildMenuCardHtml(item, menuRenderedCount + index))
+    .join("");
+  const appendedCount = Math.min(chunkSize, Math.max(menuRenderItems.length - menuRenderedCount, 0));
+
+  document.body.classList.add("menu-rendering");
+  grid.insertAdjacentHTML("beforeend", html);
+  menuRenderedCount += appendedCount;
+  document.body.classList.remove("menu-rendering");
+
+  if (menuRenderedCount >= menuRenderItems.length) return;
+
+  const nextSentinel = document.createElement("div");
+  nextSentinel.className = "menu-grid-sentinel";
+  nextSentinel.setAttribute("aria-hidden", "true");
+  grid.appendChild(nextSentinel);
+  observeMenuRenderSentinel(nextSentinel, renderToken);
 }
 
 function renderMenu() {
@@ -1141,47 +1210,13 @@ function renderMenu() {
   }
 
   const renderToken = ++menuRenderToken;
-  const isMobileMenu = window.matchMedia && window.matchMedia("(max-width: 860px)").matches;
-  const firstChunkSize = isMobileMenu ? 4 : 8;
-  const deferredChunkSize = isMobileMenu ? 3 : 6;
-  let cursor = 0;
+  menuRenderItems = filtered;
+  menuRenderedCount = 0;
 
   grid.innerHTML = "";
   bindMenuControlEvents();
   bindMenuCardEvents();
-
-  if (filtered.length > firstChunkSize) {
-    document.body.classList.add("menu-rendering");
-  }
-
-  const appendChunk = (chunkSize) => {
-    if (renderToken !== menuRenderToken) return;
-
-    const html = filtered
-      .slice(cursor, cursor + chunkSize)
-      .map((item, index) => buildMenuCardHtml(item, cursor + index))
-      .join("");
-
-    grid.insertAdjacentHTML("beforeend", html);
-    cursor += chunkSize;
-
-    if (cursor < filtered.length) {
-      menuRenderTimeoutId = window.setTimeout(() => {
-        menuRenderTimeoutId = 0;
-        menuRenderFrameId = window.requestAnimationFrame(() => {
-          menuRenderFrameId = 0;
-          appendChunk(deferredChunkSize);
-        });
-      }, 24);
-      return;
-    }
-
-    menuRenderFrameId = 0;
-    menuRenderTimeoutId = 0;
-    document.body.classList.remove("menu-rendering");
-  };
-
-  appendChunk(firstChunkSize);
+  renderNextMenuChunk(renderToken);
 }
 
 function renderCart() {

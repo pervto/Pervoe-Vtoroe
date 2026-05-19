@@ -652,7 +652,6 @@ function getDisplayItemForLanguage(item, lang = currentLanguage) {
   if (!item) return null;
   if (lang === "ru") {
     return {
-      ...item,
       displayName: item.name,
       displayCategory: item.category,
       displayDescription: item.description,
@@ -663,7 +662,6 @@ function getDisplayItemForLanguage(item, lang = currentLanguage) {
 
   const translated = menuTranslations[lang]?.[item.id] || {};
   return {
-    ...item,
     displayName: translated.name || item.name,
     displayCategory: translated.category || item.category,
     displayDescription: translated.description || item.description,
