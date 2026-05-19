@@ -990,6 +990,8 @@ main.container {
     flex: 0 0 clamp(298px, 27vw, 328px);
     min-width: clamp(298px, 27vw, 328px);
     height: auto;
+    border-radius: 24px;
+    overflow: hidden;
   }
   .hero-banner {
     height: auto;
