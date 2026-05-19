@@ -100,6 +100,9 @@ main.container {
 }
 
 .schedule-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   overflow: hidden;
   margin-bottom: 10px;
   padding: 10px 14px;
@@ -111,6 +114,19 @@ main.container {
   max-height: 120px;
   opacity: 1;
   transition: max-height .2s ease, opacity .2s ease, margin .2s ease, padding .2s ease, border-width .2s ease;
+}
+
+.schedule-status-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.52);
+  font-size: 18px;
+  line-height: 1;
 }
 
 .schedule-status-banner.is-hidden {
@@ -125,6 +141,7 @@ main.container {
 
 .schedule-status-text {
   margin: 0;
+  flex: 1 1 auto;
   font-size: 13px;
   line-height: 1.4;
   font-weight: 700;
@@ -3561,6 +3578,10 @@ html[data-theme="dark"] .schedule-status-banner {
   background: linear-gradient(135deg, rgba(70, 23, 28, 0.92), rgba(52, 18, 22, 0.96));
   color: #ffd5d8;
   box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+}
+
+html[data-theme="dark"] .schedule-status-icon {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 html[data-theme="dark"] .btn-order:disabled,

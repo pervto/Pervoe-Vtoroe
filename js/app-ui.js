@@ -139,7 +139,7 @@ const WORK_SCHEDULE = {
 
 const WORK_SCHEDULE_TEXT = {
   ru: {
-    closedBanner: "Сейчас мы не работаем. Заказы принимаем ежедневно с 9:00 до 18:00 (UTC+5).",
+    closedBanner: "Сейчас мы не работаем. Заказы принимаем ежедневно с 9:00 до 18:00.",
     closedNote: "Меню и корзина доступны в любое время. Отправить заказ можно только с 9:00 до 18:00 (UTC+5).",
     closedButton: "Заказы с 9:00 до 18:00",
     closedAlert: "Сейчас мы не работаем. Отправить заказ можно с 9:00 до 18:00 (UTC+5).",
@@ -151,7 +151,7 @@ const WORK_SCHEDULE_TEXT = {
     errorAlert: "Не удалось проверить рабочее время. Попробуйте отправить заказ чуть позже."
   },
   kk: {
-    closedBanner: "Қазір біз жұмыс істемейміз. Тапсырыстар күн сайын 9:00-ден 18:00-ге дейін қабылданады (UTC+5).",
+    closedBanner: "Қазір біз жұмыс істемейміз. Тапсырыстар күн сайын 9:00-ден 18:00-ге дейін қабылданады.",
     closedNote: "Мәзір мен себет әрқашан қолжетімді. Тапсырысты тек 9:00-ден 18:00-ге дейін жіберуге болады (UTC+5).",
     closedButton: "Тапсырыс 9:00-ден 18:00-ге дейін",
     closedAlert: "Қазір біз жұмыс істемейміз. Тапсырысты 9:00-ден 18:00-ге дейін жіберуге болады (UTC+5).",
@@ -163,7 +163,7 @@ const WORK_SCHEDULE_TEXT = {
     errorAlert: "Жұмыс уақытын тексеру мүмкін болмады. Тапсырысты сәл кейінірек жіберіп көріңіз."
   },
   en: {
-    closedBanner: "We are currently closed. Orders are accepted daily from 9:00 to 18:00 (UTC+5).",
+    closedBanner: "We are currently closed. Orders are accepted daily from 9:00 to 18:00.",
     closedNote: "You can browse the menu and build your cart at any time. Orders can be sent only from 9:00 to 18:00 (UTC+5).",
     closedButton: "Orders from 9:00 to 18:00",
     closedAlert: "We are currently closed. Orders can be sent from 9:00 to 18:00 (UTC+5).",
