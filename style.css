@@ -983,6 +983,9 @@ main.container {
 }
 
 @media (min-width:861px) {
+  .search-tomato-clip {
+    right: 42px;
+  }
   .hero-band {
     max-height: 420px;
   }
@@ -1248,7 +1251,7 @@ main.container {
 .search-clear.show { opacity: 1; pointer-events: auto; transform: scale(1); }
 
 .search-tomato-clip {
-  --search-tomato-size: clamp(101px, 23.5vw, 122px);
+  --search-tomato-size: clamp(96px, 22.3vw, 116px);
   --search-tomato-peek: 14px;
   position: absolute;
   right: 22px;

@@ -1591,9 +1591,23 @@ async function updateSiteVersionLabel() {
     mainVersion
   ].filter(Boolean);
 
-  versionLabel.textContent = versionParts.length
-    ? `Номер версии сайта - ${versionParts.join(".")}`
-    : "Номер версии сайта - автоматически";
+  if (!versionParts.length) {
+    versionLabel.textContent = "Номер версии сайта - автоматически";
+    return;
+  }
+
+  const numericParts = versionParts.map((part) => Number.parseInt(part, 10) || 0);
+  const source = versionParts.join(".");
+  let checksum = 0;
+  for (const char of source) {
+    checksum = (checksum * 31 + char.charCodeAt(0)) % 100000;
+  }
+
+  const major = String((Number.parseInt(cacheVersion, 10) || numericParts[0] || 0) % 100).padStart(2, "0");
+  const minor = String((numericParts.reduce((sum, value, index) => sum + value * (index + 3), 0) + checksum) % 100).padStart(2, "0");
+  const patch = String(checksum % 10);
+
+  versionLabel.textContent = `Номер версии сайта - ${major}.${minor}.${patch}`;
 }
 
 function syncStickyOffsets() {
