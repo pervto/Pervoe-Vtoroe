@@ -15,8 +15,13 @@
         const savedThemeMode = localStorage.getItem("pervoe-vtoroe-theme") || "auto";
         const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
         const effectiveTheme = savedThemeMode === "dark" || (savedThemeMode === "auto" && prefersDark) ? "dark" : "light";
+        const isStandaloneApp = Boolean(
+          (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+          window.navigator.standalone === true
+        );
         document.documentElement.dataset.themeMode = savedThemeMode;
         document.documentElement.dataset.theme = effectiveTheme;
+        document.documentElement.dataset.pwaMode = isStandaloneApp ? "standalone" : "browser";
         document.documentElement.style.colorScheme = effectiveTheme;
       } catch {}
     })();
@@ -32,7 +37,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=91" />
+  <link rel="stylesheet" href="style.css?v=92" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -128,7 +133,7 @@
         <img class="logo-2gis" src="icons/Mask%20group.svg" alt="2ГИС" />
         <span id="review-link-text">Будем рады вашим отзывам</span>
       </a>
-      <p class="site-version">Номер версии сайта - 1.05</p>
+      <p class="site-version">Номер версии сайта - 1.06</p>
     </div>
   </footer>
 
