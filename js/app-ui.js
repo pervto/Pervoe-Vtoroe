@@ -1640,8 +1640,20 @@ function updateHeroSearchState() {
   if (searchWrap) searchWrap.classList.toggle("search-focused", isSearchFocused);
   if (!heroBand) return;
   const shouldHide = isSearchFocused || searchQuery.trim().length > 0;
-  heroBand.classList.toggle("is-hidden", shouldHide);
-  updateTomatoLayerState();
+  window.clearTimeout(window.__heroSearchStateTimer);
+
+  const applyHeroState = () => {
+    heroBand.classList.toggle("is-hidden", shouldHide);
+    updateTomatoLayerState();
+    window.__heroSearchStateTimer = null;
+  };
+
+  if (shouldHide && isSearchFocused && !searchQuery.trim()) {
+    window.__heroSearchStateTimer = window.setTimeout(applyHeroState, 110);
+    return;
+  }
+
+  applyHeroState();
 }
 
 function updateSettingsLanguageButtons(isBusy = false) {

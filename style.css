@@ -399,8 +399,10 @@ main.container {
   background: rgba(171, 180, 191, 0.82);
   max-height: 680px;
   overflow: clip;
-  transition: max-height .24s ease, opacity .18s ease;
-  will-change: max-height, opacity;
+  opacity: 1;
+  transform: translateY(0);
+  transition: max-height .34s cubic-bezier(.22, 1, .36, 1), opacity .24s ease, transform .24s ease;
+  will-change: max-height, opacity, transform;
   backdrop-filter: blur(32px) saturate(1.12);
   -webkit-backdrop-filter: blur(32px) saturate(1.12);
 }
@@ -408,11 +410,18 @@ main.container {
 .hero-band.is-hidden {
   max-height: 0;
   opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
 }
 
 .hero-band .container {
   padding-top: 0;
   padding-bottom: 12px;
+  transition: padding-bottom .34s cubic-bezier(.22, 1, .36, 1);
+}
+
+.hero-band.is-hidden .container {
+  padding-bottom: 0;
 }
 
 .hero {
@@ -1197,7 +1206,7 @@ main.container {
   z-index: 1;
   padding-top: 0;
   padding-bottom: 8px;
-  transition: padding-top .18s ease, padding-bottom .18s ease;
+  transition: padding-top .28s ease, padding-bottom .28s ease;
   transform: translateZ(0);
   backface-visibility: hidden;
 }
@@ -1207,7 +1216,7 @@ main.container {
 }
 
 .hero-band.is-hidden + .menu-dock .container {
-  padding-top: 6px;
+  padding-top: 1px;
 }
 
 .search-wrap:focus-within,
@@ -2952,7 +2961,7 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
     padding-bottom: 10px;
   }
   .hero-band.is-hidden + .menu-dock .container {
-    padding-top: 4px;
+    padding-top: 0;
   }
   .menu-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
