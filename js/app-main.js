@@ -98,6 +98,28 @@ document.querySelectorAll(".settings-theme-btn").forEach((button) => {
   });
 });
 
+const brandLogo = document.querySelector(".brand-logo");
+let brandLogoLastTouchAt = 0;
+
+function pulseBrandLogo() {
+  if (!brandLogo) return;
+  brandLogo.classList.remove("is-pulsing");
+  void brandLogo.offsetWidth;
+  brandLogo.classList.add("is-pulsing");
+}
+
+if (brandLogo) {
+  brandLogo.addEventListener("touchstart", () => {
+    brandLogoLastTouchAt = Date.now();
+    pulseBrandLogo();
+  }, { passive: true });
+
+  brandLogo.addEventListener("click", () => {
+    if (Date.now() - brandLogoLastTouchAt < 500) return;
+    pulseBrandLogo();
+  });
+}
+
 const searchInput = document.getElementById("menu-search");
 const searchClear = document.getElementById("search-clear");
 const searchWrap = document.querySelector(".search-wrap");
