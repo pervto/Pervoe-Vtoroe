@@ -6,10 +6,22 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "browser"],
   "orientation": "portrait",
   "background_color": "#abb4bf",
   "theme_color": "#abb4bf",
   "lang": "ru",
+  "categories": ["food", "shopping"],
+  "x_project_notes": {
+    "footerVersioning": "The footer version label is generated automatically from the current manifest, service worker cache token, and linked asset versions.",
+    "searchTomato": {
+      "role": "Decorative tomato attached to the search area.",
+      "defaultState": "Visible by default and scaled to the search row.",
+      "focusAnimation": "Waits 1000ms after search focus, then slides down behind the lower edge of the search row.",
+      "blurAnimation": "On blur it waits, then returns upward into the default visible position.",
+      "scrollLayering": "While hero banners are visible, the tomato overlaps them. After banners leave the viewport, it switches to overlap the header strip with the logo and settings button."
+    }
+  },
   "icons": [
     {
       "src": "icons/icon.png",

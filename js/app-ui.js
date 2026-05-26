@@ -1553,6 +1553,49 @@ function startWorkingHoursMonitoring() {
   });
 }
 
+function getVersionTokenFromHref(selector, marker) {
+  const element = document.querySelector(selector);
+  const href = element?.getAttribute("href") || element?.getAttribute("src") || "";
+  const match = href.match(new RegExp(`${marker.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}=(\\d+)`));
+  return match ? match[1] : "";
+}
+
+async function updateSiteVersionLabel() {
+  const versionLabel = document.getElementById("site-version");
+  if (!versionLabel) return;
+
+  const manifestVersion = getVersionTokenFromHref('link[rel="manifest"]', "v");
+  const styleVersion = getVersionTokenFromHref('link[href*="style.css"]', "v");
+  const configVersion = getVersionTokenFromHref('script[src*="config.js"]', "v");
+  const stateVersion = getVersionTokenFromHref('script[src*="js/app-state.js"]', "v");
+  const heroVersion = getVersionTokenFromHref('script[src*="js/app-hero.js"]', "v");
+  const uiVersion = getVersionTokenFromHref('script[src*="js/app-ui.js"]', "v");
+  const mainVersion = getVersionTokenFromHref('script[src*="js/app-main.js"]', "v");
+
+  let cacheVersion = "";
+  try {
+    const response = await fetch(`./service-worker.js?siteVersion=${Date.now()}`, { cache: "no-store" });
+    const text = await response.text();
+    const match = text.match(/APP_CACHE\s*=\s*"pervoe-vtoroe-app-v([^"]+)"/);
+    cacheVersion = match ? match[1] : "";
+  } catch {}
+
+  const versionParts = [
+    cacheVersion,
+    manifestVersion,
+    styleVersion,
+    configVersion,
+    stateVersion,
+    heroVersion,
+    uiVersion,
+    mainVersion
+  ].filter(Boolean);
+
+  versionLabel.textContent = versionParts.length
+    ? `Номер версии сайта - ${versionParts.join(".")}`
+    : "Номер версии сайта - автоматически";
+}
+
 function syncStickyOffsets() {
   const header = document.getElementById("site-header");
   const menuDock = document.getElementById("menu-dock");
@@ -1561,6 +1604,21 @@ function syncStickyOffsets() {
   if (menuDock) {
     document.documentElement.style.setProperty("--menu-dock-height", `${Math.ceil(menuDock.offsetHeight)}px`);
   }
+}
+
+function updateTomatoLayerState() {
+  const heroBand = document.getElementById("hero-band");
+  const header = document.getElementById("site-header");
+  const menuDock = document.getElementById("menu-dock");
+  if (!heroBand || !header || !menuDock) return;
+
+  const heroHiddenByState = heroBand.classList.contains("is-hidden");
+  const headerHeight = Math.ceil(header.getBoundingClientRect().height);
+  const dockHeight = Math.ceil(menuDock.getBoundingClientRect().height);
+  const heroBottom = heroBand.getBoundingClientRect().bottom;
+  const heroStillVisibleBehindSearch = !heroHiddenByState && heroBottom > (headerHeight + Math.min(dockHeight, 40));
+
+  document.body.classList.toggle("tomato-over-header", !heroStillVisibleBehindSearch);
 }
 
 function updateHeroSearchState() {
@@ -1573,6 +1631,7 @@ function updateHeroSearchState() {
   if (!heroBand) return;
   const shouldHide = isSearchFocused || searchQuery.trim().length > 0;
   heroBand.classList.toggle("is-hidden", shouldHide);
+  updateTomatoLayerState();
 }
 
 function updateSettingsLanguageButtons(isBusy = false) {
@@ -1821,6 +1880,8 @@ function openSettingsPopover() {
   popover.classList.add("show");
   popover.setAttribute("aria-hidden", "false");
   toggle.setAttribute("aria-expanded", "true");
+  document.body.classList.add("settings-popover-open");
+  updateTomatoLayerState();
 }
 
 function closeSettingsPopover() {
@@ -1830,6 +1891,8 @@ function closeSettingsPopover() {
   popover.classList.remove("show");
   popover.setAttribute("aria-hidden", "true");
   toggle.setAttribute("aria-expanded", "false");
+  document.body.classList.remove("settings-popover-open");
+  updateTomatoLayerState();
 }
 
 function toggleSettingsPopover() {

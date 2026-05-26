@@ -31,13 +31,13 @@
   <link rel="icon" type="image/png" sizes="1200x1200" href="icons/icon.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
-  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="manifest" href="manifest.webmanifest?v=2" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=97" />
+  <link rel="stylesheet" href="style.css?v=98" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -136,7 +136,7 @@
         <img class="logo-2gis" src="icons/Mask%20group.svg" alt="2ГИС" />
         <span id="review-link-text">Будем рады вашим отзывам</span>
       </a>
-      <p class="site-version">Номер версии сайта - 1.07</p>
+      <p id="site-version" class="site-version">Номер версии сайта - определяется автоматически</p>
     </div>
   </footer>
 
@@ -288,8 +288,8 @@
   <script src="config.js?v=32"></script>
   <script src="js/app-state.js?v=3"></script>
   <script src="js/app-hero.js?v=4"></script>
-  <script src="js/app-ui.js?v=21"></script>
-  <script src="js/app-main.js?v=9"></script>
+  <script src="js/app-ui.js?v=22"></script>
+  <script src="js/app-main.js?v=10"></script>
   <script>
     const siteLogo = document.querySelector("[data-logo-src-light]");
     if (siteLogo) {
