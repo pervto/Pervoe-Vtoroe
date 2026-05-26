@@ -1144,7 +1144,7 @@ main.container {
   top: var(--logo-bar-height);
   z-index: 40;
   background: rgba(171, 180, 191, 0.82);
-  border-bottom: 1px solid rgba(17, 24, 39, 0.05);
+  border-bottom: 1px solid rgba(17, 24, 39, 0.015);
   box-shadow: none;
   backdrop-filter: blur(32px) saturate(1.12);
   -webkit-backdrop-filter: blur(32px) saturate(1.12);
@@ -1248,7 +1248,7 @@ main.container {
 .search-clear.show { opacity: 1; pointer-events: auto; transform: scale(1); }
 
 .search-tomato-clip {
-  --search-tomato-size: clamp(86px, 20vw, 104px);
+  --search-tomato-size: clamp(112px, 26vw, 135px);
   --search-tomato-peek: 14px;
   position: absolute;
   right: 22px;
@@ -3256,7 +3256,7 @@ html[data-theme="dark"] .menu-dock {
   background: rgba(25, 34, 47, 0.86);
   backdrop-filter: blur(34px) saturate(1.2);
   -webkit-backdrop-filter: blur(34px) saturate(1.2);
-  box-shadow: inset 0 -1px 0 rgba(255,255,255,.03);
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,.01);
 }
 
 html[data-theme="dark"] .header::before,
