@@ -1248,7 +1248,7 @@ main.container {
 .search-clear.show { opacity: 1; pointer-events: auto; transform: scale(1); }
 
 .search-tomato-clip {
-  --search-tomato-size: clamp(112px, 26vw, 135px);
+  --search-tomato-size: clamp(101px, 23.5vw, 122px);
   --search-tomato-peek: 14px;
   position: absolute;
   right: 22px;
