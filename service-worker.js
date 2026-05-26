@@ -1,14 +1,14 @@
-const APP_CACHE = "pervoe-vtoroe-app-v44";
+const APP_CACHE = "pervoe-vtoroe-app-v45";
 const DATA_CACHE = "pervoe-vtoroe-data-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./style.css?v=93",
+  "./style.css?v=94",
   "./config.js?v=32",
   "./js/app-state.js?v=3",
   "./js/app-hero.js?v=4",
-  "./js/app-ui.js?v=20",
-  "./js/app-main.js?v=8",
+  "./js/app-ui.js?v=21",
+  "./js/app-main.js?v=9",
   "./manifest.webmanifest",
   "./icons/logo.svg",
   "./icons/logo-dark.svg",

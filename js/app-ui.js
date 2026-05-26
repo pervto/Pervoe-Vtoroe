@@ -1555,8 +1555,12 @@ function startWorkingHoursMonitoring() {
 
 function syncStickyOffsets() {
   const header = document.getElementById("site-header");
+  const menuDock = document.getElementById("menu-dock");
   if (!header) return;
   document.documentElement.style.setProperty("--logo-bar-height", `${Math.ceil(header.offsetHeight)}px`);
+  if (menuDock) {
+    document.documentElement.style.setProperty("--menu-dock-height", `${Math.ceil(menuDock.offsetHeight)}px`);
+  }
 }
 
 function updateHeroSearchState() {
