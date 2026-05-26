@@ -1116,6 +1116,7 @@ main.container {
 }
 
 .search-wrap {
+  position: relative;
   margin-top: 0;
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -1132,6 +1133,8 @@ main.container {
   transform: translateZ(0);
   backface-visibility: hidden;
   will-change: transform, opacity;
+  overflow: visible;
+  isolation: isolate;
 }
 
 .menu-dock {
@@ -1143,7 +1146,7 @@ main.container {
   box-shadow: none;
   backdrop-filter: blur(32px) saturate(1.12);
   -webkit-backdrop-filter: blur(32px) saturate(1.12);
-  overflow: hidden;
+  overflow: visible;
   isolation: isolate;
   transform: translateZ(0);
   backface-visibility: hidden;
@@ -1182,7 +1185,8 @@ main.container {
   padding-top: 6px;
 }
 
-.search-wrap:focus-within { transform: translateY(-1px); box-shadow: 0 14px 30px rgba(21,34,76,.12); }
+.search-wrap:focus-within,
+.search-wrap.search-focused { transform: translateY(-1px); box-shadow: 0 14px 30px rgba(21,34,76,.12); }
 
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined" !important;
@@ -1199,9 +1203,16 @@ main.container {
   font-variation-settings: "FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24;
 }
 
-.search-icon { color: #6d7590; font-size: 22px; }
+.search-icon {
+  position: relative;
+  z-index: 6;
+  color: #6d7590;
+  font-size: 22px;
+}
 
 .search-input {
+  position: relative;
+  z-index: 6;
   border: none;
   outline: none;
   width: 100%;
@@ -1214,6 +1225,8 @@ main.container {
 .search-input::placeholder { color: #8a92ad; }
 
 .search-clear {
+  position: relative;
+  z-index: 7;
   border: none;
   width: 32px;
   height: 32px;
@@ -1231,6 +1244,36 @@ main.container {
 }
 
 .search-clear.show { opacity: 1; pointer-events: auto; transform: scale(1); }
+
+.search-tomato-clip {
+  --search-tomato-size: clamp(88px, 22vw, 112px);
+  --search-tomato-peek: 14px;
+  position: absolute;
+  right: -24px;
+  bottom: 0;
+  width: var(--search-tomato-size);
+  aspect-ratio: 778 / 713;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.search-tomato-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: translateY(var(--search-tomato-peek));
+  transform-origin: center bottom;
+  transition: transform 360ms cubic-bezier(.22, 1, .36, 1);
+  transition-delay: 400ms;
+  will-change: transform;
+  filter: drop-shadow(0 10px 18px rgba(134, 16, 20, 0.18));
+}
+
+.search-wrap.search-focused .search-tomato-image {
+  transform: translateY(calc(100% + var(--search-tomato-peek)));
+}
 
 .categories {
   display: flex;
@@ -3361,7 +3404,8 @@ html[data-theme="dark"] .search-wrap {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
 }
 
-html[data-theme="dark"] .search-wrap:focus-within {
+html[data-theme="dark"] .search-wrap:focus-within,
+html[data-theme="dark"] .search-wrap.search-focused {
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.04),
     0 14px 30px rgba(0, 0, 0, 0.22);

@@ -1561,9 +1561,13 @@ function syncStickyOffsets() {
 
 function updateHeroSearchState() {
   const heroBand = document.getElementById("hero-band");
+  const searchWrap = document.querySelector(".search-wrap");
   const searchInput = document.getElementById("menu-search");
-  if (!heroBand || !searchInput) return;
-  const shouldHide = document.activeElement === searchInput || searchQuery.trim().length > 0;
+  if (!searchInput) return;
+  const isSearchFocused = document.activeElement === searchInput;
+  if (searchWrap) searchWrap.classList.toggle("search-focused", isSearchFocused);
+  if (!heroBand) return;
+  const shouldHide = isSearchFocused || searchQuery.trim().length > 0;
   heroBand.classList.toggle("is-hidden", shouldHide);
 }
 
