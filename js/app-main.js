@@ -99,6 +99,7 @@ document.querySelectorAll(".settings-theme-btn").forEach((button) => {
 });
 
 const brandLogo = document.querySelector(".brand-logo");
+const searchTomatoClip = document.querySelector(".search-tomato-clip");
 const searchTomato = document.querySelector(".search-tomato-image");
 let brandLogoLastTouchAt = 0;
 let searchTomatoLastTouchAt = 0;
@@ -129,24 +130,32 @@ function pulseSearchTomato() {
   searchTomato.classList.add("is-pulsing");
 }
 
-if (searchTomato) {
-  searchTomato.addEventListener("touchstart", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+function blockSearchFocusFromTomato(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  if (typeof event.stopImmediatePropagation === "function") {
+    event.stopImmediatePropagation();
+  }
+  const currentSearchInput = document.getElementById("menu-search");
+  if (currentSearchInput && document.activeElement === currentSearchInput) {
+    currentSearchInput.blur();
+  }
+}
+
+if (searchTomatoClip) {
+  searchTomatoClip.addEventListener("pointerdown", blockSearchFocusFromTomato);
+  searchTomatoClip.addEventListener("mousedown", blockSearchFocusFromTomato);
+  searchTomatoClip.addEventListener("touchstart", (event) => {
+    blockSearchFocusFromTomato(event);
     searchTomatoLastTouchAt = Date.now();
     pulseSearchTomato();
   }, { passive: false });
 
-  searchTomato.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+  searchTomatoClip.addEventListener("touchend", blockSearchFocusFromTomato, { passive: false });
+  searchTomatoClip.addEventListener("click", (event) => {
+    blockSearchFocusFromTomato(event);
     if (Date.now() - searchTomatoLastTouchAt < 500) return;
     pulseSearchTomato();
-  });
-
-  searchTomato.addEventListener("mousedown", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
   });
 }
 

@@ -1271,7 +1271,7 @@ main.container {
 .search-clear.show { opacity: 1; pointer-events: auto; transform: scale(1); }
 
 .search-tomato-clip {
-  --search-tomato-size: clamp(96px, 22.3vw, 116px);
+  --search-tomato-size: clamp(98px, 22.8vw, 118px);
   --search-tomato-peek: 14px;
   position: absolute;
   right: 22px;
@@ -1282,6 +1282,7 @@ main.container {
   pointer-events: auto;
   z-index: 5;
   background: transparent;
+  touch-action: manipulation;
 }
 
 .search-tomato-image {
