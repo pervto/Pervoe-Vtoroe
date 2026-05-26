@@ -1281,8 +1281,13 @@ main.container {
   overflow: hidden;
   pointer-events: auto;
   z-index: 5;
+  border: none;
+  padding: 0;
+  margin: 0;
   background: transparent;
   touch-action: manipulation;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .search-tomato-image {
@@ -1291,7 +1296,7 @@ main.container {
   height: 100%;
   object-fit: contain;
   background: transparent;
-  pointer-events: auto;
+  pointer-events: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transform: translateY(var(--search-tomato-peek));
@@ -1320,6 +1325,10 @@ main.container {
 
 .search-wrap.search-focused .search-tomato-image {
   transform: translateY(calc(100% + var(--search-tomato-peek)));
+}
+
+.search-tomato-clip:focus {
+  outline: none;
 }
 
 body.tomato-over-header:not(.settings-popover-open) .header {

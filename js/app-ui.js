@@ -1506,12 +1506,8 @@ function updateOrderAvailabilityUi() {
   }
 
   if (orderNote) {
-    let noteText = "";
-    if (state === "closed") noteText = scheduleText("closedNote");
-    else if (state === "error") noteText = scheduleText("errorNote");
-    else if (state === "checking") noteText = scheduleText("checkingNote");
-    orderNote.textContent = noteText;
-    orderNote.hidden = !noteText;
+    orderNote.textContent = "";
+    orderNote.hidden = true;
   }
 
   syncStickyOffsets();

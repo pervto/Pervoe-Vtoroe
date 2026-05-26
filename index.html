@@ -37,7 +37,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=106" />
+  <link rel="stylesheet" href="style.css?v=107" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -110,9 +110,9 @@
         <button id="search-clear" class="search-clear" type="button" aria-label="Очистить поиск">
           <span class="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
-        <div class="search-tomato-clip" aria-hidden="true">
+        <button class="search-tomato-clip" type="button" aria-label="Анимировать помидор">
           <img class="search-tomato-image" src="icons/tomat.svg" alt="" />
-        </div>
+        </button>
       </div>
       <nav id="categories" class="categories"></nav>
     </div>
@@ -288,8 +288,8 @@
   <script src="config.js?v=32"></script>
   <script src="js/app-state.js?v=3"></script>
   <script src="js/app-hero.js?v=4"></script>
-  <script src="js/app-ui.js?v=23"></script>
-  <script src="js/app-main.js?v=14"></script>
+  <script src="js/app-ui.js?v=24"></script>
+  <script src="js/app-main.js?v=15"></script>
   <script>
     const siteLogo = document.querySelector("[data-logo-src-light]");
     if (siteLogo) {
