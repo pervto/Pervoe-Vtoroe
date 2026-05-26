@@ -1279,7 +1279,7 @@ main.container {
   width: var(--search-tomato-size);
   aspect-ratio: 778 / 713;
   overflow: hidden;
-  pointer-events: none;
+  pointer-events: auto;
   z-index: 5;
   background: transparent;
 }
@@ -1290,12 +1290,31 @@ main.container {
   height: 100%;
   object-fit: contain;
   background: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   transform: translateY(var(--search-tomato-peek));
   transform-origin: center bottom;
   transition: transform 1512ms cubic-bezier(.22, 1, .36, 1);
   transition-delay: 1000ms;
   will-change: transform;
   filter: none;
+}
+
+.search-tomato-image.is-pulsing {
+  animation: searchTomatoPulse 360ms ease-out;
+}
+
+@keyframes searchTomatoPulse {
+  0% {
+    transform: translateY(var(--search-tomato-peek)) scale(1);
+  }
+  18% {
+    transform: translateY(var(--search-tomato-peek)) scale(1.1);
+  }
+  100% {
+    transform: translateY(var(--search-tomato-peek)) scale(1);
+  }
 }
 
 .search-wrap.search-focused .search-tomato-image {

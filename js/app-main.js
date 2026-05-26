@@ -99,7 +99,9 @@ document.querySelectorAll(".settings-theme-btn").forEach((button) => {
 });
 
 const brandLogo = document.querySelector(".brand-logo");
+const searchTomato = document.querySelector(".search-tomato-image");
 let brandLogoLastTouchAt = 0;
+let searchTomatoLastTouchAt = 0;
 
 function pulseBrandLogo() {
   if (!brandLogo) return;
@@ -117,6 +119,25 @@ if (brandLogo) {
   brandLogo.addEventListener("click", () => {
     if (Date.now() - brandLogoLastTouchAt < 500) return;
     pulseBrandLogo();
+  });
+}
+
+function pulseSearchTomato() {
+  if (!searchTomato) return;
+  searchTomato.classList.remove("is-pulsing");
+  void searchTomato.offsetWidth;
+  searchTomato.classList.add("is-pulsing");
+}
+
+if (searchTomato) {
+  searchTomato.addEventListener("touchstart", () => {
+    searchTomatoLastTouchAt = Date.now();
+    pulseSearchTomato();
+  }, { passive: true });
+
+  searchTomato.addEventListener("click", () => {
+    if (Date.now() - searchTomatoLastTouchAt < 500) return;
+    pulseSearchTomato();
   });
 }
 
