@@ -130,14 +130,23 @@ function pulseSearchTomato() {
 }
 
 if (searchTomato) {
-  searchTomato.addEventListener("touchstart", () => {
+  searchTomato.addEventListener("touchstart", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
     searchTomatoLastTouchAt = Date.now();
     pulseSearchTomato();
-  }, { passive: true });
+  }, { passive: false });
 
-  searchTomato.addEventListener("click", () => {
+  searchTomato.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
     if (Date.now() - searchTomatoLastTouchAt < 500) return;
     pulseSearchTomato();
+  });
+
+  searchTomato.addEventListener("mousedown", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
   });
 }
 
