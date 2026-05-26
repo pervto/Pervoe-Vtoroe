@@ -189,7 +189,7 @@ main.container {
     transform: scale(1);
   }
   18% {
-    transform: scale(1.18);
+    transform: scale(1.09);
   }
   100% {
     transform: scale(1);
