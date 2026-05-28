@@ -377,9 +377,10 @@ main.container {
 .settings-theme-title {
   margin: 0;
   color: #111a2d;
-  font-size: 15px;
+  font-size: 22px;
   font-weight: 800;
-  letter-spacing: -0.01em;
+  line-height: 1.05;
+  letter-spacing: 0;
 }
 
 .settings-theme-text {
@@ -2940,6 +2941,9 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
     border-radius: 20px;
   }
   .settings-popover-title {
+    font-size: 20px;
+  }
+  .settings-theme-title {
     font-size: 20px;
   }
   .settings-language-btn {

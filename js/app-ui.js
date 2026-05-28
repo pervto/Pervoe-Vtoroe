@@ -71,11 +71,12 @@ function buildResponsiveDishImage(rawUrl, className, altText, options = {}) {
   const decoding = options.decoding || "async";
   const fetchPriority = options.fetchPriority ? ` fetchpriority="${options.fetchPriority}"` : "";
   const draggable = options.draggable === false ? ` draggable="false"` : "";
+  const referrerPolicy = options.referrerPolicy || "no-referrer";
   const fallbackAttr = candidates.length > 1
     ? ` data-photo-fallbacks="${encodePhotoFallbacks(candidates.slice(1))}"`
     : "";
 
-  return `<img class="${className}" src="${escapeHtml(candidates[0])}" alt="${escapeHtml(altText)}" loading="${loading}" decoding="${decoding}" onerror="window.handleDishImageError && window.handleDishImageError(this)"${fetchPriority}${fallbackAttr}${draggable} />`;
+  return `<img class="${className}" src="${escapeHtml(candidates[0])}" alt="${escapeHtml(altText)}" loading="${loading}" decoding="${decoding}" referrerpolicy="${escapeHtml(referrerPolicy)}" onerror="window.handleDishImageError && window.handleDishImageError(this)"${fetchPriority}${fallbackAttr}${draggable} />`;
 }
 
 function bindDishPhotoFallbacks(root = document) {

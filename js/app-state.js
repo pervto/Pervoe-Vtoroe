@@ -554,6 +554,16 @@ function extractGoogleDriveFileId(rawUrl) {
   return "";
 }
 
+function isDirectImageUrl(rawUrl) {
+  const url = String(rawUrl || "").trim().toLowerCase();
+  if (!url) return false;
+  return (
+    /\.(png|jpe?g|webp|gif|svg)(\?|#|$)/i.test(url) ||
+    url.includes("googleusercontent.com") ||
+    url.includes("ggpht.com")
+  );
+}
+
 function buildPhotoUrlCandidates(rawUrl) {
   const url = String(rawUrl || "").trim();
   if (!url) return [];
@@ -567,9 +577,13 @@ function buildPhotoUrlCandidates(rawUrl) {
 
   const driveFileId = extractGoogleDriveFileId(url);
   if (driveFileId) {
-    addCandidate(`https://drive.google.com/thumbnail?id=${driveFileId}&sz=w1600`);
+    addCandidate(`https://drive.google.com/thumbnail?id=${driveFileId}&sz=w1200`);
     addCandidate(`https://drive.google.com/uc?export=view&id=${driveFileId}`);
-    addCandidate(`https://lh3.googleusercontent.com/d/${driveFileId}=w1600`);
+    addCandidate(`https://lh3.googleusercontent.com/d/${driveFileId}=w1200`);
+  }
+
+  if (isDirectImageUrl(url)) {
+    addCandidate(url);
   }
 
   addCandidate(url);

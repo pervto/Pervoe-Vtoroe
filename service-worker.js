@@ -1,14 +1,14 @@
-const SITE_VERSION = "1.13";
+const SITE_VERSION = "1.16";
 const APP_CACHE = `pervoe-vtoroe-app-v${SITE_VERSION}`;
 const DATA_CACHE = "pervoe-vtoroe-data-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./style.css?v=113",
+  "./style.css?v=114",
   "./config.js?v=32",
-  "./js/app-state.js?v=5",
+  "./js/app-state.js?v=6",
   "./js/app-hero.js?v=4",
-  "./js/app-ui.js?v=30",
+  "./js/app-ui.js?v=31",
   "./js/app-main.js?v=15",
   "./manifest.webmanifest?v=2",
   "./icons/logo.svg",
