@@ -9,17 +9,85 @@ function getItemByName(name) {
   return menuData.find((item) => item.name === name) || null;
 }
 
+function getItemRawPhotos(item) {
+  if (!item) return [];
+  const rawPhotos = Array.isArray(item.rawPhotos) && item.rawPhotos.length
+    ? item.rawPhotos
+    : [item.rawPhoto, item.photo];
+  return [...new Set(rawPhotos.map((value) => String(value || "").trim()).filter(Boolean))];
+}
+
 function getItemPhotos(item) {
   if (!item) return [];
-  const rawPhotos = Array.isArray(item.photos) && item.photos.length ? item.photos : [item.photo];
-  return [...new Set(rawPhotos.map(normalizePhotoUrl).filter(Boolean))];
+  const rawPhotos = getItemRawPhotos(item);
+  if (rawPhotos.length) {
+    return [...new Set(rawPhotos.map(normalizePhotoUrl).filter(Boolean))];
+  }
+  const photos = Array.isArray(item.photos) && item.photos.length ? item.photos : [item.photo];
+  return [...new Set(photos.map(normalizePhotoUrl).filter(Boolean))];
+}
+
+function encodePhotoFallbacks(urls) {
+  return urls.map((url) => encodeURIComponent(url)).join("|");
+}
+
+function buildResponsiveDishImage(rawUrl, className, altText, options = {}) {
+  const candidates = buildPhotoUrlCandidates(rawUrl);
+  if (!candidates.length) return "";
+
+  const loading = options.loading || "lazy";
+  const decoding = options.decoding || "async";
+  const fetchPriority = options.fetchPriority ? ` fetchpriority="${options.fetchPriority}"` : "";
+  const draggable = options.draggable === false ? ` draggable="false"` : "";
+  const fallbackAttr = candidates.length > 1
+    ? ` data-photo-fallbacks="${encodePhotoFallbacks(candidates.slice(1))}"`
+    : "";
+
+  return `<img class="${className}" src="${escapeHtml(candidates[0])}" alt="${escapeHtml(altText)}" loading="${loading}" decoding="${decoding}" referrerpolicy="no-referrer"${fetchPriority}${fallbackAttr}${draggable} />`;
+}
+
+function bindDishPhotoFallbacks(root = document) {
+  if (!root || typeof root.querySelectorAll !== "function") return;
+
+  root.querySelectorAll("img[data-photo-fallbacks]").forEach((image) => {
+    if (image.dataset.photoFallbackBound === "true") return;
+    image.dataset.photoFallbackBound = "true";
+
+    image.addEventListener("error", () => {
+      const encodedFallbacks = String(image.dataset.photoFallbacks || "");
+      const fallbacks = encodedFallbacks
+        .split("|")
+        .map((value) => {
+          try {
+            return decodeURIComponent(value);
+          } catch {
+            return "";
+          }
+        })
+        .filter(Boolean);
+
+      while (fallbacks.length) {
+        const nextUrl = fallbacks.shift();
+        if (!nextUrl || image.currentSrc === nextUrl || image.src === nextUrl) continue;
+        image.dataset.photoFallbacks = encodePhotoFallbacks(fallbacks);
+        image.src = nextUrl;
+        return;
+      }
+
+      image.removeAttribute("data-photo-fallbacks");
+    });
+  });
 }
 
 function buildDishPhotoHtml(item, className = "food-image", altText = "") {
-  const [photoUrl] = getItemPhotos(item);
+  const [rawPhotoUrl] = getItemRawPhotos(item);
   const imageAlt = altText || item?.name || "";
-  if (photoUrl) {
-    return `<img class="${className}" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(imageAlt)}" loading="lazy" decoding="async" fetchpriority="low" />`;
+  if (rawPhotoUrl) {
+    return buildResponsiveDishImage(rawPhotoUrl, className, imageAlt, {
+      loading: "lazy",
+      decoding: "async",
+      fetchPriority: "low"
+    });
   }
   return `<div class="food-image-placeholder">${escapeHtml(t("dishPhotoSoon"))}</div>`;
 }
@@ -45,21 +113,27 @@ function renderDishModalSlides(item) {
   const track = document.getElementById("dish-modal-track");
   if (!track || !item) return 1;
 
+  const rawPhotos = getItemRawPhotos(item);
   const photos = getItemPhotos(item);
   const totalSlides = getDishSlideCount(item);
   const photoKey = photos.length ? photos.join("|") : "__empty__";
   const displayItem = getDisplayItem(item) || item;
 
   if (track.dataset.photoKey !== photoKey) {
-    track.innerHTML = photos.length
-      ? photos.map((photoUrl, index) => (
+    track.innerHTML = rawPhotos.length
+      ? rawPhotos.map((photoUrl, index) => (
         `<div class="dish-modal-slide">
-          <img class="dish-modal-image" src="${escapeHtml(photoUrl)}" alt="${escapeHtml(`${displayItem.displayName || item.name} ${index + 1}`)}" loading="eager" decoding="async" draggable="false" />
+          ${buildResponsiveDishImage(photoUrl, "dish-modal-image", `${displayItem.displayName || item.name} ${index + 1}`, {
+            loading: "eager",
+            decoding: "async",
+            draggable: false
+          })}
         </div>`
       )).join("")
       : `<div class="dish-modal-slide"><div class="dish-modal-image-placeholder">${escapeHtml(t("dishPhotoSoon"))}</div></div>`;
 
     track.dataset.photoKey = photoKey;
+    bindDishPhotoFallbacks(track);
   }
 
   activeDishPhotoKey = photoKey;
@@ -76,10 +150,13 @@ function renderDishModalDots(totalSlides) {
 }
 
 function preloadDishPhotos(item) {
-  getItemPhotos(item).forEach((photoUrl) => {
+  getItemRawPhotos(item).forEach((photoUrl) => {
+    const primaryUrl = normalizePhotoUrl(photoUrl);
+    if (!primaryUrl) return;
     const image = new Image();
     image.decoding = "async";
-    image.src = photoUrl;
+    image.referrerPolicy = "no-referrer";
+    image.src = primaryUrl;
   });
 }
 
@@ -202,8 +279,25 @@ const MENU_SYNC = {
   intervalMs: 8000,
   focusThrottleMs: 2000,
   fullReloadMs: 20000,
-  cacheBucketMs: 4000,
-  requestTimeoutMs: 6000
+  cacheBucketMs: 12000,
+  requestTimeoutMs: 15000,
+  retryAttempts: 5,
+  retryDelayMs: 900
+};
+
+const MENU_ERROR_COPY = {
+  ru: {
+    description: "Мы временно не можем получить данные из меню. Обычно помогает повторная загрузка через несколько секунд.",
+    retryHint: "Если проблема повторяется, проверьте интернет и попробуйте ещё раз."
+  },
+  kk: {
+    description: "Қазір мәзір деректерін ала алмай тұрмыз. Әдетте бірнеше секундтан кейін қайта жүктеу көмектеседі.",
+    retryHint: "Қате қайталанса, интернетті тексеріп, қайтадан көріңіз."
+  },
+  en: {
+    description: "We cannot get the menu data right now. In most cases, trying again in a few seconds helps.",
+    retryHint: "If it keeps happening, check your connection and try again."
+  }
 };
 
 const MENU_HEADER_ALIASES = {
@@ -259,6 +353,7 @@ let menuLastSyncAt = 0;
 let menuLastFullLoadAt = 0;
 let menuLastCsvSnapshot = "";
 let menuLastAvailabilitySnapshot = "";
+const menuFetchInFlight = new Map();
 let backgroundTranslationToken = 0;
 let menuRenderToken = 0;
 let menuRenderItems = [];
@@ -280,6 +375,11 @@ function scheduleText(key) {
 function menuSyncText(key) {
   const table = MENU_SYNC_TEXT[currentLanguage] || MENU_SYNC_TEXT.ru;
   return table[key] || MENU_SYNC_TEXT.ru[key] || key;
+}
+
+function menuErrorText(key) {
+  const table = MENU_ERROR_COPY[currentLanguage] || MENU_ERROR_COPY.ru;
+  return table[key] || MENU_ERROR_COPY.ru[key] || "";
 }
 
 function normalizeMenuHeader(value) {
@@ -356,34 +456,101 @@ function buildFreshMenuRequestUrl(url) {
   }
 }
 
+function buildMenuRequestKey(url) {
+  try {
+    const nextUrl = new URL(url, window.location.href);
+    nextUrl.searchParams.delete("_menuSync");
+    return nextUrl.toString();
+  } catch {
+    return String(url || "").replace(/([?&])_menuSync=[^&]*/g, "$1").replace(/[?&]$/, "");
+  }
+}
+
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function createMenuLoadError(code, message) {
+  const error = new Error(message);
+  error.code = code;
+  return error;
+}
+
+function normalizeMenuLoadError(error) {
+  if (error?.name === "AbortError") {
+    return createMenuLoadError("timeout", "Menu request timed out");
+  }
+
+  if (error instanceof TypeError) {
+    return createMenuLoadError("network", "Network error while loading menu");
+  }
+
+  if (error instanceof Error) {
+    return error;
+  }
+
+  return createMenuLoadError("unknown", String(error));
+}
+
+function shouldRetryMenuLoad(error) {
+  const code = String(error?.code || "");
+  return ["timeout", "network", "http_429", "http_500", "http_502", "http_503", "http_504"].includes(code);
+}
+
 async function fetchCsvTextFromUrl(url) {
-  const controller = typeof AbortController === "function" ? new AbortController() : null;
-  const timeoutId = controller
-    ? window.setTimeout(() => controller.abort(), MENU_SYNC.requestTimeoutMs)
-    : null;
+  const requestKey = buildMenuRequestKey(url);
+  if (menuFetchInFlight.has(requestKey)) {
+    return menuFetchInFlight.get(requestKey);
+  }
+
+  const requestPromise = (async () => {
+    const controller = typeof AbortController === "function" ? new AbortController() : null;
+    const timeoutId = controller
+      ? window.setTimeout(() => controller.abort(), MENU_SYNC.requestTimeoutMs)
+      : null;
+
+    try {
+      const response = await fetch(buildFreshMenuRequestUrl(url), {
+        redirect: "follow",
+        cache: "no-cache",
+        signal: controller ? controller.signal : undefined
+      });
+      if (!response.ok) throw createMenuLoadError(`http_${response.status}`, `CSV load failed (${response.status})`);
+      const text = await response.text();
+      if (!String(text || "").trim()) throw createMenuLoadError("empty", "CSV response is empty");
+      return text;
+    } catch (error) {
+      throw normalizeMenuLoadError(error);
+    } finally {
+      if (timeoutId) window.clearTimeout(timeoutId);
+    }
+  })();
+
+  menuFetchInFlight.set(requestKey, requestPromise);
 
   try {
-    const response = await fetch(buildFreshMenuRequestUrl(url), {
-      redirect: "follow",
-      cache: "no-store",
-      signal: controller ? controller.signal : undefined
-    });
-    if (!response.ok) throw new Error(`CSV load failed (${response.status})`);
-    return await response.text();
+    return await requestPromise;
   } finally {
-    if (timeoutId) window.clearTimeout(timeoutId);
+    if (menuFetchInFlight.get(requestKey) === requestPromise) {
+      menuFetchInFlight.delete(requestKey);
+    }
   }
 }
 
 async function fetchMenuCsvText(options = {}) {
   const urls = getMenuRequestUrls(options);
-  let lastError = new Error("CSV load failed");
+  let lastError = createMenuLoadError("network", "CSV load failed");
 
   for (const url of urls) {
-    try {
-      return await fetchCsvTextFromUrl(url);
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
+    for (let attempt = 0; attempt < MENU_SYNC.retryAttempts; attempt += 1) {
+      try {
+        return await fetchCsvTextFromUrl(url);
+      } catch (error) {
+        lastError = normalizeMenuLoadError(error);
+        const isLastAttempt = attempt >= (MENU_SYNC.retryAttempts - 1);
+        if (isLastAttempt || !shouldRetryMenuLoad(lastError)) break;
+        await wait(MENU_SYNC.retryDelayMs * (attempt + 1));
+      }
     }
   }
 
@@ -430,8 +597,11 @@ function parseMenuCsvDataset(text) {
   const nextHeroBanners = buildHeroBannersFromRows(parsedRows, indexes.banner);
   const nextMenuData = dataRows
     .map((cols, index) => {
-      const photos = photoIndexes
+      const rawPhotos = photoIndexes
         .map((photoIndex) => cols[photoIndex] || "")
+        .map((value) => String(value || "").trim())
+        .filter(Boolean);
+      const photos = rawPhotos
         .map((value) => normalizePhotoUrl(value))
         .filter(Boolean);
 
@@ -441,6 +611,8 @@ function parseMenuCsvDataset(text) {
         price: Number(cols[indexes.price]) || 0,
         category: String(cols[indexes.category] || "").trim(),
         available: isAvailableMenuValue(cols[indexes.available]),
+        rawPhoto: rawPhotos[0] || (indexes.photo >= 0 ? String(cols[indexes.photo] || "").trim() : ""),
+        rawPhotos,
         photo: photos[0] || (indexes.photo >= 0 ? normalizePhotoUrl(cols[indexes.photo]) : ""),
         photos,
         description: indexes.description >= 0 ? cols[indexes.description] : "",
@@ -1186,6 +1358,7 @@ function renderNextMenuChunk(renderToken) {
 
   document.body.classList.add("menu-rendering");
   grid.insertAdjacentHTML("beforeend", html);
+  bindDishPhotoFallbacks(grid);
   menuRenderedCount += appendedCount;
   document.body.classList.remove("menu-rendering");
 
@@ -1782,9 +1955,11 @@ function renderMenuErrorState(errorMessage) {
   cancelPendingMenuRender();
   lastMenuLoadError = String(errorMessage || "");
 
-  grid.innerHTML = `<div class="status-card">
+  grid.innerHTML = `<div class="status-card status-card--menu-error">
+    <div class="status-card-badge" aria-hidden="true">Меню</div>
     <p class="status-card-title">${escapeHtml(t("loadErrorHeading"))}</p>
-    <p class="status">${escapeHtml(t("loadError", { message: errorMessage }))}</p>
+    <p class="status-card-copy">${escapeHtml(menuErrorText("description"))}</p>
+    <p class="status-card-hint">${escapeHtml(menuErrorText("retryHint"))}</p>
     <button id="menu-retry-button" class="status-retry-btn" type="button">${escapeHtml(t("retryLoadButton"))}</button>
   </div>`;
 
@@ -1814,6 +1989,39 @@ function rerenderMenuSurface() {
 
   if (hasPendingOrder()) {
     renderPendingOrderConfirmation();
+  }
+}
+
+function renderMenuErrorState(errorMessage) {
+  const grid = document.getElementById("menu-grid");
+  if (!grid) return;
+  cancelPendingMenuRender();
+  lastMenuLoadError = String(errorMessage || "");
+
+  const errorTitle = escapeHtml(t("loadErrorHeading"));
+  const errorCopy = escapeHtml(menuErrorText("description"));
+  const errorHint = escapeHtml(menuErrorText("retryHint"));
+  const retryLabel = escapeHtml(t("retryLoadButton"));
+
+  grid.innerHTML = `
+    <div class="status-card status-card--menu-error">
+      <div class="status-card-menu-error-shell">
+        <div class="status-card-badge-row">
+          <span class="status-card-icon" aria-hidden="true">!</span>
+          <div class="status-card-badge">Меню</div>
+        </div>
+        <p class="status-card-title">${errorTitle}</p>
+        <p class="status-card-copy">${errorCopy}</p>
+        <p class="status-card-hint">${errorHint}</p>
+        <button id="menu-retry-button" class="status-retry-btn" type="button">${retryLabel}</button>
+      </div>
+    </div>`;
+
+  const retryButton = document.getElementById("menu-retry-button");
+  if (retryButton) {
+    retryButton.addEventListener("click", () => {
+      loadMenu();
+    });
   }
 }
 
@@ -2060,7 +2268,9 @@ async function loadMenu(options = {}) {
   }
 
   try {
-    const text = options.csvText || await fetchMenuCsvText();
+    const text = options.csvText || await fetchMenuCsvText({
+      allowCacheFallback: !silent && !menuData.length
+    });
     if (silent && menuLastCsvSnapshot && text === menuLastCsvSnapshot) {
       menuLastSyncAt = Date.now();
       return false;
@@ -2078,6 +2288,7 @@ async function loadMenu(options = {}) {
       renderCart();
       if (hasPendingOrder()) renderPendingOrderConfirmation();
       menuLastSyncAt = Date.now();
+      startMenuSyncMonitoring();
       return true;
     }
 
@@ -2089,6 +2300,7 @@ async function loadMenu(options = {}) {
 
     if (!silent && removedFromCart) updateTotals();
     menuLastSyncAt = Date.now();
+    startMenuSyncMonitoring();
     return true;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -2155,6 +2367,8 @@ async function refreshMenuSync(options = {}) {
 
       menuLastSyncAt = Date.now();
       return result;
+    } catch {
+      return false;
     } finally {
       menuSyncInFlight = null;
     }
@@ -2178,6 +2392,31 @@ function startMenuSyncMonitoring() {
     menuSyncTimer = null;
   }
   menuSyncMonitoringStarted = false;
+}
+
+function startMenuSyncMonitoring() {
+  if (menuSyncMonitoringStarted) return;
+
+  if (menuSyncTimer) {
+    window.clearInterval(menuSyncTimer);
+  }
+
+  menuSyncMonitoringStarted = true;
+  menuSyncTimer = window.setInterval(() => {
+    handleMenuSyncRefreshTrigger(false);
+  }, MENU_SYNC.intervalMs);
+
+  window.addEventListener("focus", () => {
+    handleMenuSyncRefreshTrigger(false);
+  });
+  window.addEventListener("pageshow", () => {
+    handleMenuSyncRefreshTrigger(false);
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      handleMenuSyncRefreshTrigger(false);
+    }
+  });
 }
 
 bindCategoryEvents();

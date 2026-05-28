@@ -538,18 +538,47 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
-function normalizePhotoUrl(rawUrl) {
+function extractGoogleDriveFileId(rawUrl) {
   const url = String(rawUrl || "").trim();
   if (!url) return "";
-  const driveFileMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/i);
-  if (driveFileMatch && driveFileMatch[1]) {
-    return `https://drive.google.com/thumbnail?id=${driveFileMatch[1]}&sz=w1200`;
+
+  const fileMatch = url.match(/drive\.google\.com\/file\/d\/([^/?#]+)/i);
+  if (fileMatch && fileMatch[1]) return fileMatch[1];
+
+  const directMatch = url.match(/drive\.google\.com\/(?:open|uc|thumbnail)[^?#]*[?&]id=([^&#]+)/i);
+  if (directMatch && directMatch[1]) return directMatch[1];
+
+  const genericIdMatch = url.match(/[?&]id=([^&#]+)/i);
+  if (genericIdMatch && genericIdMatch[1] && /drive\.google\.com/i.test(url)) return genericIdMatch[1];
+
+  return "";
+}
+
+function buildPhotoUrlCandidates(rawUrl) {
+  const url = String(rawUrl || "").trim();
+  if (!url) return [];
+
+  const candidates = [];
+  const addCandidate = (value) => {
+    const nextValue = String(value || "").trim();
+    if (!nextValue || candidates.includes(nextValue)) return;
+    candidates.push(nextValue);
+  };
+
+  const driveFileId = extractGoogleDriveFileId(url);
+  if (driveFileId) {
+    addCandidate(`https://lh3.googleusercontent.com/d/${driveFileId}=w1600`);
+    addCandidate(`https://drive.google.com/uc?export=view&id=${driveFileId}`);
+    addCandidate(`https://drive.google.com/thumbnail?id=${driveFileId}&sz=w1600`);
   }
-  const driveIdMatch = url.match(/[?&]id=([^&]+)/i);
-  if (driveIdMatch && /drive\.google\.com/i.test(url)) {
-    return `https://drive.google.com/thumbnail?id=${driveIdMatch[1]}&sz=w1200`;
-  }
-  return url;
+
+  addCandidate(url);
+  return candidates;
+}
+
+function normalizePhotoUrl(rawUrl) {
+  const candidates = buildPhotoUrlCandidates(rawUrl);
+  return candidates[0] || "";
 }
 
 function getTranslationCacheKey(text, lang) {
