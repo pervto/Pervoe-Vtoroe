@@ -554,6 +554,26 @@ function extractGoogleDriveFileId(rawUrl) {
   return "";
 }
 
+function extractGoogleDriveResourceKey(rawUrl) {
+  const url = String(rawUrl || "").trim();
+  if (!url || !/drive\.google\.com/i.test(url)) return "";
+
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.searchParams.get("resourcekey") || "";
+  } catch {
+    const match = url.match(/[?&]resourcekey=([^&#]+)/i);
+    return match && match[1] ? match[1] : "";
+  }
+}
+
+function appendGoogleDriveResourceKey(url, resourceKey) {
+  const key = String(resourceKey || "").trim();
+  if (!url || !key) return url;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}resourcekey=${encodeURIComponent(key)}`;
+}
+
 function isDirectImageUrl(rawUrl) {
   const url = String(rawUrl || "").trim().toLowerCase();
   if (!url) return false;
@@ -577,8 +597,9 @@ function buildPhotoUrlCandidates(rawUrl) {
 
   const driveFileId = extractGoogleDriveFileId(url);
   if (driveFileId) {
-    addCandidate(`https://drive.google.com/thumbnail?id=${driveFileId}&sz=w1200`);
-    addCandidate(`https://drive.google.com/uc?export=view&id=${driveFileId}`);
+    const resourceKey = extractGoogleDriveResourceKey(url);
+    addCandidate(appendGoogleDriveResourceKey(`https://drive.google.com/thumbnail?id=${driveFileId}&sz=w1200`, resourceKey));
+    addCandidate(appendGoogleDriveResourceKey(`https://drive.google.com/uc?export=view&id=${driveFileId}`, resourceKey));
     addCandidate(`https://lh3.googleusercontent.com/d/${driveFileId}=w1200`);
   }
 
