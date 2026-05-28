@@ -1314,6 +1314,10 @@ main.container {
   -webkit-appearance: none;
 }
 
+html[data-search-tomato="off"] .search-tomato-clip {
+  display: none;
+}
+
 .search-tomato-image {
   display: block;
   width: 100%;
@@ -1468,6 +1472,45 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 }
 
 .food-image { object-fit: cover; display:block; }
+
+.dish-photo-shell {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(243, 244, 246, 0.92) 0%, rgba(227, 231, 237, 0.92) 100%);
+}
+
+.dish-photo-layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: opacity .28s ease;
+  pointer-events: none;
+}
+
+.dish-photo-layer--preview {
+  opacity: 1;
+  filter: blur(12px);
+  transform: scale(1.06);
+}
+
+.dish-photo-layer--full {
+  opacity: 0;
+}
+
+.dish-photo-shell.is-full-loaded .dish-photo-layer--preview {
+  opacity: 0;
+}
+
+.dish-photo-shell.is-full-loaded .dish-photo-layer--full {
+  opacity: 1;
+}
+
+.food-image.dish-photo-shell .dish-photo-layer {
+  object-fit: cover;
+  object-position: center;
+}
 
 .food-image-placeholder {
   background: linear-gradient(135deg, #f3f4f6 0%, #e3e7ed 100%);
@@ -2205,6 +2248,15 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 
 .dish-modal-image {
   display: block;
+  object-fit: contain;
+  object-position: center;
+}
+
+.dish-modal-image.dish-photo-shell {
+  background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+}
+
+.dish-modal-image.dish-photo-shell .dish-photo-layer {
   object-fit: contain;
   object-position: center;
 }

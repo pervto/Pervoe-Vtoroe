@@ -1,15 +1,16 @@
-const SITE_VERSION = "1.20";
+const SITE_VERSION = "1.22";
 const APP_CACHE = `pervoe-vtoroe-app-v${SITE_VERSION}`;
 const DATA_CACHE = "pervoe-vtoroe-data-v2";
+const PHOTO_CACHE = "pervoe-vtoroe-photo-v1";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./style.css?v=114",
+  "./style.css?v=116",
   "./config.js?v=32",
-  "./js/app-state.js?v=8",
+  "./js/app-state.js?v=9",
   "./js/app-hero.js?v=4",
-  "./js/app-ui.js?v=34",
-  "./js/app-main.js?v=15",
+  "./js/app-ui.js?v=36",
+  "./js/app-main.js?v=16",
   "./manifest.webmanifest?v=2",
   "./icons/logo.svg",
   "./icons/logo-dark.svg",
@@ -37,11 +38,44 @@ async function putInCache(cacheName, request, response) {
   return response;
 }
 
+function isCacheablePhotoResponse(response) {
+  if (!response) return false;
+  if (response.type === "opaque") return true;
+  const contentType = String(response.headers.get("content-type") || "").toLowerCase();
+  return response.ok && (
+    contentType.startsWith("image/") ||
+    contentType.includes("application/octet-stream")
+  );
+}
+
+async function putPhotoInCache(request, response) {
+  if (!isCacheablePhotoResponse(response)) return response;
+  const cache = await caches.open(PHOTO_CACHE);
+  cache.put(request, response.clone());
+  return response;
+}
+
 async function staleWhileRevalidate(cacheName, request) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
   const networkPromise = fetch(request)
     .then((response) => putInCache(cacheName, request, response))
+    .catch(() => null);
+
+  if (cached) {
+    return cached;
+  }
+
+  const networkResponse = await networkPromise;
+  if (networkResponse) return networkResponse;
+  throw new Error("No cached response available.");
+}
+
+async function staleWhileRevalidatePhoto(request) {
+  const cache = await caches.open(PHOTO_CACHE);
+  const cached = await cache.match(request);
+  const networkPromise = fetch(request)
+    .then((response) => putPhotoInCache(request, response))
     .catch(() => null);
 
   if (cached) {
@@ -81,7 +115,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(
       keys
-        .filter((key) => ![APP_CACHE, DATA_CACHE].includes(key))
+        .filter((key) => ![APP_CACHE, DATA_CACHE, PHOTO_CACHE].includes(key))
         .map((key) => caches.delete(key))
     )).then(() => self.clients.claim())
   );
@@ -104,7 +138,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (isDriveImageRequest) {
-    event.respondWith(fetch(request));
+    event.respondWith(staleWhileRevalidatePhoto(request));
     return;
   }
 

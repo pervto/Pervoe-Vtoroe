@@ -101,6 +101,7 @@ document.querySelectorAll(".settings-theme-btn").forEach((button) => {
 const brandLogo = document.querySelector(".brand-logo");
 const searchTomatoClip = document.querySelector(".search-tomato-clip");
 const searchTomato = document.querySelector(".search-tomato-image");
+const isSearchTomatoEnabled = document.documentElement.dataset.searchTomato !== "off";
 let brandLogoLastTouchAt = 0;
 let searchTomatoLastTouchAt = 0;
 
@@ -142,7 +143,11 @@ function blockSearchFocusFromTomato(event) {
   }
 }
 
-if (searchTomatoClip) {
+if (!isSearchTomatoEnabled && searchTomatoClip) {
+  searchTomatoClip.hidden = true;
+}
+
+if (isSearchTomatoEnabled && searchTomatoClip) {
   searchTomatoClip.addEventListener("pointerdown", blockSearchFocusFromTomato);
   searchTomatoClip.addEventListener("mousedown", blockSearchFocusFromTomato);
   searchTomatoClip.addEventListener("touchstart", (event) => {
