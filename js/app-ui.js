@@ -31,11 +31,43 @@ function encodePhotoFallbacks(urls) {
   return urls.map((url) => encodeURIComponent(url)).join("|");
 }
 
+function consumePhotoFallback(image) {
+  if (!image) return false;
+
+  const encodedFallbacks = String(image.dataset.photoFallbacks || "");
+  const fallbacks = encodedFallbacks
+    .split("|")
+    .map((value) => {
+      try {
+        return decodeURIComponent(value);
+      } catch {
+        return "";
+      }
+    })
+    .filter(Boolean);
+
+  while (fallbacks.length) {
+    const nextUrl = fallbacks.shift();
+    if (!nextUrl || image.currentSrc === nextUrl || image.src === nextUrl) continue;
+    image.dataset.photoFallbacks = encodePhotoFallbacks(fallbacks);
+    image.src = nextUrl;
+    return true;
+  }
+
+  image.removeAttribute("data-photo-fallbacks");
+  return false;
+}
+
+window.handleDishImageError = function handleDishImageError(image) {
+  consumePhotoFallback(image);
+};
+
 function buildResponsiveDishImage(rawUrl, className, altText, options = {}) {
   const candidates = buildPhotoUrlCandidates(rawUrl);
   if (!candidates.length) return "";
 
-  const loading = options.loading || "lazy";
+  const isMobileViewport = window.matchMedia && window.matchMedia("(max-width: 860px)").matches;
+  const loading = options.loading || (isMobileViewport ? "eager" : "lazy");
   const decoding = options.decoding || "async";
   const fetchPriority = options.fetchPriority ? ` fetchpriority="${options.fetchPriority}"` : "";
   const draggable = options.draggable === false ? ` draggable="false"` : "";
@@ -43,7 +75,7 @@ function buildResponsiveDishImage(rawUrl, className, altText, options = {}) {
     ? ` data-photo-fallbacks="${encodePhotoFallbacks(candidates.slice(1))}"`
     : "";
 
-  return `<img class="${className}" src="${escapeHtml(candidates[0])}" alt="${escapeHtml(altText)}" loading="${loading}" decoding="${decoding}" referrerpolicy="no-referrer"${fetchPriority}${fallbackAttr}${draggable} />`;
+  return `<img class="${className}" src="${escapeHtml(candidates[0])}" alt="${escapeHtml(altText)}" loading="${loading}" decoding="${decoding}" onerror="window.handleDishImageError && window.handleDishImageError(this)"${fetchPriority}${fallbackAttr}${draggable} />`;
 }
 
 function bindDishPhotoFallbacks(root = document) {
@@ -54,27 +86,7 @@ function bindDishPhotoFallbacks(root = document) {
     image.dataset.photoFallbackBound = "true";
 
     image.addEventListener("error", () => {
-      const encodedFallbacks = String(image.dataset.photoFallbacks || "");
-      const fallbacks = encodedFallbacks
-        .split("|")
-        .map((value) => {
-          try {
-            return decodeURIComponent(value);
-          } catch {
-            return "";
-          }
-        })
-        .filter(Boolean);
-
-      while (fallbacks.length) {
-        const nextUrl = fallbacks.shift();
-        if (!nextUrl || image.currentSrc === nextUrl || image.src === nextUrl) continue;
-        image.dataset.photoFallbacks = encodePhotoFallbacks(fallbacks);
-        image.src = nextUrl;
-        return;
-      }
-
-      image.removeAttribute("data-photo-fallbacks");
+      consumePhotoFallback(image);
     });
   });
 }
@@ -84,7 +96,6 @@ function buildDishPhotoHtml(item, className = "food-image", altText = "") {
   const imageAlt = altText || item?.name || "";
   if (rawPhotoUrl) {
     return buildResponsiveDishImage(rawPhotoUrl, className, imageAlt, {
-      loading: "lazy",
       decoding: "async",
       fetchPriority: "low"
     });
@@ -155,7 +166,6 @@ function preloadDishPhotos(item) {
     if (!primaryUrl) return;
     const image = new Image();
     image.decoding = "async";
-    image.referrerPolicy = "no-referrer";
     image.src = primaryUrl;
   });
 }
@@ -1733,50 +1743,22 @@ async function updateSiteVersionLabel() {
   const versionLabel = document.getElementById("site-version");
   if (!versionLabel) return;
 
-  const manifestVersion = getVersionTokenFromHref('link[rel="manifest"]', "v");
-  const styleVersion = getVersionTokenFromHref('link[href*="style.css"]', "v");
-  const configVersion = getVersionTokenFromHref('script[src*="config.js"]', "v");
-  const stateVersion = getVersionTokenFromHref('script[src*="js/app-state.js"]', "v");
-  const heroVersion = getVersionTokenFromHref('script[src*="js/app-hero.js"]', "v");
-  const uiVersion = getVersionTokenFromHref('script[src*="js/app-ui.js"]', "v");
-  const mainVersion = getVersionTokenFromHref('script[src*="js/app-main.js"]', "v");
-
-  let cacheVersion = "";
+  let siteVersion = "";
   try {
     const response = await fetch(`./service-worker.js?siteVersion=${Date.now()}`, { cache: "no-store" });
     const text = await response.text();
-    const match = text.match(/APP_CACHE\s*=\s*"pervoe-vtoroe-app-v([^"]+)"/);
-    cacheVersion = match ? match[1] : "";
+    const directMatch = text.match(/SITE_VERSION\s*=\s*"([^"]+)"/);
+    const cacheMatch = text.match(/APP_CACHE\s*=\s*`pervoe-vtoroe-app-v\$\{SITE_VERSION\}`|APP_CACHE\s*=\s*"pervoe-vtoroe-app-v([^"]+)"/);
+    if (directMatch && directMatch[1]) {
+      siteVersion = directMatch[1];
+    } else if (cacheMatch && cacheMatch[1]) {
+      siteVersion = cacheMatch[1];
+    }
   } catch {}
 
-  const versionParts = [
-    cacheVersion,
-    manifestVersion,
-    styleVersion,
-    configVersion,
-    stateVersion,
-    heroVersion,
-    uiVersion,
-    mainVersion
-  ].filter(Boolean);
-
-  if (!versionParts.length) {
-    versionLabel.textContent = "Номер версии сайта - автоматически";
-    return;
-  }
-
-  const numericParts = versionParts.map((part) => Number.parseInt(part, 10) || 0);
-  const source = versionParts.join(".");
-  let checksum = 0;
-  for (const char of source) {
-    checksum = (checksum * 31 + char.charCodeAt(0)) % 100000;
-  }
-
-  const major = String((Number.parseInt(cacheVersion, 10) || numericParts[0] || 0) % 100).padStart(2, "0");
-  const minor = String((numericParts.reduce((sum, value, index) => sum + value * (index + 3), 0) + checksum) % 100).padStart(2, "0");
-  const patch = String(checksum % 10);
-
-  versionLabel.textContent = `Номер версии сайта - ${major}.${minor}.${patch}`;
+  versionLabel.textContent = siteVersion
+    ? `Номер версии сайта - ${siteVersion}`
+    : "Номер версии сайта - автоматически";
 }
 
 function syncStickyOffsets() {

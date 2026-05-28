@@ -567,9 +567,9 @@ function buildPhotoUrlCandidates(rawUrl) {
 
   const driveFileId = extractGoogleDriveFileId(url);
   if (driveFileId) {
-    addCandidate(`https://lh3.googleusercontent.com/d/${driveFileId}=w1600`);
-    addCandidate(`https://drive.google.com/uc?export=view&id=${driveFileId}`);
     addCandidate(`https://drive.google.com/thumbnail?id=${driveFileId}&sz=w1600`);
+    addCandidate(`https://drive.google.com/uc?export=view&id=${driveFileId}`);
+    addCandidate(`https://lh3.googleusercontent.com/d/${driveFileId}=w1600`);
   }
 
   addCandidate(url);
