@@ -63,20 +63,16 @@ window.handleDishImageError = function handleDishImageError(image) {
 };
 
 function buildResponsiveDishImage(rawUrl, className, altText, options = {}) {
-  const candidates = buildPhotoUrlCandidates(rawUrl);
-  if (!candidates.length) return "";
+  const imageUrl = normalizePhotoUrl(rawUrl);
+  if (!imageUrl) return "";
 
   const isMobileViewport = window.matchMedia && window.matchMedia("(max-width: 860px)").matches;
   const loading = options.loading || (isMobileViewport ? "eager" : "lazy");
   const decoding = options.decoding || "async";
   const fetchPriority = options.fetchPriority ? ` fetchpriority="${options.fetchPriority}"` : "";
   const draggable = options.draggable === false ? ` draggable="false"` : "";
-  const referrerPolicy = options.referrerPolicy || "no-referrer";
-  const fallbackAttr = candidates.length > 1
-    ? ` data-photo-fallbacks="${encodePhotoFallbacks(candidates.slice(1))}"`
-    : "";
 
-  return `<img class="${className}" src="${escapeHtml(candidates[0])}" alt="${escapeHtml(altText)}" loading="${loading}" decoding="${decoding}" referrerpolicy="${escapeHtml(referrerPolicy)}" onerror="window.handleDishImageError && window.handleDishImageError(this)"${fetchPriority}${fallbackAttr}${draggable} />`;
+  return `<img class="${className}" src="${escapeHtml(imageUrl)}" alt="${escapeHtml(altText)}" loading="${loading}" decoding="${decoding}"${fetchPriority}${draggable} />`;
 }
 
 function bindDishPhotoFallbacks(root = document) {

@@ -1,4 +1,4 @@
-const SITE_VERSION = "1.16";
+const SITE_VERSION = "1.18";
 const APP_CACHE = `pervoe-vtoroe-app-v${SITE_VERSION}`;
 const DATA_CACHE = "pervoe-vtoroe-data-v2";
 const APP_SHELL = [
@@ -8,7 +8,7 @@ const APP_SHELL = [
   "./config.js?v=32",
   "./js/app-state.js?v=6",
   "./js/app-hero.js?v=4",
-  "./js/app-ui.js?v=31",
+  "./js/app-ui.js?v=32",
   "./js/app-main.js?v=15",
   "./manifest.webmanifest?v=2",
   "./icons/logo.svg",
@@ -92,9 +92,19 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
+  const isDriveImageRequest =
+    url.hostname === "drive.google.com" ||
+    url.hostname === "lh3.googleusercontent.com" ||
+    url.hostname === "drive.usercontent.google.com" ||
+    url.hostname === "work.fife.usercontent.google.com";
 
   if (request.mode === "navigate") {
     event.respondWith(networkFirst(APP_CACHE, request, "./index.html"));
+    return;
+  }
+
+  if (isDriveImageRequest) {
+    event.respondWith(fetch(request));
     return;
   }
 
