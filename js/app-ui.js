@@ -1741,7 +1741,8 @@ function getVersionTokenFromHref(selector, marker) {
 
 async function updateSiteVersionLabel() {
   const versionLabel = document.getElementById("site-version");
-  if (!versionLabel) return;
+  const settingsVersionLabel = document.getElementById("settings-version");
+  if (!versionLabel && !settingsVersionLabel) return;
 
   let siteVersion = "";
   try {
@@ -1756,9 +1757,15 @@ async function updateSiteVersionLabel() {
     }
   } catch {}
 
-  versionLabel.textContent = siteVersion
+  const footerText = siteVersion
     ? `Номер версии сайта - ${siteVersion}`
     : "Номер версии сайта - автоматически";
+  const settingsText = siteVersion
+    ? `Версия сайта ${siteVersion}`
+    : "Версия сайта - автоматически";
+
+  if (versionLabel) versionLabel.textContent = footerText;
+  if (settingsVersionLabel) settingsVersionLabel.textContent = settingsText;
 }
 
 function syncStickyOffsets() {
@@ -1852,8 +1859,15 @@ function applyStaticTranslations() {
   setText("#settings-popover-text", t("settingsText"));
   const languageGroup = document.querySelector(".settings-language-list");
   if (languageGroup) languageGroup.setAttribute("aria-label", t("settingsGroupAria"));
+  const settingsIntro = t("settingsText");
+  const shortSettingsIntro = settingsIntro
+    .replace(" и в следующий раз откроется уже на нём.", ".")
+    .replace(" и сайт откроется на нем при следующем визите.", ".")
+    .replace(" and open in it next time.", ".")
+    .replace(" және келесі жолы сол тілде ашылады.", ".");
+  setText("#settings-popover-text", shortSettingsIntro);
   setText("#settings-theme-title", t("settingsThemeTitle"));
-  setText("#settings-theme-text", t("settingsThemeText"));
+  setText("#settings-theme-text", "");
   const themeGroup = document.querySelector(".settings-theme-list");
   if (themeGroup) themeGroup.setAttribute("aria-label", t("settingsThemeGroupAria"));
   setText('.settings-theme-btn[data-theme-mode="auto"]', t("themeAuto"));

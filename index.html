@@ -37,7 +37,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=112" />
+  <link rel="stylesheet" href="style.css?v=113" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -64,7 +64,7 @@
             <div class="settings-popover-inner">
               <p id="settings-popover-kicker" class="settings-popover-kicker">Настройки</p>
               <h3 id="settings-popover-title" class="settings-popover-title">Язык интерфейса</h3>
-              <p id="settings-popover-text" class="settings-popover-text">Выберите язык. Сайт запомнит его и в следующий раз откроется уже на нём.</p>
+              <p id="settings-popover-text" class="settings-popover-text">Выберите язык. Сайт запомнит его.</p>
               <div class="settings-language-list" role="group" aria-label="Выбор языка">
                 <button class="settings-language-btn" type="button" data-lang="ru">Русский</button>
                 <button class="settings-language-btn" type="button" data-lang="kk">Қазақша</button>
@@ -76,7 +76,7 @@
               <div class="settings-theme-section">
                 <div class="settings-theme-header">
                   <p id="settings-theme-title" class="settings-theme-title">Тема</p>
-                  <p id="settings-theme-text" class="settings-theme-text">Авто повторяет тему устройства.</p>
+                  <p id="settings-theme-text" class="settings-theme-text"></p>
                 </div>
                 <div class="settings-theme-list" role="group" aria-label="Выбор темы">
                   <button class="settings-theme-btn" type="button" data-theme-mode="auto">Авто</button>
@@ -84,6 +84,8 @@
                   <button class="settings-theme-btn" type="button" data-theme-mode="dark">Тёмная</button>
                 </div>
               </div>
+
+              <p id="settings-version" class="settings-version">Версия сайта - автоматически</p>
             </div>
           </div>
         </div>
@@ -286,9 +288,9 @@
   </div>
 
   <script src="config.js?v=32"></script>
-  <script src="js/app-state.js?v=5"></script>
+  <script src="js/app-state.js?v=6"></script>
   <script src="js/app-hero.js?v=4"></script>
-  <script src="js/app-ui.js?v=29"></script>
+  <script src="js/app-ui.js?v=30"></script>
   <script src="js/app-main.js?v=15"></script>
   <script>
     const siteLogo = document.querySelector("[data-logo-src-light]");

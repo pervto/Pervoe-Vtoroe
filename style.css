@@ -389,8 +389,22 @@ main.container {
   line-height: 1.4;
 }
 
+.settings-theme-text:empty {
+  display: none;
+}
+
 .settings-theme-list {
   margin-top: 12px;
+}
+
+.settings-version {
+  position: relative;
+  z-index: 1;
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.35;
+  color: rgba(81, 96, 122, 0.72);
 }
 
 .hero-band {
@@ -3570,6 +3584,10 @@ html[data-theme="dark"] .settings-theme-title {
 html[data-theme="dark"] .settings-popover-text,
 html[data-theme="dark"] .settings-theme-text {
   color: #a5b1ca;
+}
+
+html[data-theme="dark"] .settings-version {
+  color: rgba(165, 177, 202, 0.68);
 }
 
 html[data-theme="dark"] .settings-divider {
