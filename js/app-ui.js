@@ -27,6 +27,10 @@ function getItemPhotos(item) {
   return [...new Set(photos.map(normalizePhotoUrl).filter(Boolean))];
 }
 
+const DISH_CARD_PHOTO_WIDTH = 600;
+const DISH_MODAL_PHOTO_WIDTH = 800;
+const preloadedDishPhotoUrls = new Set();
+
 function encodePhotoFallbacks(urls) {
   return urls.map((url) => encodeURIComponent(url)).join("|");
 }
@@ -70,7 +74,9 @@ window.handleDishImageError = function handleDishImageError(image) {
 };
 
 function buildResponsiveDishImage(rawUrl, className, altText, options = {}) {
-  const candidates = buildPhotoUrlCandidates(rawUrl);
+  const candidates = buildPhotoUrlCandidates(rawUrl, {
+    targetWidth: options.targetWidth
+  });
   if (!candidates.length) return "";
 
   const isMobileViewport = window.matchMedia && window.matchMedia("(max-width: 860px)").matches;
@@ -103,8 +109,10 @@ function buildDishPhotoHtml(item, className = "food-image", altText = "") {
   const imageAlt = altText || item?.name || "";
   if (rawPhotoUrl) {
     return buildResponsiveDishImage(rawPhotoUrl, className, imageAlt, {
+      targetWidth: DISH_CARD_PHOTO_WIDTH,
+      loading: "eager",
       decoding: "async",
-      fetchPriority: "low"
+      fetchPriority: "high"
     });
   }
   return `<div class="food-image-placeholder">${escapeHtml(t("dishPhotoSoon"))}</div>`;
@@ -142,8 +150,10 @@ function renderDishModalSlides(item) {
       ? rawPhotos.map((photoUrl, index) => (
         `<div class="dish-modal-slide">
           ${buildResponsiveDishImage(photoUrl, "dish-modal-image", `${displayItem.displayName || item.name} ${index + 1}`, {
+            targetWidth: DISH_MODAL_PHOTO_WIDTH,
             loading: "eager",
             decoding: "async",
+            fetchPriority: "high",
             draggable: false
           })}
         </div>`
@@ -167,12 +177,19 @@ function renderDishModalDots(totalSlides) {
   )).join("");
 }
 
-function preloadDishPhotos(item) {
+function preloadDishPhotos(item, options = {}) {
+  const targetWidth = Number(options.targetWidth) > 0 ? Number(options.targetWidth) : DISH_MODAL_PHOTO_WIDTH;
+
   getItemRawPhotos(item).forEach((photoUrl) => {
-    const primaryUrl = normalizePhotoUrl(photoUrl);
+    const primaryUrl = normalizePhotoUrl(photoUrl, { targetWidth });
     if (!primaryUrl) return;
+    if (preloadedDishPhotoUrls.has(primaryUrl)) return;
+    preloadedDishPhotoUrls.add(primaryUrl);
+
     const image = new Image();
+    image.loading = "eager";
     image.decoding = "async";
+    image.fetchPriority = "high";
     image.src = primaryUrl;
   });
 }
@@ -978,7 +995,6 @@ function renderDishModal(item) {
   description.textContent = displayItem.displayDescription || t("dishDescriptionFallback");
   description.classList.toggle("is-empty", !displayItem.displayDescription);
 
-  preloadDishPhotos(item);
   updateDishModalCarousel(item);
   updateDishModalControls();
 }
@@ -987,6 +1003,7 @@ function openDishModal(name) {
   const item = getItemByName(name);
   const modal = document.getElementById("dish-modal");
   if (!item || !modal) return;
+  preloadDishPhotos(item, { targetWidth: DISH_MODAL_PHOTO_WIDTH });
   activeDishName = item.name;
   activeDishSlide = 0;
   activeDishPointerId = null;
@@ -1193,6 +1210,16 @@ function bindMenuGridEvents() {
   const grid = document.getElementById("menu-grid");
   if (!grid || grid.dataset.bound === "true") return;
   grid.dataset.bound = "true";
+
+  grid.addEventListener("pointerdown", (event) => {
+    if (event.target.closest(".btn-add[data-name], .card-plus[data-name], .card-minus[data-name]")) return;
+
+    const card = event.target.closest(".food-card[data-item-name]");
+    if (!card || !grid.contains(card)) return;
+
+    const item = getItemByName(card.dataset.itemName);
+    if (item) preloadDishPhotos(item, { targetWidth: DISH_MODAL_PHOTO_WIDTH });
+  }, { passive: true });
 
   grid.addEventListener("click", (event) => {
     const addButton = event.target.closest(".btn-add[data-name]");

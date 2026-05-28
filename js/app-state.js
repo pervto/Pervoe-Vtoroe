@@ -574,6 +574,12 @@ function appendGoogleDriveResourceKey(url, resourceKey) {
   return `${url}${separator}resourcekey=${encodeURIComponent(key)}`;
 }
 
+function normalizePhotoTargetWidth(targetWidth, fallbackWidth = 1200) {
+  const width = Number(targetWidth);
+  if (!Number.isFinite(width) || width <= 0) return fallbackWidth;
+  return Math.max(1, Math.round(width));
+}
+
 function isDirectImageUrl(rawUrl) {
   const url = String(rawUrl || "").trim().toLowerCase();
   if (!url) return false;
@@ -584,11 +590,12 @@ function isDirectImageUrl(rawUrl) {
   );
 }
 
-function buildPhotoUrlCandidates(rawUrl) {
+function buildPhotoUrlCandidates(rawUrl, options = {}) {
   const url = String(rawUrl || "").trim();
   if (!url) return [];
 
   const candidates = [];
+  const targetWidth = normalizePhotoTargetWidth(options.targetWidth, 1200);
   const addCandidate = (value) => {
     const nextValue = String(value || "").trim();
     if (!nextValue || candidates.includes(nextValue)) return;
@@ -598,9 +605,9 @@ function buildPhotoUrlCandidates(rawUrl) {
   const driveFileId = extractGoogleDriveFileId(url);
   if (driveFileId) {
     const resourceKey = extractGoogleDriveResourceKey(url);
-    addCandidate(appendGoogleDriveResourceKey(`https://drive.google.com/thumbnail?id=${driveFileId}&sz=w1200`, resourceKey));
+    addCandidate(appendGoogleDriveResourceKey(`https://drive.google.com/thumbnail?id=${driveFileId}&sz=w${targetWidth}`, resourceKey));
     addCandidate(appendGoogleDriveResourceKey(`https://drive.google.com/uc?export=view&id=${driveFileId}`, resourceKey));
-    addCandidate(`https://lh3.googleusercontent.com/d/${driveFileId}=w1200`);
+    addCandidate(`https://lh3.googleusercontent.com/d/${driveFileId}=w${targetWidth}`);
   }
 
   if (isDirectImageUrl(url)) {
@@ -611,8 +618,8 @@ function buildPhotoUrlCandidates(rawUrl) {
   return candidates;
 }
 
-function normalizePhotoUrl(rawUrl) {
-  const candidates = buildPhotoUrlCandidates(rawUrl);
+function normalizePhotoUrl(rawUrl, options = {}) {
+  const candidates = buildPhotoUrlCandidates(rawUrl, options);
   return candidates[0] || "";
 }
 
