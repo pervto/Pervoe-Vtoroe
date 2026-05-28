@@ -554,13 +554,6 @@ function extractGoogleDriveFileId(rawUrl) {
   return "";
 }
 
-function extractGoogleDriveResourceKey(rawUrl) {
-  const url = String(rawUrl || "").trim();
-  if (!url) return "";
-  const resourceKeyMatch = url.match(/[?&]resourcekey=([^&#]+)/i);
-  return resourceKeyMatch && resourceKeyMatch[1] ? resourceKeyMatch[1] : "";
-}
-
 function buildPhotoUrlCandidates(rawUrl) {
   const url = String(rawUrl || "").trim();
   if (!url) return [];
@@ -572,16 +565,14 @@ function buildPhotoUrlCandidates(rawUrl) {
     candidates.push(nextValue);
   };
 
-  addCandidate(url);
-
   const driveFileId = extractGoogleDriveFileId(url);
-  const resourceKey = extractGoogleDriveResourceKey(url);
-  const resourceKeyQuery = resourceKey ? `&resourcekey=${resourceKey}` : "";
   if (driveFileId) {
-    addCandidate(`https://drive.google.com/thumbnail?id=${driveFileId}${resourceKeyQuery}&sz=w1600`);
-    addCandidate(`https://drive.google.com/uc?export=view&id=${driveFileId}${resourceKeyQuery}`);
+    addCandidate(`https://drive.google.com/thumbnail?id=${driveFileId}&sz=w1600`);
+    addCandidate(`https://drive.google.com/uc?export=view&id=${driveFileId}`);
     addCandidate(`https://lh3.googleusercontent.com/d/${driveFileId}=w1600`);
   }
+
+  addCandidate(url);
   return candidates;
 }
 
