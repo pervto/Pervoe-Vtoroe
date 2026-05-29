@@ -1426,8 +1426,20 @@ function replaceSearchSeparators(value) {
   return String(value || "").replace(/[-–—]/g, " ");
 }
 
-const SEARCH_ALLOWED_CHARS_PATTERN = /[^0-9a-zа-яёәіңғүұқөһ\s]+/gi;
-
+const SEARCH_ALLOWED_CHARS_PATTERN = /[^0-9a-z\u0400-\u04FF\s]+/gi;
+const SEARCH_STOP_WORDS = new Set([
+  "\u043f\u043e",
+  "\u0441",
+  "\u0438",
+  "\u0432",
+  "\u0430",
+  "\u043d\u0430",
+  "\u0438\u0437",
+  "\u0441\u043e",
+  "\u0448\u0442",
+  "\u0433",
+  "\u043c\u043b"
+]);
 function normalizeSearchText(value) {
   return replaceSearchSeparators(value)
     .toLowerCase()
@@ -1435,8 +1447,6 @@ function normalizeSearchText(value) {
     .replace(/\s+/g, " ")
     .trim();
 }
-
-const SEARCH_STOP_WORDS = new Set(["по", "с", "и", "в", "а", "на", "из", "со", "шт", "г", "мл"]);
 
 function getSearchWords(value) {
   const normalized = normalizeSearchText(value);
