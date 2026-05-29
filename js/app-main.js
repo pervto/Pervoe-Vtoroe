@@ -386,52 +386,102 @@ document.addEventListener("visibilitychange", () => {
   tryShowPendingOrderConfirmation();
 });
 
-loadCart();
-loadPromo();
-loadPendingOrder();
-restorePendingOrderDraft();
-heroBanners = getDefaultHeroBanners();
-applyTheme(currentThemeMode);
-applyStaticTranslations();
-startWorkingHoursMonitoring();
-renderHeroBannerSkeleton();
-updateSettingsLanguageButtons(false);
-loadMenu();
-renderCart();
-updateSearchClearVisibility();
-syncStickyOffsets();
-updateSearchInputActiveState(false);
-updateHeroSearchState();
-updateTomatoLayerState();
-updateSiteVersionLabel();
-if (promo.code) {
-  document.getElementById("promo-code").value = promo.code;
+const APP_CACHE_RESET_VERSION = "1.28";
+
+async function resetCachedAppShellOnce() {
+  const storageKey = "pervoe-vtoroe-app-cache-reset-version";
+  let savedVersion = "";
+
+  try {
+    savedVersion = localStorage.getItem(storageKey) || "";
+  } catch (_) {
+    savedVersion = "";
+  }
+
+  if (savedVersion === APP_CACHE_RESET_VERSION) return false;
+
+  try {
+    localStorage.setItem(storageKey, APP_CACHE_RESET_VERSION);
+  } catch (_) {}
+
+  try {
+    if ("serviceWorker" in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.unregister()));
+    }
+
+    if ("caches" in window) {
+      const cacheKeys = await caches.keys();
+      await Promise.all(
+        cacheKeys
+          .filter((key) => key.startsWith("pervoe-vtoroe-"))
+          .map((key) => caches.delete(key))
+      );
+    }
+  } catch (_) {
+    return false;
+  }
+
+  window.location.reload();
+  return true;
 }
-tryShowPendingOrderConfirmation();
 
-if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(() => {
-    syncStickyOffsets();
-    updateTomatoLayerState();
-  });
-}
+function startApp() {
+  loadCart();
+  loadPromo();
+  loadPendingOrder();
+  restorePendingOrderDraft();
+  heroBanners = getDefaultHeroBanners();
+  applyTheme(currentThemeMode);
+  applyStaticTranslations();
+  startWorkingHoursMonitoring();
+  renderHeroBannerSkeleton();
+  updateSettingsLanguageButtons(false);
+  loadMenu();
+  renderCart();
+  updateSearchClearVisibility();
+  syncStickyOffsets();
+  updateSearchInputActiveState(false);
+  updateHeroSearchState();
+  updateTomatoLayerState();
+  updateSiteVersionLabel();
+  if (promo.code) {
+    document.getElementById("promo-code").value = promo.code;
+  }
+  tryShowPendingOrderConfirmation();
 
-if (systemThemeMedia) {
-  const handleSystemThemeChange = () => {
-    if (currentThemeMode === "auto") applyTheme("auto");
-  };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      syncStickyOffsets();
+      updateTomatoLayerState();
+    });
+  }
 
-  if (typeof systemThemeMedia.addEventListener === "function") {
-    systemThemeMedia.addEventListener("change", handleSystemThemeChange);
-  } else if (typeof systemThemeMedia.addListener === "function") {
-    systemThemeMedia.addListener(handleSystemThemeChange);
+  if (systemThemeMedia) {
+    const handleSystemThemeChange = () => {
+      if (currentThemeMode === "auto") applyTheme("auto");
+    };
+
+    if (typeof systemThemeMedia.addEventListener === "function") {
+      systemThemeMedia.addEventListener("change", handleSystemThemeChange);
+    } else if (typeof systemThemeMedia.addListener === "function") {
+      systemThemeMedia.addListener(handleSystemThemeChange);
+    }
+  }
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js?v=128", {
+        updateViaCache: "none"
+      }).catch(() => {});
+    });
   }
 }
 
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js?v=127", {
-      updateViaCache: "none"
-    }).catch(() => {});
+resetCachedAppShellOnce()
+  .then((didReload) => {
+    if (!didReload) startApp();
+  })
+  .catch(() => {
+    startApp();
   });
-}
