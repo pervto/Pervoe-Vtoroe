@@ -1376,18 +1376,112 @@ function cancelPendingMenuRender() {
 }
 
 function getFilteredMenuItems() {
-  const byCategory = activeCategory === ALL_CATEGORY ? menuData : menuData.filter((item) => item.category === activeCategory);
-  const query = searchQuery.trim().toLowerCase();
+  const query = normalizeSearchText(searchQuery);
+  const byCategory = activeCategory === ALL_CATEGORY
+    ? menuData
+    : menuData.filter((item) => item.category === activeCategory);
 
   if (!query) return byCategory;
-  if (currentLanguage === "ru") {
-    return byCategory.filter((item) => item.name.toLowerCase().includes(query));
+  const itemsForSearch = menuData;
+  const queryWords = getSearchWords(query);
+  const nameMatches = [];
+  const descriptionMatches = [];
+
+  itemsForSearch.forEach((item) => {
+    const displayItem = getDisplayItem(item);
+    const nameFields = [
+      item.name,
+      displayItem?.displayName
+    ];
+    const descriptionFields = [
+      item.description,
+      displayItem?.displayDescription
+    ];
+
+    const matchedByName = queryWords.some((word) => textListMatchesSearch(nameFields, word));
+    if (matchedByName) {
+      nameMatches.push(item);
+      return;
+    }
+
+    const matchedByDescription = queryWords.some((word) => textListMatchesSearch(descriptionFields, word));
+    if (matchedByDescription) {
+      descriptionMatches.push(item);
+    }
+  });
+
+  return [...nameMatches, ...descriptionMatches];
+}
+
+function replaceSearchSeparators(value) {
+  return String(value || "").replace(/-/g, " ");
+}
+
+function normalizeSearchText(value) {
+  return replaceSearchSeparators(value)
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getSearchWords(value) {
+  const normalized = normalizeSearchText(value);
+  return normalized ? normalized.split(" ") : [];
+}
+
+function textListMatchesSearch(textList, queryWord) {
+  return textList.some((text) => textMatchesSearch(text, queryWord));
+}
+
+function textMatchesSearch(text, queryWord) {
+  const normalizedText = normalizeSearchText(text);
+  if (!normalizedText || !queryWord) return false;
+  if (normalizedText.includes(queryWord)) return true;
+
+  return normalizedText.split(" ").some((word) => {
+    if (!word) return false;
+    return word.startsWith(queryWord) || word.includes(queryWord) || isOneEditAway(queryWord, word);
+  });
+}
+
+function isOneEditAway(source, target) {
+  if (!source || !target) return false;
+  if (source === target) return true;
+
+  const sourceLength = source.length;
+  const targetLength = target.length;
+  if (Math.abs(sourceLength - targetLength) > 1) return false;
+
+  if (sourceLength === targetLength) {
+    let differences = 0;
+    for (let index = 0; index < sourceLength; index += 1) {
+      if (source[index] !== target[index]) {
+        differences += 1;
+        if (differences > 1) return false;
+      }
+    }
+    return differences === 1;
   }
 
-  return byCategory.filter((item) => {
-    const displayItem = getDisplayItem(item);
-    return item.name.toLowerCase().includes(query) || String(displayItem.displayName || "").toLowerCase().includes(query);
-  });
+  const shorter = sourceLength < targetLength ? source : target;
+  const longer = sourceLength < targetLength ? target : source;
+  let shorterIndex = 0;
+  let longerIndex = 0;
+  let differenceFound = false;
+
+  while (shorterIndex < shorter.length && longerIndex < longer.length) {
+    if (shorter[shorterIndex] === longer[longerIndex]) {
+      shorterIndex += 1;
+      longerIndex += 1;
+      continue;
+    }
+
+    if (differenceFound) return false;
+    differenceFound = true;
+    longerIndex += 1;
+  }
+
+  return true;
 }
 
 function buildMenuCardHtml(item, index) {
