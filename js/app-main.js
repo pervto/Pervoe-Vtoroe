@@ -101,7 +101,6 @@ document.querySelectorAll(".settings-theme-btn").forEach((button) => {
 const brandLogo = document.querySelector(".brand-logo");
 const searchTomatoClip = document.querySelector(".search-tomato-clip");
 const searchTomato = document.querySelector(".search-tomato-image");
-const isSearchTomatoEnabled = document.documentElement.dataset.searchTomato !== "off";
 let brandLogoLastTouchAt = 0;
 let searchTomatoLastTouchAt = 0;
 
@@ -143,11 +142,7 @@ function blockSearchFocusFromTomato(event) {
   }
 }
 
-if (!isSearchTomatoEnabled && searchTomatoClip) {
-  searchTomatoClip.hidden = true;
-}
-
-if (isSearchTomatoEnabled && searchTomatoClip) {
+if (searchTomatoClip) {
   searchTomatoClip.addEventListener("pointerdown", blockSearchFocusFromTomato);
   searchTomatoClip.addEventListener("mousedown", blockSearchFocusFromTomato);
   searchTomatoClip.addEventListener("touchstart", (event) => {
@@ -241,10 +236,6 @@ if (searchInput && searchClear) {
   searchInput.addEventListener("blur", handleSearchFocusStateChange);
 
   searchInput.addEventListener("input", () => {
-    const preparedValue = replaceSearchSeparators(searchInput.value);
-    if (preparedValue !== searchInput.value) {
-      searchInput.value = preparedValue;
-    }
     searchQuery = searchInput.value.trim();
     updateSearchClearVisibility();
     updateHeroSearchState();
@@ -386,102 +377,50 @@ document.addEventListener("visibilitychange", () => {
   tryShowPendingOrderConfirmation();
 });
 
-const APP_CACHE_RESET_VERSION = "1.28";
-
-async function resetCachedAppShellOnce() {
-  const storageKey = "pervoe-vtoroe-app-cache-reset-version";
-  let savedVersion = "";
-
-  try {
-    savedVersion = localStorage.getItem(storageKey) || "";
-  } catch (_) {
-    savedVersion = "";
-  }
-
-  if (savedVersion === APP_CACHE_RESET_VERSION) return false;
-
-  try {
-    localStorage.setItem(storageKey, APP_CACHE_RESET_VERSION);
-  } catch (_) {}
-
-  try {
-    if ("serviceWorker" in navigator) {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map((registration) => registration.unregister()));
-    }
-
-    if ("caches" in window) {
-      const cacheKeys = await caches.keys();
-      await Promise.all(
-        cacheKeys
-          .filter((key) => key.startsWith("pervoe-vtoroe-"))
-          .map((key) => caches.delete(key))
-      );
-    }
-  } catch (_) {
-    return false;
-  }
-
-  window.location.reload();
-  return true;
+loadCart();
+loadPromo();
+loadPendingOrder();
+restorePendingOrderDraft();
+heroBanners = getDefaultHeroBanners();
+applyTheme(currentThemeMode);
+applyStaticTranslations();
+startWorkingHoursMonitoring();
+renderHeroBannerSkeleton();
+updateSettingsLanguageButtons(false);
+loadMenu();
+renderCart();
+updateSearchClearVisibility();
+syncStickyOffsets();
+updateSearchInputActiveState(false);
+updateHeroSearchState();
+updateTomatoLayerState();
+updateSiteVersionLabel();
+if (promo.code) {
+  document.getElementById("promo-code").value = promo.code;
 }
+tryShowPendingOrderConfirmation();
 
-function startApp() {
-  loadCart();
-  loadPromo();
-  loadPendingOrder();
-  restorePendingOrderDraft();
-  heroBanners = getDefaultHeroBanners();
-  applyTheme(currentThemeMode);
-  applyStaticTranslations();
-  startWorkingHoursMonitoring();
-  renderHeroBannerSkeleton();
-  updateSettingsLanguageButtons(false);
-  loadMenu();
-  renderCart();
-  updateSearchClearVisibility();
-  syncStickyOffsets();
-  updateSearchInputActiveState(false);
-  updateHeroSearchState();
-  updateTomatoLayerState();
-  updateSiteVersionLabel();
-  if (promo.code) {
-    document.getElementById("promo-code").value = promo.code;
-  }
-  tryShowPendingOrderConfirmation();
-
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(() => {
-      syncStickyOffsets();
-      updateTomatoLayerState();
-    });
-  }
-
-  if (systemThemeMedia) {
-    const handleSystemThemeChange = () => {
-      if (currentThemeMode === "auto") applyTheme("auto");
-    };
-
-    if (typeof systemThemeMedia.addEventListener === "function") {
-      systemThemeMedia.addEventListener("change", handleSystemThemeChange);
-    } else if (typeof systemThemeMedia.addListener === "function") {
-      systemThemeMedia.addListener(handleSystemThemeChange);
-    }
-  }
-
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js?v=128", {
-        updateViaCache: "none"
-      }).catch(() => {});
-    });
-  }
-}
-
-resetCachedAppShellOnce()
-  .then((didReload) => {
-    if (!didReload) startApp();
-  })
-  .catch(() => {
-    startApp();
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => {
+    syncStickyOffsets();
+    updateTomatoLayerState();
   });
+}
+
+if (systemThemeMedia) {
+  const handleSystemThemeChange = () => {
+    if (currentThemeMode === "auto") applyTheme("auto");
+  };
+
+  if (typeof systemThemeMedia.addEventListener === "function") {
+    systemThemeMedia.addEventListener("change", handleSystemThemeChange);
+  } else if (typeof systemThemeMedia.addListener === "function") {
+    systemThemeMedia.addListener(handleSystemThemeChange);
+  }
+}
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+  });
+}
