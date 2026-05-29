@@ -1423,13 +1423,15 @@ function getFilteredMenuItems() {
 }
 
 function replaceSearchSeparators(value) {
-  return String(value || "").replace(/-/g, " ");
+  return String(value || "").replace(/[-–—]/g, " ");
 }
+
+const SEARCH_ALLOWED_CHARS_PATTERN = /[^0-9a-zа-яёәіңғүұқөһ\s]+/gi;
 
 function normalizeSearchText(value) {
   return replaceSearchSeparators(value)
     .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s]+/gu, " ")
+    .replace(SEARCH_ALLOWED_CHARS_PATTERN, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
