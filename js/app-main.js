@@ -245,7 +245,7 @@ if (searchInput && searchClear) {
     if (preparedValue !== searchInput.value) {
       searchInput.value = preparedValue;
     }
-    searchQuery = normalizeSearchText(searchInput.value);
+    searchQuery = searchInput.value.trim();
     updateSearchClearVisibility();
     updateHeroSearchState();
     renderMenu();

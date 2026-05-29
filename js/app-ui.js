@@ -1384,33 +1384,42 @@ function getFilteredMenuItems() {
   if (!query) return byCategory;
   const itemsForSearch = menuData;
   const queryWords = getSearchWords(query);
-  const nameMatches = [];
+  if (!queryWords.length) return [];
+  const queryKey = buildSearchKey(queryWords);
+  const exactNameMatches = [];
+  const fullNameWordMatches = [];
   const descriptionMatches = [];
 
   itemsForSearch.forEach((item) => {
     const displayItem = getDisplayItem(item);
-    const nameFields = [
+    const nameTexts = [
       item.name,
       displayItem?.displayName
     ];
-    const descriptionFields = [
+    const descriptionTexts = [
       item.description,
       displayItem?.displayDescription
     ];
+    const nameKeys = getSearchKeys(nameTexts);
+    const nameWordSets = getSearchWordSets(nameTexts);
+    const descriptionWordSets = getSearchWordSets(descriptionTexts);
 
-    const matchedByName = queryWords.some((word) => textListMatchesSearch(nameFields, word));
-    if (matchedByName) {
-      nameMatches.push(item);
+    if (nameKeys.includes(queryKey)) {
+      exactNameMatches.push(item);
       return;
     }
 
-    const matchedByDescription = queryWords.some((word) => textListMatchesSearch(descriptionFields, word));
-    if (matchedByDescription) {
+    if (wordSetsContainAllQueryWords(nameWordSets, queryWords)) {
+      fullNameWordMatches.push(item);
+      return;
+    }
+
+    if (wordSetsContainAllQueryWords(descriptionWordSets, queryWords)) {
       descriptionMatches.push(item);
     }
   });
 
-  return [...nameMatches, ...descriptionMatches];
+  return [...exactNameMatches, ...fullNameWordMatches, ...descriptionMatches];
 }
 
 function replaceSearchSeparators(value) {
@@ -1420,68 +1429,42 @@ function replaceSearchSeparators(value) {
 function normalizeSearchText(value) {
   return replaceSearchSeparators(value)
     .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]+/gu, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
 
+const SEARCH_STOP_WORDS = new Set(["по", "с", "и", "в", "а", "на", "из", "со", "шт", "г", "мл"]);
+
 function getSearchWords(value) {
   const normalized = normalizeSearchText(value);
-  return normalized ? normalized.split(" ") : [];
+  return normalized
+    ? normalized
+      .split(" ")
+      .filter((word) => word.length >= 3)
+      .filter((word) => !SEARCH_STOP_WORDS.has(word))
+    : [];
 }
 
-function textListMatchesSearch(textList, queryWord) {
-  return textList.some((text) => textMatchesSearch(text, queryWord));
+function buildSearchKey(words) {
+  return words.join(" ");
 }
 
-function textMatchesSearch(text, queryWord) {
-  const normalizedText = normalizeSearchText(text);
-  if (!normalizedText || !queryWord) return false;
-  if (normalizedText.includes(queryWord)) return true;
-
-  return normalizedText.split(" ").some((word) => {
-    if (!word) return false;
-    return word.startsWith(queryWord) || word.includes(queryWord) || isOneEditAway(queryWord, word);
-  });
+function getSearchKeys(textList) {
+  return textList
+    .map((text) => buildSearchKey(getSearchWords(text)))
+    .filter(Boolean);
 }
 
-function isOneEditAway(source, target) {
-  if (!source || !target) return false;
-  if (source === target) return true;
+function getSearchWordSets(textList) {
+  return textList
+    .map((text) => getSearchWords(text))
+    .filter((words) => words.length)
+    .map((words) => new Set(words));
+}
 
-  const sourceLength = source.length;
-  const targetLength = target.length;
-  if (Math.abs(sourceLength - targetLength) > 1) return false;
-
-  if (sourceLength === targetLength) {
-    let differences = 0;
-    for (let index = 0; index < sourceLength; index += 1) {
-      if (source[index] !== target[index]) {
-        differences += 1;
-        if (differences > 1) return false;
-      }
-    }
-    return differences === 1;
-  }
-
-  const shorter = sourceLength < targetLength ? source : target;
-  const longer = sourceLength < targetLength ? target : source;
-  let shorterIndex = 0;
-  let longerIndex = 0;
-  let differenceFound = false;
-
-  while (shorterIndex < shorter.length && longerIndex < longer.length) {
-    if (shorter[shorterIndex] === longer[longerIndex]) {
-      shorterIndex += 1;
-      longerIndex += 1;
-      continue;
-    }
-
-    if (differenceFound) return false;
-    differenceFound = true;
-    longerIndex += 1;
-  }
-
-  return true;
+function wordSetsContainAllQueryWords(wordSets, queryWords) {
+  return wordSets.some((wordSet) => queryWords.every((word) => wordSet.has(word)));
 }
 
 function buildMenuCardHtml(item, index) {
