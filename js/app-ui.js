@@ -2018,7 +2018,9 @@ function applyStaticTranslations() {
   setAriaLabel("#settings-toggle", t("settingsButtonAria"));
   setText("#settings-popover-kicker", t("settingsKicker"));
   setText("#settings-popover-title", t("settingsTitle"));
-  setText("#settings-popover-text", t("settingsText"));
+  setText("#settings-popover-text", "");
+  const settingsPopoverText = document.getElementById("settings-popover-text");
+  if (settingsPopoverText) settingsPopoverText.hidden = true;
   const languageGroup = document.querySelector(".settings-language-list");
   if (languageGroup) languageGroup.setAttribute("aria-label", t("settingsGroupAria"));
   const settingsIntro = t("settingsText");
@@ -2027,7 +2029,7 @@ function applyStaticTranslations() {
     .replace(" и сайт откроется на нем при следующем визите.", ".")
     .replace(" and open in it next time.", ".")
     .replace(" және келесі жолы сол тілде ашылады.", ".");
-  setText("#settings-popover-text", shortSettingsIntro);
+  setText("#settings-popover-text", "");
   setText("#settings-theme-title", t("settingsThemeTitle"));
   setText("#settings-theme-text", "");
   const themeGroup = document.querySelector(".settings-theme-list");

@@ -485,8 +485,10 @@ function getLocale() {
 
 function t(key, vars = {}) {
   const table = UI_TRANSLATIONS[currentLanguage] || UI_TRANSLATIONS.ru;
-  const fallback = UI_TRANSLATIONS.ru[key] || key;
-  const value = table[key] || fallback;
+  const hasFallback = Object.prototype.hasOwnProperty.call(UI_TRANSLATIONS.ru, key);
+  const hasValue = Object.prototype.hasOwnProperty.call(table, key);
+  const fallback = hasFallback ? UI_TRANSLATIONS.ru[key] : key;
+  const value = hasValue ? table[key] : fallback;
   return Object.entries(vars).reduce((text, [name, replacement]) => text.replaceAll(`{${name}}`, replacement), value);
 }
 
