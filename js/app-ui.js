@@ -1276,16 +1276,31 @@ function scrollMenuToFilteredResults() {
   const menuGrid = document.getElementById("menu-grid");
   const header = document.getElementById("site-header");
   const menuDock = document.getElementById("menu-dock");
+  const searchWrap = document.querySelector(".menu-dock .search-wrap");
   const categoriesRibbon = document.getElementById("categories-ribbon");
+  const tilesBand = document.getElementById("category-tiles-band");
   if (!menuGrid) return;
 
   const headerHeight = header ? header.offsetHeight : 0;
   const dockHeight = menuDock ? menuDock.offsetHeight : 0;
+  const searchHeight = searchWrap ? searchWrap.offsetHeight : 0;
   const visibleRibbonHeight = categoriesRibbon && !categoriesRibbon.classList.contains("is-hidden")
     ? categoriesRibbon.offsetHeight
     : 0;
   const top = menuGrid.getBoundingClientRect().top + window.scrollY - headerHeight - 8;
-  window.scrollTo({ top: Math.max(top - dockHeight - visibleRibbonHeight, 0), behavior: "smooth" });
+  const menuTargetTop = Math.max(top - dockHeight - visibleRibbonHeight, 0);
+
+  let maxScrollUpTop = 0;
+  if (tilesBand && !tilesBand.hidden) {
+    const tilesBandBottom = tilesBand.getBoundingClientRect().bottom + window.scrollY;
+    const tilesBandExitOffset = headerHeight + searchHeight + 10;
+    maxScrollUpTop = Math.max(tilesBandBottom - tilesBandExitOffset, 0);
+  }
+
+  window.scrollTo({
+    top: Math.max(menuTargetTop, maxScrollUpTop),
+    behavior: "smooth"
+  });
 }
 
 function revealActiveCategoryPill() {

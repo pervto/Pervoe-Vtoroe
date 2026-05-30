@@ -361,11 +361,7 @@ main.container {
 }
 
 .settings-divider {
-  position: relative;
-  z-index: 1;
-  height: 1px;
-  margin: 14px 0 12px;
-  background: linear-gradient(90deg, rgba(17, 24, 39, 0), rgba(17, 24, 39, 0.14), rgba(17, 24, 39, 0));
+  display: none;
 }
 
 .settings-theme-section {
