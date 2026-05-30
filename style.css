@@ -254,7 +254,7 @@ main.container {
 .settings-popover-inner {
   position: relative;
   overflow: hidden;
-  padding: 18px;
+  padding: 16px;
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,.28);
   background: rgba(225, 230, 236, 0.98);
@@ -301,22 +301,22 @@ main.container {
 .settings-theme-list {
   position: relative;
   z-index: 1;
-  margin-top: 16px;
+  margin-top: 14px;
   display: grid;
-  gap: 8px;
+  gap: 7px;
 }
 
 .settings-language-btn,
 .settings-theme-btn {
   position: relative;
   width: 100%;
-  min-height: 44px;
+  min-height: 40px;
   border: 1px solid rgba(17, 24, 39, 0.08);
   border-radius: 16px;
   background: rgba(255,255,255,.72);
   color: #121a2d;
   text-align: left;
-  padding: 10px 16px;
+  padding: 9px 14px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
@@ -361,7 +361,7 @@ main.container {
   position: relative;
   z-index: 1;
   height: 1px;
-  margin: 16px 0 14px;
+  margin: 14px 0 12px;
   background: linear-gradient(90deg, rgba(17, 24, 39, 0), rgba(17, 24, 39, 0.14), rgba(17, 24, 39, 0));
 }
 
@@ -378,7 +378,7 @@ main.container {
 .settings-theme-title {
   margin: 0;
   color: #111a2d;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: 0;
@@ -396,13 +396,13 @@ main.container {
 }
 
 .settings-theme-list {
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 .settings-version {
   position: relative;
   z-index: 1;
-  margin: 14px 0 0;
+  margin: 12px 0 0;
   text-align: center;
   font-size: 11px;
   line-height: 1.35;
@@ -1253,6 +1253,10 @@ main.container {
   padding-top: 0;
   padding-bottom: 0;
   transition: padding-top .28s ease, padding-bottom .28s ease;
+}
+
+body:has(#categories-ribbon.is-hidden) .menu-dock .container {
+  padding-bottom: 8px;
 }
 
 .menu-dock .search-wrap {
@@ -3176,26 +3180,26 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
     top: calc(100% + 10px);
   }
   .settings-popover-inner {
-    padding: 16px;
+    padding: 14px;
     border-radius: 20px;
   }
   .settings-popover-title {
-    font-size: 20px;
+    font-size: 18px;
   }
   .settings-theme-title {
     font-size: 20px;
   }
   .settings-language-btn {
-    min-height: 42px;
+    min-height: 38px;
     border-radius: 14px;
-    padding: 10px 12px;
+    padding: 9px 12px;
     font-size: 13px;
   }
   .settings-theme-list {
     grid-template-columns: 1fr;
   }
   .settings-theme-btn {
-    min-height: 42px;
+    min-height: 38px;
     border-radius: 14px;
     font-size: 13px;
   }
