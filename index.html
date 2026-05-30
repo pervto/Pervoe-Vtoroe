@@ -39,7 +39,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=126" />
+  <link rel="stylesheet" href="style.css?v=127" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -106,7 +106,7 @@
     </div>
   </section>
 
-  <div id="menu-dock" class="menu-dock menu-dock--tiles-visible">
+  <div id="menu-dock" class="menu-dock">
     <div class="container">
       <div class="search-wrap">
         <span class="material-symbols-outlined search-icon" aria-hidden="true">search</span>
@@ -118,9 +118,12 @@
           <img class="search-tomato-image" src="icons/tomat.svg" alt="" />
         </button>
       </div>
-      <div id="categories-ribbon" class="categories-ribbon">
-        <nav id="categories" class="categories"></nav>
-      </div>
+    </div>
+  </div>
+
+  <div id="categories-ribbon" class="categories-ribbon is-hidden">
+    <div class="container categories-ribbon-container">
+      <nav id="categories" class="categories"></nav>
     </div>
   </div>
 
@@ -300,7 +303,7 @@
   <script src="config.js?v=32"></script>
   <script src="js/app-state.js?v=13"></script>
   <script src="js/app-hero.js?v=4"></script>
-  <script src="js/app-ui.js?v=51"></script>
+  <script src="js/app-ui.js?v=52"></script>
   <script src="js/app-main.js?v=24"></script>
   <script>
     const siteLogo = document.querySelector("[data-logo-src-light]");

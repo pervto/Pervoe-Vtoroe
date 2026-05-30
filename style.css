@@ -3,7 +3,6 @@
   --bg-2: #ffffff;
   --logo-bar-height: 78px;
   --menu-search-height: 58px;
-  --categories-ribbon-top: 136px;
   --menu-dock-height: 76px;
   --safe-top-offset: 0px;
   --top-surface: #dfe4ea;
@@ -1205,30 +1204,32 @@ main.container {
 
 .categories-ribbon {
   position: fixed;
-  top: var(--categories-ribbon-top);
+  top: 0;
   left: 50%;
   z-index: 39;
   width: min(calc(100vw - 28px), 1112px);
-  padding: 0 0 4px;
-  overflow: hidden;
   background: rgba(171, 180, 191, 0.82);
   border-bottom-left-radius: 18px;
   border-bottom-right-radius: 18px;
   backdrop-filter: blur(32px) saturate(1.12);
   -webkit-backdrop-filter: blur(32px) saturate(1.12);
   transform: translateX(-50%);
-  overflow: hidden;
   opacity: 1;
   visibility: visible;
   transition: opacity 200ms ease, visibility 0s linear 0s;
   will-change: opacity;
 }
 
-.menu-dock.menu-dock--tiles-visible .categories-ribbon {
+.categories-ribbon.is-hidden {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transition: opacity 200ms ease, visibility 0s linear 200ms;
+}
+
+.categories-ribbon-container {
+  padding-top: 0;
+  padding-bottom: 4px;
 }
 
 .menu-dock::before {

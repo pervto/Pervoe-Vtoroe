@@ -1281,7 +1281,7 @@ function scrollMenuToFilteredResults() {
 
   const headerHeight = header ? header.offsetHeight : 0;
   const dockHeight = menuDock ? menuDock.offsetHeight : 0;
-  const visibleRibbonHeight = menuDock && categoriesRibbon && !menuDock.classList.contains("menu-dock--tiles-visible")
+  const visibleRibbonHeight = categoriesRibbon && !categoriesRibbon.classList.contains("is-hidden")
     ? categoriesRibbon.offsetHeight
     : 0;
   const top = menuGrid.getBoundingClientRect().top + window.scrollY - headerHeight - 8;
@@ -1692,15 +1692,15 @@ function refreshCategoryTilesObserver() {
     categoryTilesObserver = null;
   }
 
-  const menuDock = document.getElementById("menu-dock");
+  const categoriesRibbon = document.getElementById("categories-ribbon");
   const tilesBand = document.getElementById("category-tiles-band");
-  if (!menuDock || !tilesBand || tilesBand.hidden) {
-    if (menuDock) menuDock.classList.remove("menu-dock--tiles-visible");
+  if (!categoriesRibbon || !tilesBand || tilesBand.hidden) {
+    if (categoriesRibbon) categoriesRibbon.classList.add("is-hidden");
     return;
   }
 
   categoryTilesObserver = new IntersectionObserver((entries) => {
-    menuDock.classList.toggle("menu-dock--tiles-visible", entries.some((entry) => entry.isIntersecting));
+    categoriesRibbon.classList.toggle("is-hidden", entries.some((entry) => entry.isIntersecting));
   }, {
     root: null,
     threshold: 0.02,
@@ -2100,11 +2100,14 @@ async function updateSiteVersionLabel() {
 function syncStickyOffsets() {
   const header = document.getElementById("site-header");
   const menuDock = document.getElementById("menu-dock");
+  const categoriesRibbon = document.getElementById("categories-ribbon");
   const searchWrap = document.querySelector(".menu-dock .search-wrap");
   if (!header) return;
   document.documentElement.style.setProperty("--logo-bar-height", `${Math.ceil(header.offsetHeight)}px`);
   document.documentElement.style.setProperty("--menu-search-height", `${Math.ceil(searchWrap ? searchWrap.offsetHeight : 0)}px`);
-  document.documentElement.style.setProperty("--categories-ribbon-top", `${Math.ceil(searchWrap ? searchWrap.getBoundingClientRect().bottom : header.offsetHeight)}px`);
+  if (categoriesRibbon) {
+    categoriesRibbon.style.top = `${Math.ceil(searchWrap ? searchWrap.getBoundingClientRect().bottom : header.offsetHeight)}px`;
+  }
   if (menuDock) {
     document.documentElement.style.setProperty("--menu-dock-height", `${Math.ceil(menuDock.offsetHeight)}px`);
   }
