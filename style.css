@@ -1394,6 +1394,9 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 }
 
 .category-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   border: 1px solid rgba(255,255,255,.24);
   background: rgba(230, 235, 242, .58);
   color: #131b35;
@@ -1407,6 +1410,19 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   backdrop-filter: blur(18px) saturate(1.1);
   -webkit-backdrop-filter: blur(18px) saturate(1.1);
   transition: .2s ease;
+}
+
+.category-btn-icon {
+  display: block;
+  width: auto;
+  height: 20px;
+  max-width: 28px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.category-btn-label {
+  display: block;
 }
 
 .category-btn:hover { transform: translateY(-1px); }

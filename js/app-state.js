@@ -5,6 +5,7 @@ let searchQuery = "";
 let toastTimer = null;
 let promo = { code: "", discount: 0 };
 let categoryOrderList = [];
+let categoryIconMap = {};
 let heroBanners = [];
 let lastMenuLoadError = "";
 let activeDishName = "";
