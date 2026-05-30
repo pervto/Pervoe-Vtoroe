@@ -1319,29 +1319,12 @@ function revealActiveCategoryPill() {
   });
 }
 
-function scrollCategoryTilesOutOfView() {
-  const tilesBand = document.getElementById("category-tiles-band");
-  if (!tilesBand || tilesBand.hidden) return;
-
-  const tilesBandTop = tilesBand.getBoundingClientRect().top + window.scrollY;
-  const targetTop = Math.max(tilesBandTop + tilesBand.offsetHeight + 8, 0);
-
-  window.scrollTo({
-    top: targetTop,
-    behavior: "smooth"
-  });
-}
-
-function selectCategory(category, options = {}) {
+function selectCategory(category) {
   if (!category) return;
   activeCategory = category;
   renderCategories();
   renderMenu();
   revealActiveCategoryPill();
-  if (options.scrollMode === "tiles") {
-    scrollCategoryTilesOutOfView();
-    return;
-  }
   scrollMenuToFilteredResults();
 }
 
@@ -1404,7 +1387,7 @@ function bindCategoryTileEvents() {
   tilesEl.addEventListener("click", (event) => {
     const button = event.target.closest(".category-tile[data-category]");
     if (!button || !tilesEl.contains(button)) return;
-    selectCategory(button.dataset.category, { scrollMode: "tiles" });
+    selectCategory(button.dataset.category);
   });
 }
 
