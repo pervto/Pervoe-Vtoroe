@@ -1412,17 +1412,23 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   transition: .2s ease;
 }
 
+.category-btn--with-icon {
+  gap: 5px;
+  padding: 3px 12px 3px 8px;
+}
+
 .category-btn-icon {
   display: block;
   width: auto;
-  height: 20px;
-  max-width: 28px;
+  height: 34px;
+  max-width: 44px;
   flex-shrink: 0;
   object-fit: contain;
 }
 
 .category-btn-label {
   display: block;
+  line-height: 1.05;
 }
 
 .category-btn:hover { transform: translateY(-1px); }

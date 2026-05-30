@@ -1209,10 +1209,11 @@ function renderCategories() {
         ? t("categoriesAll")
         : getDisplayCategoryLabel(cat);
       const categoryIcon = cat === ALL_CATEGORY ? "" : String(categoryIconMap[cat] || "").trim();
+      const withIconClass = categoryIcon ? " category-btn--with-icon" : "";
       const iconMarkup = categoryIcon
         ? `<img class="category-btn-icon" src="${escapeHtml(categoryIcon)}" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.remove()" />`
         : "";
-      return `<button class="category-btn ${cat === activeCategory ? "active" : ""}" data-category="${cat}">${iconMarkup}<span class="category-btn-label">${escapeHtml(translatedCategory)}</span></button>`;
+      return `<button class="category-btn${withIconClass} ${cat === activeCategory ? "active" : ""}" data-category="${cat}">${iconMarkup}<span class="category-btn-label">${escapeHtml(translatedCategory)}</span></button>`;
     })
     .join("");
 }
