@@ -1401,10 +1401,13 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   background: rgba(230, 235, 242, .58);
   color: #131b35;
   font-family: inherit;
-  padding: 9px 14px;
+  box-sizing: border-box;
+  height: 38px;
+  padding: 0 14px;
   border-radius: 999px;
   font-size: 15px;
   font-weight: 600;
+  line-height: 1;
   white-space: nowrap;
   cursor: pointer;
   backdrop-filter: blur(18px) saturate(1.1);
@@ -1413,15 +1416,16 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 }
 
 .category-btn--with-icon {
-  gap: 5px;
-  padding: 3px 12px 3px 8px;
+  gap: 4px;
+  padding: 0 12px 0 6px;
 }
 
 .category-btn-icon {
   display: block;
   width: auto;
-  height: 34px;
-  max-width: 44px;
+  height: 32px;
+  max-width: 42px;
+  margin: 0;
   flex-shrink: 0;
   object-fit: contain;
 }
