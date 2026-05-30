@@ -395,8 +395,7 @@ const MENU_HEADER_ALIASES = {
   description: ["description", "\u043e\u043f\u0438\u0441\u0430\u043d\u0438\u0435"],
   weight: ["weight", "\u0433\u0440\u0430\u043c\u043c\u043e\u0432\u043a\u0430", "\u0432\u0435\u0441", "\u0433\u0440\u0430\u043c\u043c\u044b"],
   calories: ["calories", "\u043a\u0430\u043b\u043e\u0440\u0438\u0438", "\u043a\u043a\u0430\u043b"],
-  categoryOrder: ["category order", "category_order", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438"],
-  categoryIcon: ["category icon", "category icons", "\u0437\u043d\u0430\u0447\u043a\u0438 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439", "\u0437\u043d\u0430\u0447\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438", "\u0438\u043a\u043e\u043d\u043a\u0430 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438", "\u0438\u043a\u043e\u043d\u043a\u0438 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439"]
+  categoryOrder: ["category order", "category_order", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438"]
 };
 
 const MENU_PHOTO_HEADER_RE = /^(photo|image|\u0444\u043e\u0442\u043e|\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430)(\s*\d+)?$/i;
@@ -474,33 +473,6 @@ function normalizeMenuHeader(value) {
 
 function findMenuHeaderIndex(headers, key) {
   return headers.findIndex((header) => MENU_HEADER_ALIASES[key].includes(header));
-}
-
-function buildCategoryOrderListFromRows(rows, categoryOrderIndex) {
-  if (!Array.isArray(rows) || categoryOrderIndex < 0) return [];
-
-  return rows
-    .map((line) => (Array.isArray(line) ? line : parseCsvLine(line)))
-    .map((cols) => String(cols[categoryOrderIndex] || "").trim())
-    .filter(Boolean)
-    .filter((value, index, list) => list.indexOf(value) === index);
-}
-
-function buildCategoryIconMapFromRows(rows, categoryOrderIndex, categoryIconIndex) {
-  if (!Array.isArray(rows) || categoryOrderIndex < 0 || categoryIconIndex < 0) return {};
-
-  return rows.reduce((acc, line) => {
-    const cols = Array.isArray(line) ? line : parseCsvLine(line);
-    const categoryName = String(cols[categoryOrderIndex] || "").trim();
-    const rawIcon = String(cols[categoryIconIndex] || "").trim();
-    const categoryIcon = rawIcon ? normalizePhotoUrl(rawIcon, { targetWidth: 100 }) : "";
-
-    if (categoryName && categoryIcon && !acc[categoryName]) {
-      acc[categoryName] = categoryIcon;
-    }
-
-    return acc;
-  }, {});
 }
 
 function isAvailableMenuValue(value) {
@@ -692,8 +664,7 @@ function parseMenuCsvDataset(text) {
     description: findMenuHeaderIndex(headers, "description"),
     weight: findMenuHeaderIndex(headers, "weight"),
     calories: findMenuHeaderIndex(headers, "calories"),
-    categoryOrder: findMenuHeaderIndex(headers, "categoryOrder"),
-    categoryIcon: findMenuHeaderIndex(headers, "categoryIcon")
+    categoryOrder: findMenuHeaderIndex(headers, "categoryOrder")
   };
 
   if ([indexes.name, indexes.price, indexes.category, indexes.available].some((index) => index === -1)) {
@@ -701,8 +672,12 @@ function parseMenuCsvDataset(text) {
   }
 
   const dataRows = parsedRows.slice(1);
-  const nextCategoryOrderList = buildCategoryOrderListFromRows(dataRows, indexes.categoryOrder);
-  const nextCategoryIconMap = buildCategoryIconMapFromRows(dataRows, indexes.categoryOrder, indexes.categoryIcon);
+  const nextCategoryOrderList = indexes.categoryOrder >= 0
+    ? dataRows
+      .map((cols) => String(cols[indexes.categoryOrder] || "").trim())
+      .filter(Boolean)
+      .filter((value, index, list) => list.indexOf(value) === index)
+    : [];
 
   const nextHeroBanners = buildHeroBannersFromRows(parsedRows, indexes.banner);
   const nextMenuData = dataRows
@@ -736,7 +711,6 @@ function parseMenuCsvDataset(text) {
     rawText: String(text || ""),
     menuItems: nextMenuData,
     categoryOrderList: nextCategoryOrderList,
-    categoryIconMap: nextCategoryIconMap,
     heroBanners: nextHeroBanners
   };
 }
@@ -777,9 +751,6 @@ function syncCartWithAvailableMenu(showNotice = false) {
 
 function applyMenuDataset(dataset, options = {}) {
   categoryOrderList = Array.isArray(dataset.categoryOrderList) ? dataset.categoryOrderList : [];
-  categoryIconMap = dataset.categoryIconMap && typeof dataset.categoryIconMap === "object"
-    ? { ...dataset.categoryIconMap }
-    : {};
   heroBanners = Array.isArray(dataset.heroBanners) ? dataset.heroBanners : [];
   menuData = Array.isArray(dataset.menuItems) ? dataset.menuItems : [];
   menuLastCsvSnapshot = String(dataset.rawText || "");
@@ -1208,12 +1179,7 @@ function renderCategories() {
       const translatedCategory = cat === ALL_CATEGORY
         ? t("categoriesAll")
         : getDisplayCategoryLabel(cat);
-      const categoryIcon = cat === ALL_CATEGORY ? "" : String(categoryIconMap[cat] || "").trim();
-      const withIconClass = categoryIcon ? " category-btn--with-icon" : "";
-      const iconMarkup = categoryIcon
-        ? `<img class="category-btn-icon" src="${escapeHtml(categoryIcon)}" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.remove()" />`
-        : "";
-      return `<button class="category-btn${withIconClass} ${cat === activeCategory ? "active" : ""}" data-category="${cat}">${iconMarkup}<span class="category-btn-label">${escapeHtml(translatedCategory)}</span></button>`;
+      return `<button class="category-btn ${cat === activeCategory ? "active" : ""}" data-category="${cat}">${escapeHtml(translatedCategory)}</button>`;
     })
     .join("");
 }
@@ -2052,9 +2018,7 @@ function applyStaticTranslations() {
   setAriaLabel("#settings-toggle", t("settingsButtonAria"));
   setText("#settings-popover-kicker", t("settingsKicker"));
   setText("#settings-popover-title", t("settingsTitle"));
-  setText("#settings-popover-text", "");
-  const settingsPopoverText = document.getElementById("settings-popover-text");
-  if (settingsPopoverText) settingsPopoverText.hidden = true;
+  setText("#settings-popover-text", t("settingsText"));
   const languageGroup = document.querySelector(".settings-language-list");
   if (languageGroup) languageGroup.setAttribute("aria-label", t("settingsGroupAria"));
   const settingsIntro = t("settingsText");
@@ -2063,7 +2027,7 @@ function applyStaticTranslations() {
     .replace(" и сайт откроется на нем при следующем визите.", ".")
     .replace(" and open in it next time.", ".")
     .replace(" және келесі жолы сол тілде ашылады.", ".");
-  setText("#settings-popover-text", "");
+  setText("#settings-popover-text", shortSettingsIntro);
   setText("#settings-theme-title", t("settingsThemeTitle"));
   setText("#settings-theme-text", "");
   const themeGroup = document.querySelector(".settings-theme-list");

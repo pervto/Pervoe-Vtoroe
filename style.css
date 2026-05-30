@@ -1394,45 +1394,19 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 }
 
 .category-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
   border: 1px solid rgba(255,255,255,.24);
   background: rgba(230, 235, 242, .58);
   color: #131b35;
   font-family: inherit;
-  box-sizing: border-box;
-  height: 38px;
-  padding: 0 14px;
+  padding: 9px 14px;
   border-radius: 999px;
   font-size: 15px;
   font-weight: 600;
-  line-height: 1;
   white-space: nowrap;
   cursor: pointer;
   backdrop-filter: blur(18px) saturate(1.1);
   -webkit-backdrop-filter: blur(18px) saturate(1.1);
   transition: .2s ease;
-}
-
-.category-btn--with-icon {
-  gap: 4px;
-  padding: 0 12px 0 6px;
-}
-
-.category-btn-icon {
-  display: block;
-  width: auto;
-  height: 32px;
-  max-width: 42px;
-  margin: 0;
-  flex-shrink: 0;
-  object-fit: contain;
-}
-
-.category-btn-label {
-  display: block;
-  line-height: 1.05;
 }
 
 .category-btn:hover { transform: translateY(-1px); }
