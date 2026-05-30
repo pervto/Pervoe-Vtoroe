@@ -241,6 +241,10 @@ if (searchInput && searchClear) {
   searchInput.addEventListener("blur", handleSearchFocusStateChange);
 
   searchInput.addEventListener("input", () => {
+    const preparedValue = replaceSearchSeparators(searchInput.value);
+    if (preparedValue !== searchInput.value) {
+      searchInput.value = preparedValue;
+    }
     searchQuery = searchInput.value.trim();
     updateSearchClearVisibility();
     updateHeroSearchState();

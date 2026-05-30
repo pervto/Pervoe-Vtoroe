@@ -1376,7 +1376,7 @@ function cancelPendingMenuRender() {
 }
 
 function getFilteredMenuItems() {
-  const query = searchQuery.trim().toLowerCase();
+  const query = normalizeSearchText(searchQuery);
   const byCategory = activeCategory === ALL_CATEGORY
     ? menuData
     : menuData.filter((item) => item.category === activeCategory);
@@ -1384,12 +1384,23 @@ function getFilteredMenuItems() {
   if (!query) return byCategory;
   const itemsForSearch = menuData;
   if (currentLanguage === "ru") {
-    return itemsForSearch.filter((item) => item.name.toLowerCase().includes(query));
+    return itemsForSearch.filter((item) => {
+      const name = normalizeSearchText(item.name);
+      const description = normalizeSearchText(item.description);
+      return name.includes(query) || description.includes(query);
+    });
   }
 
   return itemsForSearch.filter((item) => {
     const displayItem = getDisplayItem(item);
-    return item.name.toLowerCase().includes(query) || String(displayItem.displayName || "").toLowerCase().includes(query);
+    const name = normalizeSearchText(item.name);
+    const displayName = normalizeSearchText(displayItem.displayName || "");
+    const description = normalizeSearchText(item.description);
+    const displayDescription = normalizeSearchText(displayItem.displayDescription || "");
+    return name.includes(query) ||
+      displayName.includes(query) ||
+      description.includes(query) ||
+      displayDescription.includes(query);
   });
 }
 
