@@ -1296,31 +1296,12 @@ function revealActiveCategoryPill() {
   if (!activeButton) return;
 
   requestAnimationFrame(() => {
-    const edgeGap = 8;
-    const buttonLeft = activeButton.offsetLeft;
-    const buttonRight = buttonLeft + activeButton.offsetWidth;
-    const visibleLeft = categoriesEl.scrollLeft;
-    const visibleRight = visibleLeft + categoriesEl.clientWidth;
+    const ribbon = categoriesEl;
+    const btn = activeButton;
 
-    let nextScrollLeft = null;
-    if (buttonLeft - edgeGap < visibleLeft) {
-      nextScrollLeft = Math.max(buttonLeft - edgeGap, 0);
-    } else if (buttonRight + edgeGap > visibleRight) {
-      nextScrollLeft = Math.min(
-        buttonRight + edgeGap - categoriesEl.clientWidth,
-        Math.max(categoriesEl.scrollWidth - categoriesEl.clientWidth, 0)
-      );
-    }
-
-    if (nextScrollLeft !== null) {
-      categoriesEl.scrollTo({ left: nextScrollLeft, behavior: "smooth" });
-      return;
-    }
-
-    activeButton.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "nearest"
+    ribbon.scrollTo({
+      left: btn.offsetLeft - (ribbon.clientWidth / 2) + (btn.offsetWidth / 2),
+      behavior: "smooth"
     });
   });
 }

@@ -1205,15 +1205,14 @@ main.container {
 .categories-ribbon {
   position: fixed;
   top: 0;
-  left: 50%;
+  left: 0;
   z-index: 39;
-  width: min(calc(100vw - 28px), 1112px);
+  width: 100%;
   background: rgba(171, 180, 191, 0.82);
   border-bottom-left-radius: 18px;
   border-bottom-right-radius: 18px;
   backdrop-filter: blur(32px) saturate(1.12);
   -webkit-backdrop-filter: blur(32px) saturate(1.12);
-  transform: translateX(-50%);
   opacity: 1;
   visibility: visible;
   transition: opacity 200ms ease, visibility 0s linear 0s;
@@ -1228,8 +1227,12 @@ main.container {
 }
 
 .categories-ribbon-container {
+  max-width: none;
+  margin: 0;
   padding-top: 0;
+  padding-right: 0;
   padding-bottom: 4px;
+  padding-left: 0;
 }
 
 .menu-dock::before {
