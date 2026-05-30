@@ -1275,8 +1275,10 @@ function renderCategoriesSkeleton() {
 
 function getCategorySelectionScrollTop() {
   const tilesBand = document.getElementById("category-tiles-band");
+  const categoriesRibbon = document.getElementById("categories-ribbon");
   if (!tilesBand || tilesBand.hidden) return null;
-  return Math.max(tilesBand.offsetTop + tilesBand.offsetHeight + 8, 0);
+  const ribbonHeight = categoriesRibbon ? categoriesRibbon.offsetHeight : 0;
+  return Math.max(tilesBand.offsetTop + tilesBand.offsetHeight + ribbonHeight + 8, 0);
 }
 
 function scrollPageToCategoryTarget(targetTop) {
