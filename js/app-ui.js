@@ -27,8 +27,9 @@ function getItemPhotos(item) {
   return [...new Set(photos.map(normalizePhotoUrl).filter(Boolean))];
 }
 
-const DISH_CARD_PHOTO_WIDTH = 600;
+const DISH_CARD_PHOTO_WIDTH = 510;
 const DISH_MODAL_PHOTO_WIDTH = 800;
+const DISH_PREVIEW_PHOTO_WIDTH = 80;
 const preloadedDishPhotoUrls = new Set();
 
 function encodePhotoFallbacks(urls) {
@@ -65,30 +66,76 @@ function consumePhotoFallback(image) {
 window.handleDishImageError = function handleDishImageError(image) {
   if (consumePhotoFallback(image)) return;
 
-  const placeholder = document.createElement("div");
-  placeholder.className = image.classList.contains("dish-modal-image")
-    ? "dish-modal-image-placeholder"
-    : "food-image-placeholder";
-  placeholder.textContent = t("dishPhotoSoon");
-  image.replaceWith(placeholder);
+  const shell = image.closest(".dish-photo-shell");
+  if (!shell) {
+    const placeholder = createDishPhotoPlaceholderElement(
+      image.classList.contains("dish-modal-image")
+        ? "dish-modal-image-placeholder"
+        : "food-image-placeholder"
+    );
+    image.replaceWith(placeholder);
+    return;
+  }
+
+  if (image.dataset.photoStage === "preview") {
+    image.remove();
+    return;
+  }
+
+  shell.replaceWith(createDishPhotoPlaceholderElement(shell.dataset.placeholderClass || "food-image-placeholder"));
 };
 
+window.handleDishImageLoad = function handleDishImageLoad(image) {
+  if (!image || image.dataset.photoStage !== "full") return;
+
+  const shell = image.closest(".dish-photo-shell");
+  if (!shell) return;
+  shell.classList.add("is-full-loaded");
+};
+
+function buildDishPhotoPlaceholderHtml(className) {
+  return `<div class="${className}">${escapeHtml(t("dishPhotoSoon"))}</div>`;
+}
+
+function createDishPhotoPlaceholderElement(className) {
+  const placeholder = document.createElement("div");
+  placeholder.className = className;
+  placeholder.textContent = t("dishPhotoSoon");
+  return placeholder;
+}
+
 function buildResponsiveDishImage(rawUrl, className, altText, options = {}) {
-  const candidates = buildPhotoUrlCandidates(rawUrl, {
+  const fullCandidates = buildPhotoUrlCandidates(rawUrl, {
     targetWidth: options.targetWidth
   });
-  if (!candidates.length) return "";
+  if (!fullCandidates.length) return "";
+
+  const previewCandidates = buildPhotoUrlCandidates(rawUrl, {
+    targetWidth: options.previewTargetWidth || DISH_PREVIEW_PHOTO_WIDTH
+  });
 
   const isMobileViewport = window.matchMedia && window.matchMedia("(max-width: 860px)").matches;
   const loading = options.loading || (isMobileViewport ? "eager" : "lazy");
   const decoding = options.decoding || "async";
-  const fetchPriority = options.fetchPriority ? ` fetchpriority="${options.fetchPriority}"` : "";
+  const fetchPriorityValue = options.fetchPriority || "high";
+  const fetchPriority = fetchPriorityValue ? ` fetchpriority="${fetchPriorityValue}"` : "";
   const draggable = options.draggable === false ? ` draggable="false"` : "";
-  const fallbackAttr = candidates.length > 1
-    ? ` data-photo-fallbacks="${encodePhotoFallbacks(candidates.slice(1))}"`
+  const previewFallbackAttr = previewCandidates.length > 1
+    ? ` data-photo-fallbacks="${encodePhotoFallbacks(previewCandidates.slice(1))}"`
+    : "";
+  const fullFallbackAttr = fullCandidates.length > 1
+    ? ` data-photo-fallbacks="${encodePhotoFallbacks(fullCandidates.slice(1))}"`
+    : "";
+  const previewUrl = previewCandidates[0] || fullCandidates[0];
+  const fullUrl = fullCandidates[0];
+
+  if (!previewUrl && !fullUrl) return "";
+
+  const previewMarkup = previewUrl && previewUrl !== fullUrl
+    ? `<img class="dish-photo-layer dish-photo-layer--preview" src="${escapeHtml(previewUrl)}" alt="" aria-hidden="true" loading="eager" decoding="async" fetchpriority="high" data-photo-stage="preview" onerror="window.handleDishImageError && window.handleDishImageError(this)"${previewFallbackAttr} />`
     : "";
 
-  return `<img class="${className}" src="${escapeHtml(candidates[0])}" alt="${escapeHtml(altText)}" loading="${loading}" decoding="${decoding}" onerror="window.handleDishImageError && window.handleDishImageError(this)"${fetchPriority}${fallbackAttr}${draggable} />`;
+  return `<div class="${className} dish-photo-shell" data-placeholder-class="${escapeHtml(options.placeholderClassName || "food-image-placeholder")}">${previewMarkup}<img class="dish-photo-layer dish-photo-layer--full" src="${escapeHtml(fullUrl)}" alt="${escapeHtml(altText)}" loading="${loading}" decoding="${decoding}"${fetchPriority} data-photo-stage="full" onload="window.handleDishImageLoad && window.handleDishImageLoad(this)" onerror="window.handleDishImageError && window.handleDishImageError(this)"${fullFallbackAttr}${draggable} /></div>`;
 }
 
 function bindDishPhotoFallbacks(root = document) {
@@ -110,12 +157,14 @@ function buildDishPhotoHtml(item, className = "food-image", altText = "") {
   if (rawPhotoUrl) {
     return buildResponsiveDishImage(rawPhotoUrl, className, imageAlt, {
       targetWidth: DISH_CARD_PHOTO_WIDTH,
+      previewTargetWidth: DISH_PREVIEW_PHOTO_WIDTH,
+      placeholderClassName: "food-image-placeholder",
       loading: "eager",
       decoding: "async",
       fetchPriority: "high"
     });
   }
-  return `<div class="food-image-placeholder">${escapeHtml(t("dishPhotoSoon"))}</div>`;
+  return buildDishPhotoPlaceholderHtml("food-image-placeholder");
 }
 
 function getDishSlideCount(item) {
@@ -151,6 +200,8 @@ function renderDishModalSlides(item) {
         `<div class="dish-modal-slide">
           ${buildResponsiveDishImage(photoUrl, "dish-modal-image", `${displayItem.displayName || item.name} ${index + 1}`, {
             targetWidth: DISH_MODAL_PHOTO_WIDTH,
+            previewTargetWidth: DISH_PREVIEW_PHOTO_WIDTH,
+            placeholderClassName: "dish-modal-image-placeholder",
             loading: "eager",
             decoding: "async",
             fetchPriority: "high",
@@ -158,7 +209,7 @@ function renderDishModalSlides(item) {
           })}
         </div>`
       )).join("")
-      : `<div class="dish-modal-slide"><div class="dish-modal-image-placeholder">${escapeHtml(t("dishPhotoSoon"))}</div></div>`;
+      : `<div class="dish-modal-slide">${buildDishPhotoPlaceholderHtml("dish-modal-image-placeholder")}</div>`;
 
     track.dataset.photoKey = photoKey;
     bindDishPhotoFallbacks(track);
@@ -1325,18 +1376,78 @@ function cancelPendingMenuRender() {
 }
 
 function getFilteredMenuItems() {
-  const byCategory = activeCategory === ALL_CATEGORY ? menuData : menuData.filter((item) => item.category === activeCategory);
   const query = searchQuery.trim().toLowerCase();
+  const byCategory = activeCategory === ALL_CATEGORY
+    ? menuData
+    : menuData.filter((item) => item.category === activeCategory);
 
   if (!query) return byCategory;
+  const itemsForSearch = menuData;
   if (currentLanguage === "ru") {
-    return byCategory.filter((item) => item.name.toLowerCase().includes(query));
+    return itemsForSearch.filter((item) => item.name.toLowerCase().includes(query));
   }
 
-  return byCategory.filter((item) => {
+  return itemsForSearch.filter((item) => {
     const displayItem = getDisplayItem(item);
     return item.name.toLowerCase().includes(query) || String(displayItem.displayName || "").toLowerCase().includes(query);
   });
+}
+
+function replaceSearchSeparators(value) {
+  return String(value || "").replace(/[-–—]/g, " ");
+}
+
+const SEARCH_ALLOWED_CHARS_PATTERN = /[^0-9a-z\u0400-\u04FF\s]+/gi;
+const SEARCH_STOP_WORDS = new Set([
+  "\u043f\u043e",
+  "\u0441",
+  "\u0438",
+  "\u0432",
+  "\u0430",
+  "\u043d\u0430",
+  "\u0438\u0437",
+  "\u0441\u043e",
+  "\u0448\u0442",
+  "\u0433",
+  "\u043c\u043b"
+]);
+function normalizeSearchText(value) {
+  return replaceSearchSeparators(value)
+    .toLowerCase()
+    .replace(SEARCH_ALLOWED_CHARS_PATTERN, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getSearchWords(value) {
+  const normalized = normalizeSearchText(value);
+  return normalized
+    ? normalized
+      .split(" ")
+      .filter((word) => word.length >= 3)
+      .filter((word) => !SEARCH_STOP_WORDS.has(word))
+    : [];
+}
+
+function buildSearchKey(words) {
+  return words.join(" ");
+}
+
+function getSearchKeys(textList) {
+  return textList
+    .map((text) => buildSearchKey(getSearchWords(text)))
+    .filter(Boolean);
+}
+
+function getSearchWordSets(textList) {
+  return textList
+    .map((text) => getSearchWords(text))
+    .filter((words) => words.length)
+    .map((words) => new Set(words));
+}
+
+function wordSetsContainAllQueryWords(wordSets, queryWords) {
+  return wordSets.some((wordSet) => queryWords.every((word) => wordSet.has(word)));
 }
 
 function buildMenuCardHtml(item, index) {
@@ -1813,6 +1924,12 @@ function syncStickyOffsets() {
 }
 
 function updateTomatoLayerState() {
+  const isSearchTomatoEnabled = document.documentElement.dataset.searchTomato !== "off";
+  if (!isSearchTomatoEnabled) {
+    document.body.classList.remove("tomato-over-header");
+    return;
+  }
+
   const heroBand = document.getElementById("hero-band");
   const header = document.getElementById("site-header");
   const menuDock = document.getElementById("menu-dock");

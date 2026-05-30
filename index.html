@@ -12,6 +12,7 @@
   <script>
     (() => {
       try {
+        const SEARCH_TOMATO_ENABLED = false;
         const savedThemeMode = localStorage.getItem("pervoe-vtoroe-theme") || "auto";
         const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
         const effectiveTheme = savedThemeMode === "dark" || (savedThemeMode === "auto" && prefersDark) ? "dark" : "light";
@@ -22,6 +23,7 @@
         document.documentElement.dataset.themeMode = savedThemeMode;
         document.documentElement.dataset.theme = effectiveTheme;
         document.documentElement.dataset.pwaMode = isStandaloneApp ? "standalone" : "browser";
+        document.documentElement.dataset.searchTomato = SEARCH_TOMATO_ENABLED ? "on" : "off";
         document.documentElement.style.colorScheme = effectiveTheme;
       } catch {}
     })();
@@ -37,7 +39,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=114" />
+  <link rel="stylesheet" href="style.css?v=116" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -288,10 +290,10 @@
   </div>
 
   <script src="config.js?v=32"></script>
-  <script src="js/app-state.js?v=8"></script>
+  <script src="js/app-state.js?v=9"></script>
   <script src="js/app-hero.js?v=4"></script>
-  <script src="js/app-ui.js?v=34"></script>
-  <script src="js/app-main.js?v=15"></script>
+  <script src="js/app-ui.js?v=37"></script>
+  <script src="js/app-main.js?v=16"></script>
   <script>
     const siteLogo = document.querySelector("[data-logo-src-light]");
     if (siteLogo) {
