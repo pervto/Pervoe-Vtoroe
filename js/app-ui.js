@@ -446,7 +446,6 @@ let menuRenderItems = [];
 let menuRenderedCount = 0;
 let menuRenderObserver = null;
 let categoryTilesObserver = null;
-let categoryRibbonSyncTimer = 0;
 let scheduledBackgroundTranslationId = 0;
 const OVERLAY_SCROLL_CONTAINER_SELECTOR = ".modal-content, .dish-modal-shell, .thanks-card";
 
@@ -1640,33 +1639,6 @@ function renderNextMenuChunk(renderToken) {
   observeMenuRenderSentinel(nextSentinel, renderToken);
 }
 
-function syncCategoryRibbonOffsetsSoon() {
-  syncStickyOffsets();
-  updateTomatoLayerState();
-  if (categoryRibbonSyncTimer) {
-    window.clearTimeout(categoryRibbonSyncTimer);
-  }
-  categoryRibbonSyncTimer = window.setTimeout(() => {
-    categoryRibbonSyncTimer = 0;
-    syncStickyOffsets();
-    updateTomatoLayerState();
-  }, 320);
-}
-
-function setCategoryRibbonHiddenByTiles(isHidden) {
-  const menuDock = document.getElementById("menu-dock");
-  const categoriesRibbon = document.getElementById("categories-ribbon");
-  if (!menuDock || !categoriesRibbon) return;
-
-  const shouldHide = Boolean(isHidden);
-  const hasHiddenClass = menuDock.classList.contains("menu-dock--tiles-visible");
-  if (hasHiddenClass === shouldHide) return;
-
-  menuDock.classList.toggle("menu-dock--tiles-visible", shouldHide);
-  categoriesRibbon.setAttribute("aria-hidden", shouldHide ? "true" : "false");
-  syncCategoryRibbonOffsetsSoon();
-}
-
 function getCategoryTilesObserverRootMargin() {
   const header = document.getElementById("site-header");
   const searchWrap = document.querySelector(".menu-dock .search-wrap");
@@ -1682,15 +1654,15 @@ function refreshCategoryTilesObserver() {
     categoryTilesObserver = null;
   }
 
+  const menuDock = document.getElementById("menu-dock");
   const tilesBand = document.getElementById("category-tiles-band");
-  if (!tilesBand || tilesBand.hidden) {
-    setCategoryRibbonHiddenByTiles(false);
+  if (!menuDock || !tilesBand || tilesBand.hidden) {
+    if (menuDock) menuDock.classList.remove("menu-dock--tiles-visible");
     return;
   }
 
   categoryTilesObserver = new IntersectionObserver((entries) => {
-    const tilesVisible = entries.some((entry) => entry.isIntersecting);
-    setCategoryRibbonHiddenByTiles(tilesVisible);
+    menuDock.classList.toggle("menu-dock--tiles-visible", entries.some((entry) => entry.isIntersecting));
   }, {
     root: null,
     threshold: 0.02,
