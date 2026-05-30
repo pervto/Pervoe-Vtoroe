@@ -49,7 +49,6 @@ bindHeroBannerSwipeEvents();
 
 let whatsappReturnPending = false;
 let whatsappPageBackgrounded = false;
-let stickyScrollSyncQueued = false;
 
 function resetWhatsAppReturnState() {
   whatsappReturnPending = false;
@@ -266,13 +265,6 @@ window.addEventListener("scroll", () => {
   const topBtn = document.getElementById("to-top");
   if (window.scrollY > 380) topBtn.classList.add("show");
   else topBtn.classList.remove("show");
-  if (!stickyScrollSyncQueued) {
-    stickyScrollSyncQueued = true;
-    requestAnimationFrame(() => {
-      stickyScrollSyncQueued = false;
-      syncStickyOffsets();
-    });
-  }
   updateTomatoLayerState();
 }, { passive: true });
 
@@ -281,7 +273,6 @@ window.addEventListener("resize", () => {
     window.__stickyMetricsTicking = true;
     requestAnimationFrame(() => {
       syncStickyOffsets();
-      refreshCategoryTilesObserver();
       updateTomatoLayerState();
       if (activeDishName) syncDishModalTrack({ withTransition: false, offsetX: 0 });
       if (heroBanners.length) syncHeroBannerTrack({ withTransition: false, offsetX: 0 });
@@ -295,7 +286,6 @@ window.addEventListener("resize", () => {
 
 if (window.visualViewport) {
   const handleVisualViewportChange = () => {
-    syncStickyOffsets();
     if (document.activeElement === searchInput) {
       scheduleSearchViewportSync();
     }
@@ -307,20 +297,8 @@ if (window.visualViewport) {
 
 window.addEventListener("load", () => {
   syncStickyOffsets();
-  refreshCategoryTilesObserver();
   updateTomatoLayerState();
 });
-
-if (window.ResizeObserver) {
-  const stickyMetricsObserver = new ResizeObserver(() => {
-    syncStickyOffsets();
-    refreshCategoryTilesObserver();
-  });
-  const header = document.getElementById("site-header");
-  const searchWrap = document.querySelector(".menu-dock .search-wrap");
-  if (header) stickyMetricsObserver.observe(header);
-  if (searchWrap) stickyMetricsObserver.observe(searchWrap);
-}
 window.addEventListener("keydown", (event) => {
   const dishModal = document.getElementById("dish-modal");
   const cartModal = document.getElementById("cart-modal");
@@ -419,11 +397,9 @@ startWorkingHoursMonitoring();
 renderHeroBannerSkeleton();
 updateSettingsLanguageButtons(false);
 loadMenu();
-bindCategoryTileEvents();
 renderCart();
 updateSearchClearVisibility();
 syncStickyOffsets();
-refreshCategoryTilesObserver();
 updateSearchInputActiveState(false);
 updateHeroSearchState();
 updateTomatoLayerState();
@@ -436,7 +412,6 @@ tryShowPendingOrderConfirmation();
 if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(() => {
     syncStickyOffsets();
-    refreshCategoryTilesObserver();
     updateTomatoLayerState();
   });
 }
