@@ -4,6 +4,7 @@
   --logo-bar-height: 78px;
   --menu-search-height: 58px;
   --menu-dock-height: 76px;
+  --categories-ribbon-height: 0px;
   --safe-top-offset: 0px;
   --top-surface: #dfe4ea;
   --glass: rgba(255, 255, 255, 0.82);
@@ -80,6 +81,10 @@ main.container {
   flex: 1;
   padding-top: 14px;
   padding-bottom: 18px;
+}
+
+body:not(:has(#categories-ribbon.is-hidden)) main.container {
+  padding-top: calc(14px + var(--categories-ribbon-height) + 8px);
 }
 
 .header {

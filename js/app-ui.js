@@ -1690,11 +1690,13 @@ function refreshCategoryTilesObserver() {
   const tilesBand = document.getElementById("category-tiles-band");
   if (!categoriesRibbon || !tilesBand || tilesBand.hidden) {
     if (categoriesRibbon) categoriesRibbon.classList.add("is-hidden");
+    syncStickyOffsets();
     return;
   }
 
   categoryTilesObserver = new IntersectionObserver((entries) => {
     categoriesRibbon.classList.toggle("is-hidden", entries.some((entry) => entry.isIntersecting));
+    syncStickyOffsets();
   }, {
     root: null,
     threshold: 0.02,
@@ -2101,6 +2103,12 @@ function syncStickyOffsets() {
   document.documentElement.style.setProperty("--menu-search-height", `${Math.ceil(searchWrap ? searchWrap.offsetHeight : 0)}px`);
   if (categoriesRibbon) {
     categoriesRibbon.style.top = `${Math.ceil(searchWrap ? searchWrap.getBoundingClientRect().bottom : header.offsetHeight)}px`;
+    document.documentElement.style.setProperty(
+      "--categories-ribbon-height",
+      categoriesRibbon.classList.contains("is-hidden") ? "0px" : `${Math.ceil(categoriesRibbon.offsetHeight)}px`
+    );
+  } else {
+    document.documentElement.style.setProperty("--categories-ribbon-height", "0px");
   }
   if (menuDock) {
     document.documentElement.style.setProperty("--menu-dock-height", `${Math.ceil(menuDock.offsetHeight)}px`);
