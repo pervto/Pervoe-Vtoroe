@@ -446,7 +446,6 @@ let menuRenderItems = [];
 let menuRenderedCount = 0;
 let menuRenderObserver = null;
 let categoryTilesObserver = null;
-let tileClickInProgress = false;
 let scheduledBackgroundTranslationId = 0;
 const OVERLAY_SCROLL_CONTAINER_SELECTOR = ".modal-content, .dish-modal-shell, .thanks-card";
 
@@ -1299,37 +1298,12 @@ function getCategorySelectionScrollTop() {
   return Math.max(menuTargetTop, tilesHideTargetTop);
 }
 
-function scrollPageToCategoryTarget(options = {}) {
-  const targetTop = getCategorySelectionScrollTop();
-  if (targetTop === null) {
-    if (options.fromTiles) {
-      tileClickInProgress = false;
-      refreshCategoryTilesObserver();
-    }
-    return;
-  }
-
-  if (Math.abs(window.scrollY - targetTop) < 2) {
-    if (options.fromTiles) {
-      tileClickInProgress = false;
-      refreshCategoryTilesObserver();
-    }
-    return;
-  }
-
-  const tileScrollToken = options.fromTiles ? ++tileClickScrollToken : 0;
-
+function scrollPageToCategoryTarget(targetTop) {
+  if (targetTop === null) return;
+  if (Math.abs(window.scrollY - targetTop) < 2) return;
   window.scrollTo({
     top: targetTop,
     behavior: "smooth"
-  });
-
-  if (!options.fromTiles) return;
-
-  waitForScrollEnd(() => {
-    if (tileScrollToken !== tileClickScrollToken) return;
-    tileClickInProgress = false;
-    refreshCategoryTilesObserver();
   });
 }
 
@@ -1349,57 +1323,14 @@ function revealActiveCategoryPill() {
   });
 }
 
-let pendingCategorySelectionFromTiles = false;
-let tileClickScrollToken = 0;
-
-function waitForScrollEnd(callback) {
-  let finished = false;
-  let lastPos = window.scrollY;
-  let hasMoved = false;
-  let stableTicks = 0;
-
-  const finish = () => {
-    if (finished) return;
-    finished = true;
-    window.clearInterval(timer);
-    window.clearTimeout(fallbackTimer);
-    callback();
-  };
-
-  const timer = window.setInterval(() => {
-    const currentPos = window.scrollY;
-    if (currentPos !== lastPos) {
-      hasMoved = true;
-      stableTicks = 0;
-      lastPos = currentPos;
-      return;
-    }
-
-    if (!hasMoved) return;
-
-    stableTicks += 1;
-    if (stableTicks >= 2) finish();
-  }, 50);
-
-  const fallbackTimer = window.setTimeout(finish, 700);
-}
-
 function selectCategory(category) {
   if (!category) return;
-  const fromTiles = pendingCategorySelectionFromTiles;
-  pendingCategorySelectionFromTiles = false;
-
-  const categoriesRibbon = document.getElementById("categories-ribbon");
-  if (fromTiles && categoriesRibbon) {
-    categoriesRibbon.classList.remove("is-hidden");
-    syncStickyOffsets();
-  }
-
   activeCategory = category;
   renderCategories();
-  revealActiveCategoryPill();
   renderMenu();
-  scrollPageToCategoryTarget({ fromTiles });
+  const targetTop = getCategorySelectionScrollTop();
+  revealActiveCategoryPill();
+  scrollPageToCategoryTarget(targetTop);
 }
 
 function buildControlsHtml(name, options = {}) {
@@ -1460,8 +1391,6 @@ function bindCategoryTileEvents() {
   let lastTileTouchAt = 0;
 
   const activateTileCategory = (button) => {
-    pendingCategorySelectionFromTiles = true;
-    tileClickInProgress = true;
     selectCategory(button.dataset.category);
   };
 
@@ -1770,6 +1699,13 @@ function getCategoryTilesObserverRootMargin() {
   return `-${topOffset}px 0px 0px 0px`;
 }
 
+function updateCategoryRibbonVisibility(tilesAreVisible) {
+  const categoriesRibbon = document.getElementById("categories-ribbon");
+  if (!categoriesRibbon) return;
+  categoriesRibbon.classList.toggle("is-hidden", tilesAreVisible);
+  syncStickyOffsets();
+}
+
 function refreshCategoryTilesObserver() {
   if (categoryTilesObserver) {
     categoryTilesObserver.disconnect();
@@ -1779,20 +1715,18 @@ function refreshCategoryTilesObserver() {
   const categoriesRibbon = document.getElementById("categories-ribbon");
   const tilesBand = document.getElementById("category-tiles-band");
   if (!categoriesRibbon || !tilesBand || tilesBand.hidden) {
-    if (categoriesRibbon) categoriesRibbon.classList.add("is-hidden");
-    syncStickyOffsets();
+    updateCategoryRibbonVisibility(true);
     return;
   }
 
+  const tilesBandRect = tilesBand.getBoundingClientRect();
+  const observerTopOffset = Math.abs(parseFloat(getCategoryTilesObserverRootMargin())) || 0;
+  const tilesAreVisibleInitially = tilesBandRect.bottom > observerTopOffset && tilesBandRect.top < window.innerHeight;
+  updateCategoryRibbonVisibility(tilesAreVisibleInitially);
+
   categoryTilesObserver = new IntersectionObserver((entries) => {
     const tilesStillVisible = entries.some((entry) => entry.isIntersecting);
-    if (tileClickInProgress) {
-      categoriesRibbon.classList.remove("is-hidden");
-      syncStickyOffsets();
-      return;
-    }
-    categoriesRibbon.classList.toggle("is-hidden", tilesStillVisible);
-    syncStickyOffsets();
+    updateCategoryRibbonVisibility(tilesStillVisible);
   }, {
     root: null,
     threshold: 0.02,
