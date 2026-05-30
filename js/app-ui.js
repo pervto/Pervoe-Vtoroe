@@ -446,6 +446,7 @@ let menuRenderItems = [];
 let menuRenderedCount = 0;
 let menuRenderObserver = null;
 let categoryTilesObserver = null;
+let isScrollingFromTile = false;
 let scheduledBackgroundTranslationId = 0;
 const OVERLAY_SCROLL_CONTAINER_SELECTOR = ".modal-content, .dish-modal-shell, .thanks-card";
 
@@ -1273,29 +1274,9 @@ function renderCategoriesSkeleton() {
 }
 
 function getCategorySelectionScrollTop() {
-  const menuGrid = document.getElementById("menu-grid");
-  const header = document.getElementById("site-header");
-  const menuDock = document.getElementById("menu-dock");
-  const categoriesRibbon = document.getElementById("categories-ribbon");
   const tilesBand = document.getElementById("category-tiles-band");
-  if (!menuGrid) return null;
-
-  const headerHeight = header ? header.offsetHeight : 0;
-  const dockHeight = menuDock ? menuDock.offsetHeight : 0;
-  const ribbonHeight = categoriesRibbon ? categoriesRibbon.offsetHeight : 0;
-  const stackedTopHeight = headerHeight + dockHeight + ribbonHeight;
-  const menuGap = 10;
-  const tilesGap = 8;
-  const top = menuGrid.getBoundingClientRect().top + window.scrollY - headerHeight - 8;
-  const menuTargetTop = Math.max(top - dockHeight - ribbonHeight - menuGap, 0);
-
-  let tilesHideTargetTop = 0;
-  if (tilesBand && !tilesBand.hidden) {
-    const tilesBandBottom = tilesBand.getBoundingClientRect().bottom + window.scrollY;
-    tilesHideTargetTop = Math.max(tilesBandBottom - stackedTopHeight + tilesGap, 0);
-  }
-
-  return Math.max(menuTargetTop, tilesHideTargetTop);
+  if (!tilesBand || tilesBand.hidden) return null;
+  return Math.max(tilesBand.offsetTop + tilesBand.offsetHeight + 8, 0);
 }
 
 function scrollPageToCategoryTarget(targetTop) {
@@ -1323,14 +1304,57 @@ function revealActiveCategoryPill() {
   });
 }
 
+function showCategoryRibbon() {
+  const categoriesRibbon = document.getElementById("categories-ribbon");
+  if (!categoriesRibbon) return;
+  categoriesRibbon.classList.remove("is-hidden");
+  syncStickyOffsets();
+}
+
+function waitForScrollEnd(callback) {
+  let lastPos = window.scrollY;
+  let hasMoved = false;
+  const timer = window.setInterval(() => {
+    const currentPos = window.scrollY;
+    if (currentPos !== lastPos) {
+      hasMoved = true;
+      lastPos = currentPos;
+      return;
+    }
+    if (!hasMoved) return;
+    window.clearInterval(timer);
+    callback();
+  }, 50);
+}
+
 function selectCategory(category) {
   if (!category) return;
   activeCategory = category;
   renderCategories();
   renderMenu();
-  const targetTop = getCategorySelectionScrollTop();
   revealActiveCategoryPill();
+}
+
+function finishTileCategoryScroll() {
+  isScrollingFromTile = false;
+  refreshCategoryTilesObserver();
+}
+
+function handleTileCategorySelection(category) {
+  if (!category) return;
+
+  isScrollingFromTile = true;
+  selectCategory(category);
+  showCategoryRibbon();
+
+  const targetTop = getCategorySelectionScrollTop();
+  if (targetTop === null || Math.abs(window.scrollY - targetTop) < 2) {
+    finishTileCategoryScroll();
+    return;
+  }
+
   scrollPageToCategoryTarget(targetTop);
+  waitForScrollEnd(finishTileCategoryScroll);
 }
 
 function buildControlsHtml(name, options = {}) {
@@ -1391,7 +1415,7 @@ function bindCategoryTileEvents() {
   let lastTileTouchAt = 0;
 
   const activateTileCategory = (button) => {
-    selectCategory(button.dataset.category);
+    handleTileCategorySelection(button.dataset.category);
   };
 
   tilesEl.addEventListener("touchend", (event) => {
@@ -1702,6 +1726,7 @@ function getCategoryTilesObserverRootMargin() {
 function updateCategoryRibbonVisibility(tilesAreVisible) {
   const categoriesRibbon = document.getElementById("categories-ribbon");
   if (!categoriesRibbon) return;
+  if (isScrollingFromTile) return;
   categoriesRibbon.classList.toggle("is-hidden", tilesAreVisible);
   syncStickyOffsets();
 }
