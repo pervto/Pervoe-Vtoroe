@@ -1209,8 +1209,7 @@ main.container {
   z-index: 39;
   width: 100%;
   background: rgba(171, 180, 191, 0.82);
-  border-bottom-left-radius: 18px;
-  border-bottom-right-radius: 18px;
+  border-radius: 0;
   backdrop-filter: blur(32px) saturate(1.12);
   -webkit-backdrop-filter: blur(32px) saturate(1.12);
   opacity: 1;
@@ -1231,7 +1230,7 @@ main.container {
   margin: 0;
   padding-top: 0;
   padding-right: 0;
-  padding-bottom: 4px;
+  padding-bottom: 8px;
   padding-left: 0;
 }
 
@@ -1533,7 +1532,7 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding: 12px 0 3px;
+  padding: 12px 14px 3px;
   min-height: 48px;
   align-items: center;
   position: relative;
