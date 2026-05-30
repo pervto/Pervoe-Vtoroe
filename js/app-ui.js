@@ -1296,10 +1296,31 @@ function revealActiveCategoryPill() {
   if (!activeButton) return;
 
   requestAnimationFrame(() => {
+    const edgeGap = 8;
+    const buttonLeft = activeButton.offsetLeft;
+    const buttonRight = buttonLeft + activeButton.offsetWidth;
+    const visibleLeft = categoriesEl.scrollLeft;
+    const visibleRight = visibleLeft + categoriesEl.clientWidth;
+
+    let nextScrollLeft = null;
+    if (buttonLeft - edgeGap < visibleLeft) {
+      nextScrollLeft = Math.max(buttonLeft - edgeGap, 0);
+    } else if (buttonRight + edgeGap > visibleRight) {
+      nextScrollLeft = Math.min(
+        buttonRight + edgeGap - categoriesEl.clientWidth,
+        Math.max(categoriesEl.scrollWidth - categoriesEl.clientWidth, 0)
+      );
+    }
+
+    if (nextScrollLeft !== null) {
+      categoriesEl.scrollTo({ left: nextScrollLeft, behavior: "smooth" });
+      return;
+    }
+
     activeButton.scrollIntoView({
       behavior: "smooth",
       block: "nearest",
-      inline: "center"
+      inline: "nearest"
     });
   });
 }
@@ -2083,6 +2104,7 @@ function syncStickyOffsets() {
   if (!header) return;
   document.documentElement.style.setProperty("--logo-bar-height", `${Math.ceil(header.offsetHeight)}px`);
   document.documentElement.style.setProperty("--menu-search-height", `${Math.ceil(searchWrap ? searchWrap.offsetHeight : 0)}px`);
+  document.documentElement.style.setProperty("--menu-search-offset-top", `${Math.ceil(searchWrap ? searchWrap.offsetTop : 0)}px`);
   if (menuDock) {
     document.documentElement.style.setProperty("--menu-dock-height", `${Math.ceil(menuDock.offsetHeight)}px`);
   }
