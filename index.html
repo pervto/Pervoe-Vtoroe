@@ -39,7 +39,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=119" />
+  <link rel="stylesheet" href="style.css?v=123" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -106,7 +106,7 @@
     </div>
   </section>
 
-  <div id="menu-dock" class="menu-dock">
+  <div id="menu-dock" class="menu-dock menu-dock--tiles-visible">
     <div class="container">
       <div class="search-wrap">
         <span class="material-symbols-outlined search-icon" aria-hidden="true">search</span>
@@ -118,9 +118,17 @@
           <img class="search-tomato-image" src="icons/tomat.svg" alt="" />
         </button>
       </div>
-      <nav id="categories" class="categories"></nav>
+      <div id="categories-ribbon" class="categories-ribbon">
+        <nav id="categories" class="categories"></nav>
+      </div>
     </div>
   </div>
+
+  <section id="category-tiles-band" class="category-tiles-band">
+    <div class="container">
+      <div id="category-tiles" class="category-tiles" aria-label="Категории"></div>
+    </div>
+  </section>
 
   <main class="container">
     <section id="menu-grid" class="menu-grid">
@@ -292,8 +300,8 @@
   <script src="config.js?v=32"></script>
   <script src="js/app-state.js?v=13"></script>
   <script src="js/app-hero.js?v=4"></script>
-  <script src="js/app-ui.js?v=46"></script>
-  <script src="js/app-main.js?v=22"></script>
+  <script src="js/app-ui.js?v=49"></script>
+  <script src="js/app-main.js?v=23"></script>
   <script>
     const siteLogo = document.querySelector("[data-logo-src-light]");
     if (siteLogo) {
