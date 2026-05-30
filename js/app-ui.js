@@ -1319,12 +1319,51 @@ function revealActiveCategoryPill() {
   });
 }
 
-function selectCategory(category) {
+let categorySelectionRequestId = 0;
+
+function ensureCategoryRibbonViewport() {
+  const tilesBand = document.getElementById("category-tiles-band");
+  if (!tilesBand || tilesBand.hidden) return Promise.resolve();
+
+  const targetTop = Math.max(tilesBand.offsetTop + tilesBand.offsetHeight + 8, 0);
+  if (Math.abs(window.scrollY - targetTop) < 2) return Promise.resolve();
+
+  window.scrollTo({
+    top: targetTop,
+    behavior: "smooth"
+  });
+
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      window.removeEventListener("scrollend", handleScrollEnd);
+      window.clearTimeout(fallbackTimer);
+      resolve();
+    };
+    const handleScrollEnd = () => finish();
+    const fallbackTimer = window.setTimeout(finish, 260);
+
+    window.addEventListener("scrollend", handleScrollEnd, { once: true });
+    requestAnimationFrame(() => {
+      if (Math.abs(window.scrollY - targetTop) < 2) finish();
+    });
+  });
+}
+
+async function selectCategory(category) {
   if (!category) return;
+  const requestId = ++categorySelectionRequestId;
+
+  await ensureCategoryRibbonViewport();
+  if (requestId !== categorySelectionRequestId) return;
+
   activeCategory = category;
   renderCategories();
-  renderMenu();
   revealActiveCategoryPill();
+  renderMenu();
+  if (requestId !== categorySelectionRequestId) return;
   scrollMenuToFilteredResults();
 }
 
@@ -1387,13 +1426,6 @@ function bindCategoryTileEvents() {
   tilesEl.addEventListener("click", (event) => {
     const button = event.target.closest(".category-tile[data-category]");
     if (!button || !tilesEl.contains(button)) return;
-    const ribbonButton = document.querySelector(
-      `#categories .category-btn[data-category="${CSS.escape(button.dataset.category)}"]`
-    );
-    if (ribbonButton instanceof HTMLButtonElement) {
-      ribbonButton.click();
-      return;
-    }
     selectCategory(button.dataset.category);
   });
 }
