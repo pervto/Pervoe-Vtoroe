@@ -1276,29 +1276,27 @@ function scrollMenuToFilteredResults() {
   const menuGrid = document.getElementById("menu-grid");
   const header = document.getElementById("site-header");
   const menuDock = document.getElementById("menu-dock");
-  const searchWrap = document.querySelector(".menu-dock .search-wrap");
   const categoriesRibbon = document.getElementById("categories-ribbon");
   const tilesBand = document.getElementById("category-tiles-band");
   if (!menuGrid) return;
 
   const headerHeight = header ? header.offsetHeight : 0;
   const dockHeight = menuDock ? menuDock.offsetHeight : 0;
-  const searchHeight = searchWrap ? searchWrap.offsetHeight : 0;
-  const visibleRibbonHeight = categoriesRibbon && !categoriesRibbon.classList.contains("is-hidden")
-    ? categoriesRibbon.offsetHeight
-    : 0;
+  const ribbonHeight = categoriesRibbon ? categoriesRibbon.offsetHeight : 0;
+  const stackedTopHeight = headerHeight + dockHeight + ribbonHeight;
+  const menuGap = 10;
+  const tilesGap = 8;
   const top = menuGrid.getBoundingClientRect().top + window.scrollY - headerHeight - 8;
-  const menuTargetTop = Math.max(top - dockHeight - visibleRibbonHeight, 0);
+  const menuTargetTop = Math.max(top - dockHeight - ribbonHeight - menuGap, 0);
 
-  let maxScrollUpTop = 0;
+  let tilesHideTargetTop = 0;
   if (tilesBand && !tilesBand.hidden) {
     const tilesBandBottom = tilesBand.getBoundingClientRect().bottom + window.scrollY;
-    const tilesBandExitOffset = headerHeight + searchHeight + 10;
-    maxScrollUpTop = Math.max(tilesBandBottom - tilesBandExitOffset, 0);
+    tilesHideTargetTop = Math.max(tilesBandBottom - stackedTopHeight + tilesGap, 0);
   }
 
   window.scrollTo({
-    top: Math.max(menuTargetTop, maxScrollUpTop),
+    top: Math.max(menuTargetTop, tilesHideTargetTop),
     behavior: "smooth"
   });
 }
