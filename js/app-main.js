@@ -49,6 +49,7 @@ bindHeroBannerSwipeEvents();
 
 let whatsappReturnPending = false;
 let whatsappPageBackgrounded = false;
+let stickyScrollSyncQueued = false;
 
 function resetWhatsAppReturnState() {
   whatsappReturnPending = false;
@@ -265,6 +266,13 @@ window.addEventListener("scroll", () => {
   const topBtn = document.getElementById("to-top");
   if (window.scrollY > 380) topBtn.classList.add("show");
   else topBtn.classList.remove("show");
+  if (!stickyScrollSyncQueued) {
+    stickyScrollSyncQueued = true;
+    requestAnimationFrame(() => {
+      stickyScrollSyncQueued = false;
+      syncStickyOffsets();
+    });
+  }
   updateTomatoLayerState();
 }, { passive: true });
 
@@ -287,6 +295,7 @@ window.addEventListener("resize", () => {
 
 if (window.visualViewport) {
   const handleVisualViewportChange = () => {
+    syncStickyOffsets();
     if (document.activeElement === searchInput) {
       scheduleSearchViewportSync();
     }
@@ -301,6 +310,17 @@ window.addEventListener("load", () => {
   refreshCategoryTilesObserver();
   updateTomatoLayerState();
 });
+
+if (window.ResizeObserver) {
+  const stickyMetricsObserver = new ResizeObserver(() => {
+    syncStickyOffsets();
+    refreshCategoryTilesObserver();
+  });
+  const header = document.getElementById("site-header");
+  const searchWrap = document.querySelector(".menu-dock .search-wrap");
+  if (header) stickyMetricsObserver.observe(header);
+  if (searchWrap) stickyMetricsObserver.observe(searchWrap);
+}
 window.addEventListener("keydown", (event) => {
   const dishModal = document.getElementById("dish-modal");
   const cartModal = document.getElementById("cart-modal");

@@ -2,8 +2,8 @@
   --bg-1: #ffffff;
   --bg-2: #ffffff;
   --logo-bar-height: 78px;
-  --menu-search-offset-top: 0px;
   --menu-search-height: 58px;
+  --categories-ribbon-top: 136px;
   --menu-dock-height: 76px;
   --safe-top-offset: 0px;
   --top-surface: #dfe4ea;
@@ -1207,7 +1207,7 @@ main.container {
 
 .categories-ribbon {
   position: fixed;
-  top: calc(var(--logo-bar-height) + var(--menu-search-offset-top) + var(--menu-search-height));
+  top: var(--categories-ribbon-top);
   left: 50%;
   z-index: 39;
   width: min(calc(100vw - 28px), 1112px);

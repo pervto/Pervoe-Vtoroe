@@ -2104,7 +2104,7 @@ function syncStickyOffsets() {
   if (!header) return;
   document.documentElement.style.setProperty("--logo-bar-height", `${Math.ceil(header.offsetHeight)}px`);
   document.documentElement.style.setProperty("--menu-search-height", `${Math.ceil(searchWrap ? searchWrap.offsetHeight : 0)}px`);
-  document.documentElement.style.setProperty("--menu-search-offset-top", `${Math.ceil(searchWrap ? searchWrap.offsetTop : 0)}px`);
+  document.documentElement.style.setProperty("--categories-ribbon-top", `${Math.ceil(searchWrap ? searchWrap.getBoundingClientRect().bottom : header.offsetHeight)}px`);
   if (menuDock) {
     document.documentElement.style.setProperty("--menu-dock-height", `${Math.ceil(menuDock.offsetHeight)}px`);
   }
