@@ -273,6 +273,7 @@ window.addEventListener("resize", () => {
     window.__stickyMetricsTicking = true;
     requestAnimationFrame(() => {
       syncStickyOffsets();
+      refreshCategoryTilesObserver();
       updateTomatoLayerState();
       if (activeDishName) syncDishModalTrack({ withTransition: false, offsetX: 0 });
       if (heroBanners.length) syncHeroBannerTrack({ withTransition: false, offsetX: 0 });
@@ -297,6 +298,7 @@ if (window.visualViewport) {
 
 window.addEventListener("load", () => {
   syncStickyOffsets();
+  refreshCategoryTilesObserver();
   updateTomatoLayerState();
 });
 window.addEventListener("keydown", (event) => {
@@ -397,9 +399,11 @@ startWorkingHoursMonitoring();
 renderHeroBannerSkeleton();
 updateSettingsLanguageButtons(false);
 loadMenu();
+bindCategoryTileEvents();
 renderCart();
 updateSearchClearVisibility();
 syncStickyOffsets();
+refreshCategoryTilesObserver();
 updateSearchInputActiveState(false);
 updateHeroSearchState();
 updateTomatoLayerState();
@@ -412,6 +416,7 @@ tryShowPendingOrderConfirmation();
 if (document.fonts && document.fonts.ready) {
   document.fonts.ready.then(() => {
     syncStickyOffsets();
+    refreshCategoryTilesObserver();
     updateTomatoLayerState();
   });
 }

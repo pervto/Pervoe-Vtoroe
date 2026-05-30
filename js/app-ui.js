@@ -395,7 +395,8 @@ const MENU_HEADER_ALIASES = {
   description: ["description", "\u043e\u043f\u0438\u0441\u0430\u043d\u0438\u0435"],
   weight: ["weight", "\u0433\u0440\u0430\u043c\u043c\u043e\u0432\u043a\u0430", "\u0432\u0435\u0441", "\u0433\u0440\u0430\u043c\u043c\u044b"],
   calories: ["calories", "\u043a\u0430\u043b\u043e\u0440\u0438\u0438", "\u043a\u043a\u0430\u043b"],
-  categoryOrder: ["category order", "category_order", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438"]
+  categoryOrder: ["category order", "category_order", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438"],
+  categoryIcon: ["category icon", "category icons", "\u0437\u043d\u0430\u0447\u043a\u0438 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439", "\u0437\u043d\u0430\u0447\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438", "\u0438\u043a\u043e\u043d\u043a\u0430 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438", "\u0438\u043a\u043e\u043d\u043a\u0438 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439"]
 };
 
 const MENU_PHOTO_HEADER_RE = /^(photo|image|\u0444\u043e\u0442\u043e|\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430)(\s*\d+)?$/i;
@@ -444,6 +445,8 @@ let menuRenderToken = 0;
 let menuRenderItems = [];
 let menuRenderedCount = 0;
 let menuRenderObserver = null;
+let categoryTilesObserver = null;
+let categoryRibbonSyncTimer = 0;
 let scheduledBackgroundTranslationId = 0;
 const OVERLAY_SCROLL_CONTAINER_SELECTOR = ".modal-content, .dish-modal-shell, .thanks-card";
 
@@ -473,6 +476,40 @@ function normalizeMenuHeader(value) {
 
 function findMenuHeaderIndex(headers, key) {
   return headers.findIndex((header) => MENU_HEADER_ALIASES[key].includes(header));
+}
+
+function getOrderedMenuCategories() {
+  const uniqueCategories = [...new Set(menuData.map((item) => item.category).filter(Boolean))];
+  const orderedFromSheet = categoryOrderList.filter((cat) => uniqueCategories.includes(cat));
+  const notInSheetOrder = uniqueCategories.filter((cat) => !orderedFromSheet.includes(cat));
+  return [...orderedFromSheet, ...notInSheetOrder];
+}
+
+function buildCategoryOrderListFromRows(rows, categoryOrderIndex) {
+  if (!Array.isArray(rows) || categoryOrderIndex < 0) return [];
+
+  return rows
+    .map((line) => (Array.isArray(line) ? line : parseCsvLine(line)))
+    .map((cols) => String(cols[categoryOrderIndex] || "").trim())
+    .filter(Boolean)
+    .filter((value, index, list) => list.indexOf(value) === index);
+}
+
+function buildCategoryIconMapFromRows(rows, categoryOrderIndex, categoryIconIndex) {
+  if (!Array.isArray(rows) || categoryOrderIndex < 0 || categoryIconIndex < 0) return {};
+
+  return rows.reduce((acc, line) => {
+    const cols = Array.isArray(line) ? line : parseCsvLine(line);
+    const categoryName = String(cols[categoryOrderIndex] || "").trim();
+    const rawIcon = String(cols[categoryIconIndex] || "").trim();
+    const categoryIcon = rawIcon ? normalizePhotoUrl(rawIcon, { targetWidth: 100 }) : "";
+
+    if (categoryName && categoryIcon && !acc[categoryName]) {
+      acc[categoryName] = categoryIcon;
+    }
+
+    return acc;
+  }, {});
 }
 
 function isAvailableMenuValue(value) {
@@ -664,7 +701,8 @@ function parseMenuCsvDataset(text) {
     description: findMenuHeaderIndex(headers, "description"),
     weight: findMenuHeaderIndex(headers, "weight"),
     calories: findMenuHeaderIndex(headers, "calories"),
-    categoryOrder: findMenuHeaderIndex(headers, "categoryOrder")
+    categoryOrder: findMenuHeaderIndex(headers, "categoryOrder"),
+    categoryIcon: findMenuHeaderIndex(headers, "categoryIcon")
   };
 
   if ([indexes.name, indexes.price, indexes.category, indexes.available].some((index) => index === -1)) {
@@ -672,12 +710,8 @@ function parseMenuCsvDataset(text) {
   }
 
   const dataRows = parsedRows.slice(1);
-  const nextCategoryOrderList = indexes.categoryOrder >= 0
-    ? dataRows
-      .map((cols) => String(cols[indexes.categoryOrder] || "").trim())
-      .filter(Boolean)
-      .filter((value, index, list) => list.indexOf(value) === index)
-    : [];
+  const nextCategoryOrderList = buildCategoryOrderListFromRows(dataRows, indexes.categoryOrder);
+  const nextCategoryIconMap = buildCategoryIconMapFromRows(dataRows, indexes.categoryOrder, indexes.categoryIcon);
 
   const nextHeroBanners = buildHeroBannersFromRows(parsedRows, indexes.banner);
   const nextMenuData = dataRows
@@ -711,6 +745,7 @@ function parseMenuCsvDataset(text) {
     rawText: String(text || ""),
     menuItems: nextMenuData,
     categoryOrderList: nextCategoryOrderList,
+    categoryIconMap: nextCategoryIconMap,
     heroBanners: nextHeroBanners
   };
 }
@@ -751,6 +786,9 @@ function syncCartWithAvailableMenu(showNotice = false) {
 
 function applyMenuDataset(dataset, options = {}) {
   categoryOrderList = Array.isArray(dataset.categoryOrderList) ? dataset.categoryOrderList : [];
+  categoryIconMap = dataset.categoryIconMap && typeof dataset.categoryIconMap === "object"
+    ? { ...dataset.categoryIconMap }
+    : {};
   heroBanners = Array.isArray(dataset.heroBanners) ? dataset.heroBanners : [];
   menuData = Array.isArray(dataset.menuItems) ? dataset.menuItems : [];
   menuLastCsvSnapshot = String(dataset.rawText || "");
@@ -1167,30 +1205,96 @@ function removeFromCart(name) {
   saveCart();
 }
 
+function renderCategoryTiles(categories = getOrderedMenuCategories()) {
+  const tilesBand = document.getElementById("category-tiles-band");
+  const tilesEl = document.getElementById("category-tiles");
+  if (!tilesBand || !tilesEl) return;
+
+  if (!categories.length) {
+    tilesBand.hidden = true;
+    tilesEl.innerHTML = "";
+    refreshCategoryTilesObserver();
+    return;
+  }
+
+  tilesBand.hidden = false;
+  tilesEl.innerHTML = categories
+    .map((cat) => {
+      const translatedCategory = getDisplayCategoryLabel(cat);
+      const categoryIcon = String(categoryIconMap[cat] || "").trim();
+      const iconMarkup = categoryIcon
+        ? `<img class="category-tile-icon" src="${escapeHtml(categoryIcon)}" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.remove()" />`
+        : `<span class="category-tile-icon category-tile-icon--fallback" aria-hidden="true">${escapeHtml(translatedCategory.slice(0, 1).toUpperCase())}</span>`;
+      return `<button class="category-tile ${cat === activeCategory ? "active" : ""}" data-category="${cat}" type="button" aria-pressed="${cat === activeCategory ? "true" : "false"}"><span class="category-tile-art">${iconMarkup}</span><span class="category-tile-label">${escapeHtml(translatedCategory)}</span></button>`;
+    })
+    .join("");
+
+  refreshCategoryTilesObserver();
+}
+
 function renderCategories() {
   const categoriesEl = document.getElementById("categories");
-  const uniqueCategories = [...new Set(menuData.map((item) => item.category).filter(Boolean))];
-  const orderedFromSheet = categoryOrderList.filter((cat) => uniqueCategories.includes(cat));
-  const notInSheetOrder = uniqueCategories.filter((cat) => !orderedFromSheet.includes(cat));
-  const categories = [ALL_CATEGORY, ...orderedFromSheet, ...notInSheetOrder];
+  const orderedCategories = getOrderedMenuCategories();
+  const categories = [ALL_CATEGORY, ...orderedCategories];
 
   categoriesEl.innerHTML = categories
     .map((cat) => {
       const translatedCategory = cat === ALL_CATEGORY
         ? t("categoriesAll")
         : getDisplayCategoryLabel(cat);
-      return `<button class="category-btn ${cat === activeCategory ? "active" : ""}" data-category="${cat}">${escapeHtml(translatedCategory)}</button>`;
+      const categoryIcon = cat === ALL_CATEGORY ? "" : String(categoryIconMap[cat] || "").trim();
+      const withIconClass = categoryIcon ? " category-btn--with-icon" : "";
+      const iconMarkup = categoryIcon
+        ? `<img class="category-btn-icon" src="${escapeHtml(categoryIcon)}" alt="" aria-hidden="true" loading="lazy" decoding="async" onerror="this.remove()" />`
+        : "";
+      return `<button class="category-btn${withIconClass} ${cat === activeCategory ? "active" : ""}" data-category="${cat}">${iconMarkup}<span class="category-btn-label">${escapeHtml(translatedCategory)}</span></button>`;
     })
     .join("");
+
+  renderCategoryTiles(orderedCategories);
 }
 
 function renderCategoriesSkeleton() {
+  const tilesBand = document.getElementById("category-tiles-band");
+  const tilesEl = document.getElementById("category-tiles");
   const categoriesEl = document.getElementById("categories");
   if (!categoriesEl) return;
+  if (tilesBand && tilesEl) {
+    tilesBand.hidden = false;
+    tilesEl.innerHTML = Array.from({ length: 6 }, () => (
+      `<span class="category-tile-skeleton" aria-hidden="true"><span class="category-tile-skeleton-icon"></span><span class="category-tile-skeleton-label"></span></span>`
+    )).join("");
+  }
   const skeletonItems = [88, 126, 114, 98, 108, 92];
   categoriesEl.innerHTML = skeletonItems
     .map((width) => `<span class="category-skeleton" style="width:${width}px" aria-hidden="true"></span>`)
     .join("");
+
+  refreshCategoryTilesObserver();
+}
+
+function scrollMenuToFilteredResults() {
+  const menuGrid = document.getElementById("menu-grid");
+  const header = document.getElementById("site-header");
+  const menuDock = document.getElementById("menu-dock");
+  const categoriesRibbon = document.getElementById("categories-ribbon");
+  if (!menuGrid) return;
+
+  const headerHeight = header ? header.offsetHeight : 0;
+  const dockHeight = menuDock ? menuDock.offsetHeight : 0;
+  const hiddenRibbonHeight = menuDock && categoriesRibbon && menuDock.classList.contains("menu-dock--tiles-visible")
+    ? categoriesRibbon.scrollHeight
+    : 0;
+  const top = menuGrid.getBoundingClientRect().top + window.scrollY - headerHeight - 8;
+  window.scrollTo({ top: Math.max(top - dockHeight - hiddenRibbonHeight, 0), behavior: "smooth" });
+}
+
+function selectCategory(category) {
+  if (!category) return;
+  activeCategory = category;
+  renderCategories();
+  renderMenu();
+  scrollMenuToFilteredResults();
 }
 
 function buildControlsHtml(name, options = {}) {
@@ -1240,20 +1344,19 @@ function bindCategoryEvents() {
   categoriesEl.addEventListener("click", (event) => {
     const button = event.target.closest(".category-btn[data-category]");
     if (!button || !categoriesEl.contains(button)) return;
+    selectCategory(button.dataset.category);
+  });
+}
 
-    activeCategory = button.dataset.category;
-    renderCategories();
-    renderMenu();
+function bindCategoryTileEvents() {
+  const tilesEl = document.getElementById("category-tiles");
+  if (!tilesEl || tilesEl.dataset.bound === "true") return;
+  tilesEl.dataset.bound = "true";
 
-    const menuGrid = document.getElementById("menu-grid");
-    const header = document.getElementById("site-header");
-    const menuDock = document.getElementById("menu-dock");
-    if (!menuGrid) return;
-
-    const headerHeight = header ? header.offsetHeight : 0;
-    const dockHeight = menuDock ? menuDock.offsetHeight : 0;
-    const top = menuGrid.getBoundingClientRect().top + window.scrollY - headerHeight - 8;
-    window.scrollTo({ top: Math.max(top - dockHeight, 0), behavior: "smooth" });
+  tilesEl.addEventListener("click", (event) => {
+    const button = event.target.closest(".category-tile[data-category]");
+    if (!button || !tilesEl.contains(button)) return;
+    selectCategory(button.dataset.category);
   });
 }
 
@@ -1535,6 +1638,66 @@ function renderNextMenuChunk(renderToken) {
   nextSentinel.setAttribute("aria-hidden", "true");
   grid.appendChild(nextSentinel);
   observeMenuRenderSentinel(nextSentinel, renderToken);
+}
+
+function syncCategoryRibbonOffsetsSoon() {
+  syncStickyOffsets();
+  updateTomatoLayerState();
+  if (categoryRibbonSyncTimer) {
+    window.clearTimeout(categoryRibbonSyncTimer);
+  }
+  categoryRibbonSyncTimer = window.setTimeout(() => {
+    categoryRibbonSyncTimer = 0;
+    syncStickyOffsets();
+    updateTomatoLayerState();
+  }, 320);
+}
+
+function setCategoryRibbonHiddenByTiles(isHidden) {
+  const menuDock = document.getElementById("menu-dock");
+  const categoriesRibbon = document.getElementById("categories-ribbon");
+  if (!menuDock || !categoriesRibbon) return;
+
+  const shouldHide = Boolean(isHidden);
+  const hasHiddenClass = menuDock.classList.contains("menu-dock--tiles-visible");
+  if (hasHiddenClass === shouldHide) return;
+
+  menuDock.classList.toggle("menu-dock--tiles-visible", shouldHide);
+  categoriesRibbon.setAttribute("aria-hidden", shouldHide ? "true" : "false");
+  syncCategoryRibbonOffsetsSoon();
+}
+
+function getCategoryTilesObserverRootMargin() {
+  const header = document.getElementById("site-header");
+  const searchWrap = document.querySelector(".menu-dock .search-wrap");
+  const headerHeight = header ? Math.ceil(header.getBoundingClientRect().height) : 0;
+  const searchHeight = searchWrap ? Math.ceil(searchWrap.getBoundingClientRect().height) : 0;
+  const topOffset = headerHeight + searchHeight + 10;
+  return `-${topOffset}px 0px 0px 0px`;
+}
+
+function refreshCategoryTilesObserver() {
+  if (categoryTilesObserver) {
+    categoryTilesObserver.disconnect();
+    categoryTilesObserver = null;
+  }
+
+  const tilesBand = document.getElementById("category-tiles-band");
+  if (!tilesBand || tilesBand.hidden) {
+    setCategoryRibbonHiddenByTiles(false);
+    return;
+  }
+
+  categoryTilesObserver = new IntersectionObserver((entries) => {
+    const tilesVisible = entries.some((entry) => entry.isIntersecting);
+    setCategoryRibbonHiddenByTiles(tilesVisible);
+  }, {
+    root: null,
+    threshold: 0.02,
+    rootMargin: getCategoryTilesObserverRootMargin()
+  });
+
+  categoryTilesObserver.observe(tilesBand);
 }
 
 function renderMenu() {
@@ -2018,7 +2181,9 @@ function applyStaticTranslations() {
   setAriaLabel("#settings-toggle", t("settingsButtonAria"));
   setText("#settings-popover-kicker", t("settingsKicker"));
   setText("#settings-popover-title", t("settingsTitle"));
-  setText("#settings-popover-text", t("settingsText"));
+  setText("#settings-popover-text", "");
+  const settingsPopoverText = document.getElementById("settings-popover-text");
+  if (settingsPopoverText) settingsPopoverText.hidden = true;
   const languageGroup = document.querySelector(".settings-language-list");
   if (languageGroup) languageGroup.setAttribute("aria-label", t("settingsGroupAria"));
   const settingsIntro = t("settingsText");
@@ -2027,7 +2192,7 @@ function applyStaticTranslations() {
     .replace(" и сайт откроется на нем при следующем визите.", ".")
     .replace(" and open in it next time.", ".")
     .replace(" және келесі жолы сол тілде ашылады.", ".");
-  setText("#settings-popover-text", shortSettingsIntro);
+  setText("#settings-popover-text", "");
   setText("#settings-theme-title", t("settingsThemeTitle"));
   setText("#settings-theme-text", "");
   const themeGroup = document.querySelector(".settings-theme-list");

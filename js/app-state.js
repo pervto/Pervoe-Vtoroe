@@ -5,6 +5,7 @@ let searchQuery = "";
 let toastTimer = null;
 let promo = { code: "", discount: 0 };
 let categoryOrderList = [];
+let categoryIconMap = {};
 let heroBanners = [];
 let lastMenuLoadError = "";
 let activeDishName = "";
@@ -41,7 +42,7 @@ const UI_TRANSLATIONS = {
     settingsButtonAria: "Открыть настройки",
     settingsKicker: "Настройки",
     settingsTitle: "Язык интерфейса",
-    settingsText: "Выберите язык. Сайт запомнит его и в следующий раз откроется уже на нём.",
+    settingsText: "",
     settingsGroupAria: "Выбор языка",
     languageRu: "Русский",
     languageKk: "Казахский",
@@ -137,7 +138,7 @@ const UI_TRANSLATIONS = {
     settingsButtonAria: "Баптауларды ашу",
     settingsKicker: "Баптаулар",
     settingsTitle: "Интерфейс тілі",
-    settingsText: "Тілді таңдаңыз. Сайт оны есте сақтап, келесі жолы сол тілде ашылады.",
+    settingsText: "",
     settingsGroupAria: "Тілді таңдау",
     languageRu: "Орысша",
     languageKk: "Қазақша",
@@ -233,7 +234,7 @@ const UI_TRANSLATIONS = {
     settingsButtonAria: "Open settings",
     settingsKicker: "Settings",
     settingsTitle: "Interface language",
-    settingsText: "Choose a language. The site will remember it and open in it next time.",
+    settingsText: "",
     settingsGroupAria: "Language selection",
     languageRu: "Russian",
     languageKk: "Kazakh",
@@ -485,8 +486,10 @@ function getLocale() {
 
 function t(key, vars = {}) {
   const table = UI_TRANSLATIONS[currentLanguage] || UI_TRANSLATIONS.ru;
-  const fallback = UI_TRANSLATIONS.ru[key] || key;
-  const value = table[key] || fallback;
+  const hasFallback = Object.prototype.hasOwnProperty.call(UI_TRANSLATIONS.ru, key);
+  const hasValue = Object.prototype.hasOwnProperty.call(table, key);
+  const fallback = hasFallback ? UI_TRANSLATIONS.ru[key] : key;
+  const value = hasValue ? table[key] : fallback;
   return Object.entries(vars).reduce((text, [name, replacement]) => text.replaceAll(`{${name}}`, replacement), value);
 }
 
