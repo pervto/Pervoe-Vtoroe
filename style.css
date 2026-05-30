@@ -367,6 +367,7 @@ main.container {
 .settings-theme-section {
   position: relative;
   z-index: 1;
+  margin-top: 12px;
 }
 
 .settings-theme-header {
@@ -1246,7 +1247,7 @@ main.container {
 }
 
 body:has(#categories-ribbon.is-hidden) .menu-dock .container {
-  padding-bottom: 8px;
+  padding-bottom: 12px;
 }
 
 .menu-dock .search-wrap {
@@ -1255,7 +1256,7 @@ body:has(#categories-ribbon.is-hidden) .menu-dock .container {
 
 .category-tiles-band {
   position: relative;
-  padding: 10px 0 6px;
+  padding: 10px 0 12px;
 }
 
 .category-tiles {
@@ -3296,7 +3297,7 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   .search-wrap { margin-top: 10px; }
   .category-tiles-band {
     padding-top: 8px;
-    padding-bottom: 4px;
+    padding-bottom: 10px;
   }
   .category-tiles {
     gap: 8px;
