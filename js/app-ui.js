@@ -446,6 +446,7 @@ let menuRenderItems = [];
 let menuRenderedCount = 0;
 let menuRenderObserver = null;
 let categoryTilesObserver = null;
+let isCategoryTilesObserverSuspended = false;
 let scheduledBackgroundTranslationId = 0;
 const OVERLAY_SCROLL_CONTAINER_SELECTOR = ".modal-content, .dish-modal-shell, .thanks-card";
 
@@ -1320,13 +1321,43 @@ function revealActiveCategoryPill() {
 }
 
 let categorySelectionRequestId = 0;
+let pendingCategorySelectionFromTiles = false;
 
-function ensureCategoryRibbonViewport() {
+function suspendCategoryTilesObserver() {
+  isCategoryTilesObserverSuspended = true;
+  if (categoryTilesObserver) {
+    categoryTilesObserver.disconnect();
+    categoryTilesObserver = null;
+  }
+
+  const categoriesRibbon = document.getElementById("categories-ribbon");
+  if (categoriesRibbon) {
+    categoriesRibbon.classList.remove("is-hidden");
+  }
+  syncStickyOffsets();
+}
+
+function resumeCategoryTilesObserver() {
+  isCategoryTilesObserverSuspended = false;
+  refreshCategoryTilesObserver();
+}
+
+function ensureCategoryRibbonViewport(options = {}) {
   const tilesBand = document.getElementById("category-tiles-band");
   if (!tilesBand || tilesBand.hidden) return Promise.resolve();
+  const shouldSuspendObserver = options.suspendObserver === true;
+
+  if (shouldSuspendObserver) {
+    suspendCategoryTilesObserver();
+  }
 
   const targetTop = Math.max(tilesBand.offsetTop + tilesBand.offsetHeight + 8, 0);
-  if (Math.abs(window.scrollY - targetTop) < 2) return Promise.resolve();
+  if (Math.abs(window.scrollY - targetTop) < 2) {
+    if (shouldSuspendObserver) {
+      window.setTimeout(() => resumeCategoryTilesObserver(), 400);
+    }
+    return Promise.resolve();
+  }
 
   window.scrollTo({
     top: targetTop,
@@ -1340,10 +1371,13 @@ function ensureCategoryRibbonViewport() {
       settled = true;
       window.removeEventListener("scrollend", handleScrollEnd);
       window.clearTimeout(fallbackTimer);
+      if (shouldSuspendObserver) {
+        window.setTimeout(() => resumeCategoryTilesObserver(), 0);
+      }
       resolve();
     };
     const handleScrollEnd = () => finish();
-    const fallbackTimer = window.setTimeout(finish, 260);
+    const fallbackTimer = window.setTimeout(finish, 400);
 
     window.addEventListener("scrollend", handleScrollEnd, { once: true });
     requestAnimationFrame(() => {
@@ -1355,8 +1389,10 @@ function ensureCategoryRibbonViewport() {
 async function selectCategory(category) {
   if (!category) return;
   const requestId = ++categorySelectionRequestId;
+  const fromTiles = pendingCategorySelectionFromTiles;
+  pendingCategorySelectionFromTiles = false;
 
-  await ensureCategoryRibbonViewport();
+  await ensureCategoryRibbonViewport({ suspendObserver: fromTiles });
   if (requestId !== categorySelectionRequestId) return;
 
   activeCategory = category;
@@ -1426,6 +1462,7 @@ function bindCategoryTileEvents() {
   tilesEl.addEventListener("click", (event) => {
     const button = event.target.closest(".category-tile[data-category]");
     if (!button || !tilesEl.contains(button)) return;
+    pendingCategorySelectionFromTiles = true;
     selectCategory(button.dataset.category);
   });
 }
@@ -1723,6 +1760,13 @@ function refreshCategoryTilesObserver() {
   if (categoryTilesObserver) {
     categoryTilesObserver.disconnect();
     categoryTilesObserver = null;
+  }
+
+  if (isCategoryTilesObserverSuspended) {
+    const categoriesRibbon = document.getElementById("categories-ribbon");
+    if (categoriesRibbon) categoriesRibbon.classList.remove("is-hidden");
+    syncStickyOffsets();
+    return;
   }
 
   const categoriesRibbon = document.getElementById("categories-ribbon");
