@@ -1284,8 +1284,8 @@ body:has(#categories-ribbon.is-hidden) .menu-dock .container {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 8px;
-  padding: 11px 8px 9px;
+  gap: 10px;
+  padding: 12px 8px 10px;
   border: 1px solid rgba(17, 24, 39, 0.08);
   background: linear-gradient(180deg, rgba(247, 249, 252, 0.98), rgba(232, 237, 244, 0.96));
   box-shadow: none;
@@ -1308,40 +1308,40 @@ body:has(#categories-ribbon.is-hidden) .menu-dock .container {
 .category-tile-art {
   flex: 0 0 auto;
   width: 100%;
-  min-height: 66px;
+  min-height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .category-tile-icon {
-  width: 66px;
-  height: 66px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
   display: block;
 }
 
 .category-tile-icon--fallback {
-  width: 66px;
-  height: 66px;
+  width: 64px;
+  height: 64px;
   border-radius: 18px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: rgba(224, 54, 59, 0.08);
   color: #982028;
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 800;
 }
 
 .category-tile-label {
   display: -webkit-box;
   width: 100%;
-  min-height: 36px;
-  max-height: 36px;
+  min-height: 34px;
+  max-height: 34px;
   text-align: center;
-  font-size: 15px;
-  line-height: 1.08;
+  font-size: 14px;
+  line-height: 1.12;
   font-weight: 700;
   color: #17203d;
   overflow: hidden;
@@ -3315,16 +3315,16 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   }
   .category-tile {
     padding: 10px 8px 8px;
-    gap: 7px;
+    gap: 8px;
   }
   .category-tile-skeleton {
     padding: 10px 8px 8px;
     gap: 8px;
   }
   .category-tile-label {
-    min-height: 32px;
-    max-height: 32px;
-    font-size: 13px;
+    min-height: 30px;
+    max-height: 30px;
+    font-size: 12px;
   }
   body.search-input-active .menu-dock .container {
     padding-bottom: 10px;

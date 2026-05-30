@@ -1387,6 +1387,13 @@ function bindCategoryTileEvents() {
   tilesEl.addEventListener("click", (event) => {
     const button = event.target.closest(".category-tile[data-category]");
     if (!button || !tilesEl.contains(button)) return;
+    const ribbonButton = document.querySelector(
+      `#categories .category-btn[data-category="${CSS.escape(button.dataset.category)}"]`
+    );
+    if (ribbonButton instanceof HTMLButtonElement) {
+      ribbonButton.click();
+      return;
+    }
     selectCategory(button.dataset.category);
   });
 }
