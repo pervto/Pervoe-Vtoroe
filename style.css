@@ -81,6 +81,7 @@ main.container {
   flex: 1;
   padding-top: 14px;
   padding-bottom: 18px;
+  transition: padding-top 200ms ease;
 }
 
 body:not(:has(#categories-ribbon.is-hidden)) main.container {
