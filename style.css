@@ -1284,8 +1284,8 @@ body:has(#categories-ribbon.is-hidden) .menu-dock .container {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 10px;
-  padding: 12px 8px 10px;
+  gap: 8px;
+  padding: 9px 8px 4px;
   border: 1px solid rgba(17, 24, 39, 0.08);
   background: linear-gradient(180deg, rgba(247, 249, 252, 0.98), rgba(232, 237, 244, 0.96));
   box-shadow: none;
@@ -1361,12 +1361,12 @@ body:has(#categories-ribbon.is-hidden) .menu-dock .container {
   background: linear-gradient(90deg, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0.68) 50%, rgba(255,255,255,0.32) 100%);
   background-size: 220% 100%;
   animation: skeletonPulse 1.35s ease-in-out infinite;
-  padding: 12px 8px 10px;
+  padding: 9px 8px 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 10px;
+  gap: 8px;
 }
 
 .category-tile-skeleton-icon {
@@ -3314,12 +3314,12 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
     border-radius: 18px;
   }
   .category-tile {
-    padding: 10px 8px 8px;
-    gap: 8px;
+    padding: 8px 8px 4px;
+    gap: 7px;
   }
   .category-tile-skeleton {
-    padding: 10px 8px 8px;
-    gap: 8px;
+    padding: 8px 8px 4px;
+    gap: 7px;
   }
   .category-tile-label {
     min-height: 30px;

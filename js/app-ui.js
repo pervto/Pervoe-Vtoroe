@@ -1273,13 +1273,13 @@ function renderCategoriesSkeleton() {
   refreshCategoryTilesObserver();
 }
 
-function scrollMenuToFilteredResults() {
+function getCategorySelectionScrollTop() {
   const menuGrid = document.getElementById("menu-grid");
   const header = document.getElementById("site-header");
   const menuDock = document.getElementById("menu-dock");
   const categoriesRibbon = document.getElementById("categories-ribbon");
   const tilesBand = document.getElementById("category-tiles-band");
-  if (!menuGrid) return;
+  if (!menuGrid) return null;
 
   const headerHeight = header ? header.offsetHeight : 0;
   const dockHeight = menuDock ? menuDock.offsetHeight : 0;
@@ -1296,9 +1296,40 @@ function scrollMenuToFilteredResults() {
     tilesHideTargetTop = Math.max(tilesBandBottom - stackedTopHeight + tilesGap, 0);
   }
 
+  return Math.max(menuTargetTop, tilesHideTargetTop);
+}
+
+function scrollPageToCategoryTarget(options = {}) {
+  const targetTop = getCategorySelectionScrollTop();
+  if (targetTop === null) {
+    if (options.fromTiles) {
+      tileClickInProgress = false;
+      refreshCategoryTilesObserver();
+    }
+    return;
+  }
+
+  if (Math.abs(window.scrollY - targetTop) < 2) {
+    if (options.fromTiles) {
+      tileClickInProgress = false;
+      refreshCategoryTilesObserver();
+    }
+    return;
+  }
+
+  const tileScrollToken = options.fromTiles ? ++tileClickScrollToken : 0;
+
   window.scrollTo({
-    top: Math.max(menuTargetTop, tilesHideTargetTop),
+    top: targetTop,
     behavior: "smooth"
+  });
+
+  if (!options.fromTiles) return;
+
+  waitForScrollEnd(() => {
+    if (tileScrollToken !== tileClickScrollToken) return;
+    tileClickInProgress = false;
+    refreshCategoryTilesObserver();
   });
 }
 
@@ -1309,19 +1340,17 @@ function revealActiveCategoryPill() {
   const activeButton = categoriesEl.querySelector(`.category-btn[data-category="${CSS.escape(activeCategory)}"]`);
   if (!activeButton) return;
 
-  requestAnimationFrame(() => {
-    const ribbon = categoriesEl;
-    const btn = activeButton;
+  const ribbon = categoriesEl;
+  const btn = activeButton;
 
-    ribbon.scrollTo({
-      left: btn.offsetLeft - (ribbon.clientWidth / 2) + (btn.offsetWidth / 2),
-      behavior: "smooth"
-    });
+  ribbon.scrollTo({
+    left: btn.offsetLeft - (ribbon.clientWidth / 2) + (btn.offsetWidth / 2),
+    behavior: "smooth"
   });
 }
 
-let categorySelectionRequestId = 0;
 let pendingCategorySelectionFromTiles = false;
+let tileClickScrollToken = 0;
 
 function waitForScrollEnd(callback) {
   let finished = false;
@@ -1355,59 +1384,22 @@ function waitForScrollEnd(callback) {
   const fallbackTimer = window.setTimeout(finish, 700);
 }
 
-function ensureCategoryRibbonViewport(options = {}) {
-  const tilesBand = document.getElementById("category-tiles-band");
-  if (!tilesBand || tilesBand.hidden) return Promise.resolve();
-  const fromTiles = options.fromTiles === true;
-  const categoriesRibbon = document.getElementById("categories-ribbon");
-
-  if (fromTiles) {
-    if (categoriesRibbon) categoriesRibbon.classList.remove("is-hidden");
-    syncStickyOffsets();
-  }
-
-  const targetTop = Math.max(tilesBand.offsetTop + tilesBand.offsetHeight + 8, 0);
-  if (Math.abs(window.scrollY - targetTop) < 2) {
-    if (fromTiles) {
-      window.setTimeout(() => {
-        tileClickInProgress = false;
-        refreshCategoryTilesObserver();
-      }, 500);
-    }
-    return Promise.resolve();
-  }
-
-  window.scrollTo({
-    top: targetTop,
-    behavior: "smooth"
-  });
-
-  return new Promise((resolve) => {
-    waitForScrollEnd(() => {
-      if (fromTiles) {
-        tileClickInProgress = false;
-        refreshCategoryTilesObserver();
-      }
-      resolve();
-    });
-  });
-}
-
-async function selectCategory(category) {
+function selectCategory(category) {
   if (!category) return;
-  const requestId = ++categorySelectionRequestId;
   const fromTiles = pendingCategorySelectionFromTiles;
   pendingCategorySelectionFromTiles = false;
 
-  await ensureCategoryRibbonViewport({ fromTiles });
-  if (requestId !== categorySelectionRequestId) return;
+  const categoriesRibbon = document.getElementById("categories-ribbon");
+  if (fromTiles && categoriesRibbon) {
+    categoriesRibbon.classList.remove("is-hidden");
+    syncStickyOffsets();
+  }
 
   activeCategory = category;
   renderCategories();
   revealActiveCategoryPill();
   renderMenu();
-  if (requestId !== categorySelectionRequestId) return;
-  scrollMenuToFilteredResults();
+  scrollPageToCategoryTarget({ fromTiles });
 }
 
 function buildControlsHtml(name, options = {}) {
