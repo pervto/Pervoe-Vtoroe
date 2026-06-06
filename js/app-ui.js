@@ -308,9 +308,9 @@ const WORK_SCHEDULE_TEXT = {
     checkingNote: "Проверяем рабочее время. Кнопка заказа откроется автоматически.",
     checkingButton: "Проверяем время...",
     checkingAlert: "Сейчас проверяем рабочее время. Попробуйте еще раз через пару секунд.",
-    errorNote: "Не удалось проверить рабочее время. Отправка заказа временно недоступна, попробуйте чуть позже.",
-    errorButton: "Временная проверка времени",
-    errorAlert: "Не удалось проверить рабочее время. Попробуйте отправить заказ чуть позже."
+    errorNote: "Мы принимаем заказы с 9:00 до 18:00 (UTC+5).",
+    errorButton: "Отправить заказ",
+    errorAlert: "Не удалось проверить рабочее время, но заказ всё равно можно отправить."
   },
   kk: {
     closedBanner: "Қазір біз жұмыс істемейміз. Тапсырыстар күн сайын 9:00-ден 18:00-ге дейін қабылданады.",
@@ -320,9 +320,9 @@ const WORK_SCHEDULE_TEXT = {
     checkingNote: "Жұмыс уақытын тексеріп жатырмыз. Тапсырыс батырмасы автоматты түрде ашылады.",
     checkingButton: "Уақыт тексерілуде...",
     checkingAlert: "Қазір жұмыс уақытын тексеріп жатырмыз. Бірнеше секундтан кейін қайталап көріңіз.",
-    errorNote: "Жұмыс уақытын тексеру мүмкін болмады. Тапсырыс жіберу уақытша қолжетімсіз, кейінірек қайталап көріңіз.",
-    errorButton: "Уақыт тексерілуде",
-    errorAlert: "Жұмыс уақытын тексеру мүмкін болмады. Тапсырысты сәл кейінірек жіберіп көріңіз."
+    errorNote: "Тапсырыстарды 9:00-ден 18:00-ге дейін қабылдаймыз (UTC+5).",
+    errorButton: "Тапсырыс жіберу",
+    errorAlert: "Жұмыс уақытын тексеру мүмкін болмады, бірақ тапсырысты бәрібір жіберуге болады."
   },
   en: {
     closedBanner: "We are currently closed. Orders are accepted daily from 9:00 to 18:00.",
@@ -332,9 +332,9 @@ const WORK_SCHEDULE_TEXT = {
     checkingNote: "Checking business hours. The order button will unlock automatically.",
     checkingButton: "Checking time...",
     checkingAlert: "We are checking business hours now. Please try again in a couple of seconds.",
-    errorNote: "We could not verify business hours right now. Order sending is temporarily unavailable, please try again later.",
-    errorButton: "Time check in progress",
-    errorAlert: "We could not verify business hours right now. Please try sending the order a little later."
+    errorNote: "We accept orders from 9:00 to 18:00 (UTC+5).",
+    errorButton: "Send order",
+    errorAlert: "We could not verify business hours right now, but you can still send the order."
   }
 };
 
@@ -1857,7 +1857,7 @@ function updateOrderAvailabilityUi() {
   const orderButtonText = document.getElementById("btn-order-text");
   const orderNote = document.getElementById("order-availability-note");
   const state = getOrderAvailabilityTextState();
-  const isOpen = state === "open";
+  const isOpen = state === "open" || state === "error";
 
   if (banner && bannerText) {
     const showBanner = state === "closed";
@@ -1873,21 +1873,25 @@ function updateOrderAvailabilityUi() {
 
   if (orderButtonText) {
     if (state === "closed") orderButtonText.textContent = scheduleText("closedButton");
-    else if (state === "error") orderButtonText.textContent = scheduleText("errorButton");
     else if (state === "checking") orderButtonText.textContent = scheduleText("checkingButton");
     else orderButtonText.textContent = t("orderButton");
   }
 
   if (orderNote) {
-    orderNote.textContent = "";
-    orderNote.hidden = true;
+    if (state === "error") {
+      orderNote.textContent = scheduleText("errorNote");
+      orderNote.hidden = false;
+    } else {
+      orderNote.textContent = "";
+      orderNote.hidden = true;
+    }
   }
 
   syncStickyOffsets();
 }
 
 function canSubmitOrderNow() {
-  return workScheduleState.status === "open" && workScheduleState.isOpen === true;
+  return workScheduleState.status === "open" || workScheduleState.status === "error";
 }
 
 function getOrderAvailabilityAlertText() {
@@ -2326,7 +2330,8 @@ function toggleSettingsPopover() {
   else openSettingsPopover();
 }
 
-async function loadMenu() {
+// Legacy loader kept only as an archive snapshot; the real entry point is loadMenu(options).
+async function legacyLoadMenu_doNotUse() {
   const grid = document.getElementById("menu-grid");
   lastMenuLoadError = "";
   document.body.classList.add("menu-loading");
