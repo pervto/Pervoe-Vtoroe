@@ -393,6 +393,7 @@ const MENU_HEADER_ALIASES = {
   photo: ["photo", "photo 1", "photo 2", "\u0444\u043e\u0442\u043e", "\u0444\u043e\u0442\u043e 1", "\u0444\u043e\u0442\u043e 2", "image", "image 1", "image 2", "\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430", "\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430 1", "\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430 2"],
   banner: ["banner", "banners", "\u0431\u0430\u043d\u043d\u0435\u0440", "\u0431\u0430\u043d\u043d\u0435\u0440\u044b"],
   description: ["description", "\u043e\u043f\u0438\u0441\u0430\u043d\u0438\u0435"],
+  composition: ["composition", "ingredients", "\u0441\u043e\u0441\u0442\u0430\u0432", "\u049b\u04b1\u0440\u0430\u043c\u044b"],
   weight: ["weight", "\u0433\u0440\u0430\u043c\u043c\u043e\u0432\u043a\u0430", "\u0432\u0435\u0441", "\u0433\u0440\u0430\u043c\u043c\u044b"],
   calories: ["calories", "\u043a\u0430\u043b\u043e\u0440\u0438\u0438", "\u043a\u043a\u0430\u043b"],
   categoryOrder: ["category order", "category_order", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438"],
@@ -690,6 +691,7 @@ function parseMenuCsvDataset(text) {
     photo: findMenuHeaderIndex(headers, "photo"),
     banner: findMenuHeaderIndex(headers, "banner"),
     description: findMenuHeaderIndex(headers, "description"),
+    composition: findMenuHeaderIndex(headers, "composition"),
     weight: findMenuHeaderIndex(headers, "weight"),
     calories: findMenuHeaderIndex(headers, "calories"),
     categoryOrder: findMenuHeaderIndex(headers, "categoryOrder"),
@@ -726,6 +728,7 @@ function parseMenuCsvDataset(text) {
         photo: photos[0] || (indexes.photo >= 0 ? normalizePhotoUrl(cols[indexes.photo]) : ""),
         photos,
         description: indexes.description >= 0 ? cols[indexes.description] : "",
+        composition: indexes.composition >= 0 ? cols[indexes.composition] : "",
         weight: indexes.weight >= 0 ? cols[indexes.weight] : "",
         calories: indexes.calories >= 0 ? cols[indexes.calories] : ""
       };
@@ -1058,9 +1061,12 @@ function renderDishModal(item) {
   const tagWeight = document.getElementById("dish-modal-tag-weight");
   const meta = document.getElementById("dish-modal-meta");
   const description = document.getElementById("dish-modal-description");
+  const compositionBlock = document.getElementById("dish-modal-composition-block");
+  const composition = document.getElementById("dish-modal-composition");
 
   const metaParts = [];
   if (displayItem.displayCalories) metaParts.push(displayItem.displayCalories);
+  const compositionText = String(displayItem.displayComposition || "").trim();
 
   title.textContent = displayItem.displayName;
   price.textContent = money(item.price);
@@ -1074,6 +1080,10 @@ function renderDishModal(item) {
   meta.classList.toggle("is-empty", !metaParts.length);
   description.textContent = displayItem.displayDescription || t("dishDescriptionFallback");
   description.classList.toggle("is-empty", !displayItem.displayDescription);
+  if (compositionBlock && composition) {
+    composition.textContent = compositionText;
+    compositionBlock.hidden = !compositionText;
+  }
 
   updateDishModalCarousel(item);
   updateDishModalControls();
@@ -2111,6 +2121,7 @@ function applyStaticTranslations() {
   setAriaLabel("#dish-modal-prev", t("dishPrevPhotoAria"));
   setAriaLabel("#dish-modal-next", t("dishNextPhotoAria"));
   setText("#dish-modal-copy-label", t("dishAbout"));
+  setText("#dish-modal-composition-label", t("dishComposition"));
 
   setText("#thanks-title", orderFlowText("successTitle"));
   setText("#thanks-text", orderFlowText("successText"));

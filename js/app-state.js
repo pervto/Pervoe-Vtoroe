@@ -103,6 +103,7 @@ const UI_TRANSLATIONS = {
     orderButton: "Оформить в WhatsApp",
     paymentNote: "Оплата временно осуществляется только через удалённую оплату Kaspi. Приносим извинения за неудобства.",
     dishAbout: "О блюде",
+    dishComposition: "Состав",
     dishNoCategory: "Без категории",
     dishDescriptionFallback: "Подробное описание скоро появится.",
     dishOpenAria: "Открыть {name}",
@@ -199,6 +200,7 @@ const UI_TRANSLATIONS = {
     orderButton: "WhatsApp арқылы рәсімдеу",
     paymentNote: "Қазір төлем тек Kaspi арқылы қашықтан қабылданады. Қолайсыздық үшін кешірім сұраймыз.",
     dishAbout: "Тағам туралы",
+    dishComposition: "Құрамы",
     dishNoCategory: "Санатсыз",
     dishDescriptionFallback: "Толық сипаттама жақында қосылады.",
     dishOpenAria: "{name} ашу",
@@ -295,6 +297,7 @@ const UI_TRANSLATIONS = {
     orderButton: "Checkout via WhatsApp",
     paymentNote: "Payment is currently available only via remote Kaspi payment. We apologize for the inconvenience.",
     dishAbout: "About the dish",
+    dishComposition: "Ingredients",
     dishNoCategory: "No category",
     dishDescriptionFallback: "Detailed description will be added soon.",
     dishOpenAria: "Open {name}",
@@ -704,16 +707,18 @@ async function ensureMenuTranslations(lang) {
   if (!untranslatedItems.length) return;
 
   menuTranslationPromises[lang] = mapWithConcurrency(untranslatedItems, async (item) => {
-    const [name, category, description] = await Promise.all([
+    const [name, category, description, composition] = await Promise.all([
       translateText(item.name, lang),
       translateText(item.category, lang),
-      translateText(item.description, lang)
+      translateText(item.description, lang),
+      translateText(item.composition, lang)
     ]);
 
     menuTranslations[lang][item.id] = {
       name: name || item.name,
       category: category || item.category,
-      description: description || item.description
+      description: description || item.description,
+      composition: composition || item.composition
     };
   }, 3).finally(() => {
     delete menuTranslationPromises[lang];
@@ -729,6 +734,7 @@ function getDisplayItemForLanguage(item, lang = currentLanguage) {
       displayName: item.name,
       displayCategory: item.category,
       displayDescription: item.description,
+      displayComposition: item.composition,
       displayWeight: getLocalizedWeight(item.weight, lang),
       displayCalories: getLocalizedCalories(item.calories, lang)
     };
@@ -739,6 +745,7 @@ function getDisplayItemForLanguage(item, lang = currentLanguage) {
     displayName: translated.name || item.name,
     displayCategory: translated.category || item.category,
     displayDescription: translated.description || item.description,
+    displayComposition: translated.composition || item.composition,
     displayWeight: getLocalizedWeight(item.weight, lang),
     displayCalories: getLocalizedCalories(item.calories, lang)
   };
