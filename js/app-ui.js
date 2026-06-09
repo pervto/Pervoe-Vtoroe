@@ -31,6 +31,7 @@ const DISH_CARD_PHOTO_WIDTH = 510;
 const DISH_MODAL_PHOTO_WIDTH = 800;
 const DISH_PREVIEW_PHOTO_WIDTH = 80;
 const preloadedDishPhotoUrls = new Set();
+let allCategoryRandomOrderIds = [];
 
 function encodePhotoFallbacks(urls) {
   return urls.map((url) => encodeURIComponent(url)).join("|");
@@ -504,6 +505,61 @@ function extraOrderText(key, lang = currentLanguage) {
   return table[key] || ORDER_EXTRA_TEXT.ru[key] || "";
 }
 
+function shuffleItems(items) {
+  const nextItems = Array.isArray(items) ? items.slice() : [];
+  for (let index = nextItems.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [nextItems[index], nextItems[swapIndex]] = [nextItems[swapIndex], nextItems[index]];
+  }
+  return nextItems;
+}
+
+function buildAllCategoryRandomOrder(items = menuData) {
+  const source = Array.isArray(items) ? items : [];
+  allCategoryRandomOrderIds = shuffleItems(
+    source
+      .map((item) => String(item?.id || item?.name || "").trim())
+      .filter(Boolean)
+  );
+}
+
+function getAllCategoryItemsInRandomOrder(items = menuData) {
+  const source = Array.isArray(items) ? items.filter(Boolean) : [];
+  if (!source.length) return [];
+  if (!allCategoryRandomOrderIds.length) buildAllCategoryRandomOrder(source);
+
+  const itemMap = new Map(
+    source.map((item) => [String(item?.id || item?.name || "").trim(), item])
+  );
+  const orderedItems = [];
+  const usedIds = new Set();
+
+  allCategoryRandomOrderIds.forEach((itemId) => {
+    const item = itemMap.get(itemId);
+    if (!item || usedIds.has(itemId)) return;
+    orderedItems.push(item);
+    usedIds.add(itemId);
+  });
+
+  source.forEach((item) => {
+    const itemId = String(item?.id || item?.name || "").trim();
+    if (!itemId || usedIds.has(itemId)) return;
+    orderedItems.push(item);
+    usedIds.add(itemId);
+  });
+
+  return orderedItems;
+}
+
+function normalizeUtensilsQty(value, fallback = 1) {
+  const parsed = Number(value);
+  if (Number.isFinite(parsed) && parsed >= 0) return Math.floor(parsed);
+
+  const backup = Number(fallback);
+  if (Number.isFinite(backup) && backup >= 0) return Math.floor(backup);
+  return 1;
+}
+
 function normalizeMenuHeader(value) {
   return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
 }
@@ -943,7 +999,7 @@ function saveUtensilsQty() {
 function loadUtensilsQty() {
   try {
     const raw = Number(localStorage.getItem(UTENSILS_QTY_KEY));
-    if (Number.isFinite(raw) && raw >= 1) {
+    if (Number.isFinite(raw) && raw >= 0) {
       utensilsQty = Math.floor(raw);
     }
   } catch {
@@ -992,7 +1048,7 @@ function clearPendingOrder() {
 
 function getCartPricing() {
   const subtotal = cart.reduce((sum, item) => sum + (Number(item.price || 0) * Number(item.qty || 0)), 0);
-  const normalizedUtensilsQty = Math.max(1, Number(utensilsQty) || 1);
+  const normalizedUtensilsQty = normalizeUtensilsQty(utensilsQty, 1);
   const normalizedUtensilsUnitPrice = parseMenuNumber(utensilsUnitPrice);
   const normalizedDeliveryPrice = parseMenuNumber(deliveryPrice);
   const utensilsAmount = cart.length ? normalizedUtensilsQty * normalizedUtensilsUnitPrice : 0;
@@ -1035,7 +1091,7 @@ function renderUtensilsControl() {
   const pricing = getCartPricing();
   countEl.textContent = String(pricing.utensilsQty);
   amountEl.textContent = money(pricing.utensilsAmount);
-  if (minusBtn) minusBtn.disabled = pricing.utensilsQty <= 1;
+  if (minusBtn) minusBtn.disabled = pricing.utensilsQty <= 0;
 }
 
 function hasPromoUiContent() {
@@ -1070,7 +1126,7 @@ function expandPromoBlock(options = {}) {
 }
 
 function changeUtensilsQty(delta) {
-  const nextQty = Math.max(1, (Number(utensilsQty) || 1) + Number(delta || 0));
+  const nextQty = Math.max(0, normalizeUtensilsQty(utensilsQty, 1) + Number(delta || 0));
   if (nextQty === utensilsQty) {
     renderUtensilsControl();
     return;
@@ -1094,7 +1150,7 @@ function restorePendingOrderDraft(order = pendingOrder) {
   if (addressInput) addressInput.value = order.customer.address || "";
   if (commentInput) commentInput.value = order.customer.comment || "";
 
-  const restoredUtensilsQty = Math.max(1, Number(order.extras?.utensilsQty) || utensilsQty || 1);
+  const restoredUtensilsQty = normalizeUtensilsQty(order.extras?.utensilsQty, utensilsQty);
   utensilsQty = restoredUtensilsQty;
   saveUtensilsQty();
   renderUtensilsControl();
@@ -1355,25 +1411,9 @@ function updateCartButton() {
 
 function updateTotals() {
   const pricing = getCartPricing();
-  const subtotalRow = document.getElementById("subtotal-row");
-  const utensilsRow = document.getElementById("utensils-row");
-  const deliveryRow = document.getElementById("delivery-row");
-  const discountRow = document.getElementById("discount-row");
   const totalLabel = document.getElementById("total-label");
-  const totalsBox = document.querySelector(".totals-box");
-
-  document.getElementById("subtotal-amount").textContent = money(pricing.subtotal);
-  document.getElementById("utensils-fee-amount").textContent = money(pricing.utensilsAmount);
-  document.getElementById("delivery-fee-amount").textContent = money(pricing.deliveryAmount);
-  document.getElementById("discount-amount").textContent = money(pricing.discountAmount);
   document.getElementById("total-amount").textContent = Number(pricing.finalTotal).toLocaleString(getLocale());
-
-  if (subtotalRow) subtotalRow.classList.toggle("is-hidden", !pricing.showSubtotalRow);
-  if (utensilsRow) utensilsRow.classList.toggle("is-hidden", !pricing.showUtensilsRow);
-  if (deliveryRow) deliveryRow.classList.toggle("is-hidden", !pricing.showDeliveryRow);
-  if (discountRow) discountRow.classList.toggle("is-hidden", !pricing.showDiscountRow);
-  if (totalLabel) totalLabel.textContent = pricing.hasBreakdown ? t("total") : t("totalFull");
-  if (totalsBox) totalsBox.classList.toggle("is-compact", !pricing.hasBreakdown);
+  if (totalLabel) totalLabel.textContent = t("totalFull");
   return pricing;
 }
 
@@ -1651,11 +1691,13 @@ function cancelPendingMenuRender() {
 function getFilteredMenuItems() {
   const query = normalizeSearchText(searchQuery);
   const byCategory = activeCategory === ALL_CATEGORY
-    ? menuData
+    ? getAllCategoryItemsInRandomOrder()
     : menuData.filter((item) => item.category === activeCategory);
 
   if (!query) return byCategory;
-  const itemsForSearch = menuData;
+  const itemsForSearch = activeCategory === ALL_CATEGORY
+    ? getAllCategoryItemsInRandomOrder()
+    : menuData;
   if (currentLanguage === "ru") {
     return itemsForSearch.filter((item) => {
       const name = normalizeSearchText(item.name);
@@ -1878,8 +1920,12 @@ function createWhatsAppMessage(userName, userPhone, userAddress, orderComment) {
       return `- ${displayItem.displayName || item.name}${weightText} x${item.qty} - ${money(Number(item.price || 0) * Number(item.qty || 0), lang)}`;
     });
 
-    lines.push(`- ${extraOrderText("waUtensils", lang)}: ${pricing.utensilsQty} x ${money(pricing.utensilsUnitPrice, lang)} - ${money(pricing.utensilsAmount, lang)}`);
-    lines.push(`- ${extraOrderText("waDelivery", lang)}: ${money(pricing.deliveryAmount, lang)}`);
+    if (pricing.utensilsQty > 0) {
+      lines.push(`- ${extraOrderText("waUtensils", lang)}: ${pricing.utensilsQty} x ${money(pricing.utensilsUnitPrice, lang)} - ${money(pricing.utensilsAmount, lang)}`);
+    }
+    if (pricing.deliveryAmount > 0) {
+      lines.push(`- ${extraOrderText("waDelivery", lang)}: ${money(pricing.deliveryAmount, lang)}`);
+    }
 
     const commentText = orderComment ? `\n${table.waComment}: ${orderComment}` : "";
     const promoText = promo.code ? `\n${table.waPromo}: ${promo.code}` : "";
@@ -1970,17 +2016,19 @@ function renderPendingOrderConfirmation() {
   const extras = pendingOrder.extras || {};
   const extraCards = [];
   if (Object.prototype.hasOwnProperty.call(extras, "utensilsQty")) {
-    const pendingUtensilsQty = Math.max(1, Number(extras.utensilsQty) || 1);
+    const pendingUtensilsQty = normalizeUtensilsQty(extras.utensilsQty, 0);
     const pendingUtensilsAmount = Number(extras.utensilsAmount || 0);
-    extraCards.push(`<div class="cart-item">
-      <div class="cart-item-top">
-        <span class="cart-item-name">${escapeHtml(extraOrderText("utensilsFee"))}</span>
-        <strong>${money(pendingUtensilsAmount)}</strong>
-      </div>
-      <div class="cart-controls">
-        <span>${escapeHtml(`x${pendingUtensilsQty}`)}</span>
-      </div>
-    </div>`);
+    if (pendingUtensilsQty > 0 || pendingUtensilsAmount > 0) {
+      extraCards.push(`<div class="cart-item">
+        <div class="cart-item-top">
+          <span class="cart-item-name">${escapeHtml(extraOrderText("utensilsFee"))}</span>
+          <strong>${money(pendingUtensilsAmount)}</strong>
+        </div>
+        <div class="cart-controls">
+          <span>${escapeHtml(`x${pendingUtensilsQty}`)}</span>
+        </div>
+      </div>`);
+    }
   }
 
   if (Object.prototype.hasOwnProperty.call(extras, "deliveryAmount") || Object.prototype.hasOwnProperty.call(extras, "deliveryPrice")) {
@@ -2377,10 +2425,6 @@ function applyStaticTranslations() {
   setPlaceholder("#promo-code", t("promoPlaceholder"));
   setText("#promo-apply", t("promoApply"));
   setText("#utensils-label", extraOrderText("utensilsTitle"));
-  setText("#subtotal-label", t("subtotal"));
-  setText("#utensils-fee-label", extraOrderText("utensilsFee"));
-  setText("#delivery-fee-label", extraOrderText("deliveryFee"));
-  setText("#discount-label", t("discount"));
   setText("#total-label", t("totalFull"));
   setText("#order-form-title", t("deliveryTitle"));
   setPlaceholder("#user-name", t("namePlaceholder"));
