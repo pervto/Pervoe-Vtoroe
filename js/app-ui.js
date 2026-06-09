@@ -397,7 +397,8 @@ const MENU_HEADER_ALIASES = {
   weight: ["weight", "\u0433\u0440\u0430\u043c\u043c\u043e\u0432\u043a\u0430", "\u0432\u0435\u0441", "\u0433\u0440\u0430\u043c\u043c\u044b"],
   calories: ["calories", "\u043a\u0430\u043b\u043e\u0440\u0438\u0438", "\u043a\u043a\u0430\u043b"],
   categoryOrder: ["category order", "category_order", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438"],
-  categoryIcon: ["category icon", "category icons", "\u0437\u043d\u0430\u0447\u043a\u0438 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439", "\u0437\u043d\u0430\u0447\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438", "\u0438\u043a\u043e\u043d\u043a\u0430 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438", "\u0438\u043a\u043e\u043d\u043a\u0438 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439"]
+  categoryIcon: ["category icon", "category icons", "\u0437\u043d\u0430\u0447\u043a\u0438 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439", "\u0437\u043d\u0430\u0447\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438", "\u0438\u043a\u043e\u043d\u043a\u0430 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438", "\u0438\u043a\u043e\u043d\u043a\u0438 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439"],
+  packagingSurcharge: ["packaging surcharge", "packaging extra", "packaging fee", "\u0434\u043e\u043f\u043b\u0430\u0442\u0430 \u0437\u0430 \u0443\u043f\u0430\u043a\u043e\u0432\u043a\u0443", "\u0434\u043e\u043f\u043b\u0430\u0442\u0430 \u0437\u0430 \u0443\u043f\u0430\u043a\u043e\u0432\u043a\u0443 (+)", "\u0434\u043e\u043f\u043b\u0430\u0442\u0430 \u0437\u0430 \u0443\u043f\u0430\u043a\u043e\u0432\u043a\u0443(+)"]
 };
 
 const MENU_PHOTO_HEADER_RE = /^(photo|image|\u0444\u043e\u0442\u043e|\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430)(\s*\d+)?$/i;
@@ -477,6 +478,36 @@ function findMenuHeaderIndex(headers, key) {
   return headers.findIndex((header) => MENU_HEADER_ALIASES[key].includes(header));
 }
 
+function parseMenuNumber(value) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+
+  const raw = String(value || "").trim();
+  if (!raw) return 0;
+
+  const sanitized = raw
+    .replace(/[\s\u00a0\u202f]/g, "")
+    .replace(/[^\d,.-]/g, "");
+  if (!sanitized) return 0;
+
+  let normalized = sanitized;
+  const hasComma = sanitized.includes(",");
+  const hasDot = sanitized.includes(".");
+
+  if (hasComma && hasDot) {
+    normalized = sanitized.lastIndexOf(",") > sanitized.lastIndexOf(".")
+      ? sanitized.replace(/\./g, "").replace(",", ".")
+      : sanitized.replace(/,/g, "");
+  } else if (hasComma) {
+    const parts = sanitized.split(",");
+    normalized = parts.length === 2 && parts[1].length <= 2
+      ? `${parts[0]}.${parts[1]}`
+      : sanitized.replace(/,/g, "");
+  }
+
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 function buildCategoryOrderListFromRows(rows, categoryOrderIndex) {
   if (!Array.isArray(rows) || categoryOrderIndex < 0) return [];
 
@@ -498,6 +529,24 @@ function buildCategoryIconMapFromRows(rows, categoryOrderIndex, categoryIconInde
 
     if (categoryName && categoryIcon && !acc[categoryName]) {
       acc[categoryName] = categoryIcon;
+    }
+
+    return acc;
+  }, {});
+}
+
+function buildCategoryPackagingSurchargeMapFromRows(rows, categoryOrderIndex, packagingSurchargeIndex) {
+  if (!Array.isArray(rows) || categoryOrderIndex < 0 || packagingSurchargeIndex < 0) return {};
+
+  return rows.reduce((acc, line) => {
+    const cols = Array.isArray(line) ? line : parseCsvLine(line);
+    const categoryName = String(cols[categoryOrderIndex] || "").trim();
+    if (!categoryName) return acc;
+
+    const surcharge = parseMenuNumber(cols[packagingSurchargeIndex]);
+    const hasValue = Object.prototype.hasOwnProperty.call(acc, categoryName);
+    if (!hasValue || (acc[categoryName] === 0 && surcharge !== 0)) {
+      acc[categoryName] = surcharge;
     }
 
     return acc;
@@ -695,7 +744,8 @@ function parseMenuCsvDataset(text) {
     weight: findMenuHeaderIndex(headers, "weight"),
     calories: findMenuHeaderIndex(headers, "calories"),
     categoryOrder: findMenuHeaderIndex(headers, "categoryOrder"),
-    categoryIcon: findMenuHeaderIndex(headers, "categoryIcon")
+    categoryIcon: findMenuHeaderIndex(headers, "categoryIcon"),
+    packagingSurcharge: findMenuHeaderIndex(headers, "packagingSurcharge")
   };
 
   if ([indexes.name, indexes.price, indexes.category, indexes.available].some((index) => index === -1)) {
@@ -705,10 +755,18 @@ function parseMenuCsvDataset(text) {
   const dataRows = parsedRows.slice(1);
   const nextCategoryOrderList = buildCategoryOrderListFromRows(dataRows, indexes.categoryOrder);
   const nextCategoryIconMap = buildCategoryIconMapFromRows(dataRows, indexes.categoryOrder, indexes.categoryIcon);
+  const nextCategoryPackagingSurchargeMap = buildCategoryPackagingSurchargeMapFromRows(
+    dataRows,
+    indexes.categoryOrder,
+    indexes.packagingSurcharge
+  );
 
   const nextHeroBanners = buildHeroBannersFromRows(parsedRows, indexes.banner);
   const nextMenuData = dataRows
     .map((cols, index) => {
+      const category = String(cols[indexes.category] || "").trim();
+      const basePrice = parseMenuNumber(cols[indexes.price]);
+      const packagingSurcharge = nextCategoryPackagingSurchargeMap[category] || 0;
       const rawPhotos = photoIndexes
         .map((photoIndex) => cols[photoIndex] || "")
         .map((value) => String(value || "").trim())
@@ -720,8 +778,8 @@ function parseMenuCsvDataset(text) {
       return {
         id: `item-${index}`,
         name: String(cols[indexes.name] || "").trim(),
-        price: Number(cols[indexes.price]) || 0,
-        category: String(cols[indexes.category] || "").trim(),
+        price: basePrice + packagingSurcharge,
+        category,
         available: isAvailableMenuValue(cols[indexes.available]),
         rawPhoto: rawPhotos[0] || (indexes.photo >= 0 ? String(cols[indexes.photo] || "").trim() : ""),
         rawPhotos,
