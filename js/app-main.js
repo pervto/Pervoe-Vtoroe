@@ -75,6 +75,31 @@ document.getElementById("promo-code").addEventListener("keydown", (e) => {
     applyPromoCode();
   }
 });
+const promoBlock = document.getElementById("promo-block");
+const promoCodeInput = document.getElementById("promo-code");
+if (promoBlock && promoCodeInput) {
+  promoBlock.addEventListener("click", (event) => {
+    if (!promoBlock.classList.contains("is-expanded") && !promoBlock.classList.contains("has-hint")) {
+      expandPromoBlock({ focusInput: !event.target.closest("input, button") });
+    }
+  });
+  promoBlock.addEventListener("focusin", () => {
+    isPromoExpanded = true;
+    updatePromoBlockState();
+  });
+  promoBlock.addEventListener("focusout", () => {
+    window.setTimeout(() => {
+      if (!promoBlock.contains(document.activeElement) && !hasPromoUiContent()) {
+        isPromoExpanded = false;
+      }
+      updatePromoBlockState();
+    }, 0);
+  });
+}
+const utensilsMinusButton = document.getElementById("utensils-minus");
+const utensilsPlusButton = document.getElementById("utensils-plus");
+if (utensilsMinusButton) utensilsMinusButton.addEventListener("click", () => changeUtensilsQty(-1));
+if (utensilsPlusButton) utensilsPlusButton.addEventListener("click", () => changeUtensilsQty(1));
 document.getElementById("settings-toggle").addEventListener("click", (e) => {
   e.stopPropagation();
   toggleSettingsPopover();
@@ -338,8 +363,14 @@ window.addEventListener("keydown", (event) => {
 document.addEventListener("click", (event) => {
   const wrap = document.querySelector(".settings-wrap");
   const popover = document.getElementById("settings-popover");
-  if (!wrap || !popover || !popover.classList.contains("show")) return;
-  if (!wrap.contains(event.target)) closeSettingsPopover();
+  if (wrap && popover && popover.classList.contains("show") && !wrap.contains(event.target)) {
+    closeSettingsPopover();
+  }
+
+  if (promoBlock && !promoBlock.contains(event.target) && !hasPromoUiContent()) {
+    isPromoExpanded = false;
+    updatePromoBlockState();
+  }
 });
 
 document.getElementById("order-form").addEventListener("submit", (e) => {
@@ -388,6 +419,7 @@ document.addEventListener("visibilitychange", () => {
 
 loadCart();
 loadPromo();
+loadUtensilsQty();
 loadPendingOrder();
 restorePendingOrderDraft();
 heroBanners = getDefaultHeroBanners();
@@ -407,6 +439,7 @@ updateSiteVersionLabel();
 if (promo.code) {
   document.getElementById("promo-code").value = promo.code;
 }
+updatePromoBlockState();
 tryShowPendingOrderConfirmation();
 
 if (document.fonts && document.fonts.ready) {

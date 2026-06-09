@@ -398,7 +398,9 @@ const MENU_HEADER_ALIASES = {
   calories: ["calories", "\u043a\u0430\u043b\u043e\u0440\u0438\u0438", "\u043a\u043a\u0430\u043b"],
   categoryOrder: ["category order", "category_order", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439", "\u043f\u043e\u0440\u044f\u0434\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438"],
   categoryIcon: ["category icon", "category icons", "\u0437\u043d\u0430\u0447\u043a\u0438 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439", "\u0437\u043d\u0430\u0447\u043e\u043a \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438", "\u0438\u043a\u043e\u043d\u043a\u0430 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0438", "\u0438\u043a\u043e\u043d\u043a\u0438 \u043a\u0430\u0442\u0435\u0433\u043e\u0440\u0438\u0439"],
-  packagingSurcharge: ["packaging surcharge", "packaging extra", "packaging fee", "\u0434\u043e\u043f\u043b\u0430\u0442\u0430 \u0437\u0430 \u0443\u043f\u0430\u043a\u043e\u0432\u043a\u0443", "\u0434\u043e\u043f\u043b\u0430\u0442\u0430 \u0437\u0430 \u0443\u043f\u0430\u043a\u043e\u0432\u043a\u0443 (+)", "\u0434\u043e\u043f\u043b\u0430\u0442\u0430 \u0437\u0430 \u0443\u043f\u0430\u043a\u043e\u0432\u043a\u0443(+)"]
+  packagingSurcharge: ["packaging surcharge", "packaging extra", "packaging fee", "\u0434\u043e\u043f\u043b\u0430\u0442\u0430 \u0437\u0430 \u0443\u043f\u0430\u043a\u043e\u0432\u043a\u0443", "\u0434\u043e\u043f\u043b\u0430\u0442\u0430 \u0437\u0430 \u0443\u043f\u0430\u043a\u043e\u0432\u043a\u0443 (+)", "\u0434\u043e\u043f\u043b\u0430\u0442\u0430 \u0437\u0430 \u0443\u043f\u0430\u043a\u043e\u0432\u043a\u0443(+)"],
+  utensilsPrice: ["utensils price", "cutlery price", "price of utensils", "\u0446\u0435\u043d\u0430 \u043f\u0440\u0438\u0431\u043e\u0440\u043e\u0432"],
+  deliveryPrice: ["delivery price", "delivery fee", "shipping price", "\u0446\u0435\u043d\u0430 \u0434\u043e\u0441\u0442\u0430\u0432\u043a\u0438"]
 };
 
 const MENU_PHOTO_HEADER_RE = /^(photo|image|\u0444\u043e\u0442\u043e|\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430)(\s*\d+)?$/i;
@@ -420,6 +422,33 @@ const MENU_SYNC_TEXT = {
   },
   en: {
     unavailableRemoved: "Some dishes are no longer available and were removed from the cart."
+  }
+};
+
+const ORDER_EXTRA_TEXT = {
+  ru: {
+    promoLabelCompact: "Промокод",
+    utensilsTitle: "Количество приборов",
+    utensilsFee: "Приборы",
+    deliveryFee: "Цена доставки",
+    waUtensils: "Приборы",
+    waDelivery: "Доставка"
+  },
+  kk: {
+    promoLabelCompact: "Промокод",
+    utensilsTitle: "Ас құралдарының саны",
+    utensilsFee: "Ас құралдары",
+    deliveryFee: "Жеткізу бағасы",
+    waUtensils: "Ас құралдары",
+    waDelivery: "Жеткізу"
+  },
+  en: {
+    promoLabelCompact: "Promo code",
+    utensilsTitle: "Utensils count",
+    utensilsFee: "Utensils",
+    deliveryFee: "Delivery fee",
+    waUtensils: "Utensils",
+    waDelivery: "Delivery"
   }
 };
 
@@ -468,6 +497,11 @@ function menuSyncText(key) {
 function menuErrorText(key) {
   const table = MENU_ERROR_COPY[currentLanguage] || MENU_ERROR_COPY.ru;
   return table[key] || MENU_ERROR_COPY.ru[key] || "";
+}
+
+function extraOrderText(key, lang = currentLanguage) {
+  const table = ORDER_EXTRA_TEXT[lang] || ORDER_EXTRA_TEXT.ru;
+  return table[key] || ORDER_EXTRA_TEXT.ru[key] || "";
 }
 
 function normalizeMenuHeader(value) {
@@ -551,6 +585,19 @@ function buildCategoryPackagingSurchargeMapFromRows(rows, categoryOrderIndex, pa
 
     return acc;
   }, {});
+}
+
+function findFirstMenuNumberFromRows(rows, columnIndex) {
+  if (!Array.isArray(rows) || columnIndex < 0) return 0;
+
+  for (const line of rows) {
+    const cols = Array.isArray(line) ? line : parseCsvLine(line);
+    const rawValue = String(cols[columnIndex] || "").trim();
+    if (!rawValue) continue;
+    return parseMenuNumber(rawValue);
+  }
+
+  return 0;
 }
 
 function isAvailableMenuValue(value) {
@@ -745,7 +792,9 @@ function parseMenuCsvDataset(text) {
     calories: findMenuHeaderIndex(headers, "calories"),
     categoryOrder: findMenuHeaderIndex(headers, "categoryOrder"),
     categoryIcon: findMenuHeaderIndex(headers, "categoryIcon"),
-    packagingSurcharge: findMenuHeaderIndex(headers, "packagingSurcharge")
+    packagingSurcharge: findMenuHeaderIndex(headers, "packagingSurcharge"),
+    utensilsPrice: findMenuHeaderIndex(headers, "utensilsPrice"),
+    deliveryPrice: findMenuHeaderIndex(headers, "deliveryPrice")
   };
 
   if ([indexes.name, indexes.price, indexes.category, indexes.available].some((index) => index === -1)) {
@@ -760,6 +809,8 @@ function parseMenuCsvDataset(text) {
     indexes.categoryOrder,
     indexes.packagingSurcharge
   );
+  const nextUtensilsUnitPrice = findFirstMenuNumberFromRows(dataRows, indexes.utensilsPrice);
+  const nextDeliveryPrice = findFirstMenuNumberFromRows(dataRows, indexes.deliveryPrice);
 
   const nextHeroBanners = buildHeroBannersFromRows(parsedRows, indexes.banner);
   const nextMenuData = dataRows
@@ -798,7 +849,9 @@ function parseMenuCsvDataset(text) {
     menuItems: nextMenuData,
     categoryOrderList: nextCategoryOrderList,
     categoryIconMap: nextCategoryIconMap,
-    heroBanners: nextHeroBanners
+    heroBanners: nextHeroBanners,
+    utensilsUnitPrice: nextUtensilsUnitPrice,
+    deliveryPrice: nextDeliveryPrice
   };
 }
 
@@ -843,6 +896,8 @@ function applyMenuDataset(dataset, options = {}) {
     : {};
   heroBanners = Array.isArray(dataset.heroBanners) ? dataset.heroBanners : [];
   menuData = Array.isArray(dataset.menuItems) ? dataset.menuItems : [];
+  utensilsUnitPrice = parseMenuNumber(dataset.utensilsUnitPrice);
+  deliveryPrice = parseMenuNumber(dataset.deliveryPrice);
   menuLastCsvSnapshot = String(dataset.rawText || "");
   menuLastFullLoadAt = Date.now();
   menuLastAvailabilitySnapshot = "";
@@ -878,6 +933,21 @@ function loadPromo() {
     if (parsed && typeof parsed.discount === "number") promo = parsed;
   } catch {
     promo = { code: "", discount: 0 };
+  }
+}
+
+function saveUtensilsQty() {
+  localStorage.setItem(UTENSILS_QTY_KEY, String(utensilsQty));
+}
+
+function loadUtensilsQty() {
+  try {
+    const raw = Number(localStorage.getItem(UTENSILS_QTY_KEY));
+    if (Number.isFinite(raw) && raw >= 1) {
+      utensilsQty = Math.floor(raw);
+    }
+  } catch {
+    utensilsQty = 1;
   }
 }
 
@@ -920,6 +990,98 @@ function clearPendingOrder() {
   localStorage.removeItem(PENDING_ORDER_KEY);
 }
 
+function getCartPricing() {
+  const subtotal = cart.reduce((sum, item) => sum + (Number(item.price || 0) * Number(item.qty || 0)), 0);
+  const normalizedUtensilsQty = Math.max(1, Number(utensilsQty) || 1);
+  const normalizedUtensilsUnitPrice = parseMenuNumber(utensilsUnitPrice);
+  const normalizedDeliveryPrice = parseMenuNumber(deliveryPrice);
+  const utensilsAmount = cart.length ? normalizedUtensilsQty * normalizedUtensilsUnitPrice : 0;
+  const deliveryAmount = cart.length ? normalizedDeliveryPrice : 0;
+
+  let discountAmount = 0;
+  if (promo.discount > 0 && promo.discount < 100) discountAmount = Math.round(subtotal * promo.discount / 100);
+  else discountAmount = Number(promo.discount || 0);
+  discountAmount = Math.min(discountAmount, subtotal);
+
+  const showUtensilsRow = cart.length > 0;
+  const showDeliveryRow = cart.length > 0;
+  const showDiscountRow = discountAmount > 0;
+  const showSubtotalRow = cart.length > 0 && (showUtensilsRow || showDeliveryRow || showDiscountRow);
+  const hasBreakdown = showSubtotalRow || showUtensilsRow || showDeliveryRow || showDiscountRow;
+  const finalTotal = Math.max(0, subtotal - discountAmount + utensilsAmount + deliveryAmount);
+
+  return {
+    subtotal,
+    utensilsQty: normalizedUtensilsQty,
+    utensilsUnitPrice: normalizedUtensilsUnitPrice,
+    utensilsAmount,
+    deliveryAmount,
+    discountAmount,
+    finalTotal,
+    showSubtotalRow,
+    showUtensilsRow,
+    showDeliveryRow,
+    showDiscountRow,
+    hasBreakdown
+  };
+}
+
+function renderUtensilsControl() {
+  const countEl = document.getElementById("utensils-count");
+  const amountEl = document.getElementById("utensils-amount");
+  const minusBtn = document.getElementById("utensils-minus");
+  if (!countEl || !amountEl) return;
+
+  const pricing = getCartPricing();
+  countEl.textContent = String(pricing.utensilsQty);
+  amountEl.textContent = money(pricing.utensilsAmount);
+  if (minusBtn) minusBtn.disabled = pricing.utensilsQty <= 1;
+}
+
+function hasPromoUiContent() {
+  const input = document.getElementById("promo-code");
+  const hint = document.getElementById("promo-hint");
+  return Boolean(
+    promo.code ||
+    String(input?.value || "").trim() ||
+    String(hint?.textContent || "").trim()
+  );
+}
+
+function updatePromoBlockState() {
+  const block = document.getElementById("promo-block");
+  const hint = document.getElementById("promo-hint");
+  if (!block) return;
+
+  const hasHint = Boolean(String(hint?.textContent || "").trim());
+  const shouldExpand = isPromoExpanded || block.contains(document.activeElement) || hasPromoUiContent();
+  block.classList.toggle("is-expanded", shouldExpand);
+  block.classList.toggle("is-collapsed", !shouldExpand);
+  block.classList.toggle("has-hint", hasHint);
+}
+
+function expandPromoBlock(options = {}) {
+  isPromoExpanded = true;
+  updatePromoBlockState();
+  if (options.focusInput) {
+    const input = document.getElementById("promo-code");
+    if (input) input.focus({ preventScroll: true });
+  }
+}
+
+function changeUtensilsQty(delta) {
+  const nextQty = Math.max(1, (Number(utensilsQty) || 1) + Number(delta || 0));
+  if (nextQty === utensilsQty) {
+    renderUtensilsControl();
+    return;
+  }
+
+  utensilsQty = nextQty;
+  saveUtensilsQty();
+  renderUtensilsControl();
+  updateTotals();
+}
+
 function restorePendingOrderDraft(order = pendingOrder) {
   if (!order || !order.customer) return;
 
@@ -931,6 +1093,12 @@ function restorePendingOrderDraft(order = pendingOrder) {
   if (phoneInput) phoneInput.value = order.customer.phone || "";
   if (addressInput) addressInput.value = order.customer.address || "";
   if (commentInput) commentInput.value = order.customer.comment || "";
+
+  const restoredUtensilsQty = Math.max(1, Number(order.extras?.utensilsQty) || utensilsQty || 1);
+  utensilsQty = restoredUtensilsQty;
+  saveUtensilsQty();
+  renderUtensilsControl();
+  updateTotals();
 }
 
 function applyPromoCode() {
@@ -943,6 +1111,7 @@ function applyPromoCode() {
     hint.textContent = t("promoMissing");
     savePromo();
     updateTotals();
+    updatePromoBlockState();
     return;
   }
 
@@ -959,6 +1128,7 @@ function applyPromoCode() {
 
   savePromo();
   updateTotals();
+  updatePromoBlockState();
 }
 
 function getCartQty(name) {
@@ -1184,26 +1354,27 @@ function updateCartButton() {
 }
 
 function updateTotals() {
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  let discountAmount = 0;
-  if (promo.discount > 0 && promo.discount < 100) discountAmount = Math.round(subtotal * promo.discount / 100);
-  else discountAmount = promo.discount;
-  discountAmount = Math.min(discountAmount, subtotal);
-  const finalTotal = subtotal - discountAmount;
-  const hasDiscount = discountAmount > 0;
+  const pricing = getCartPricing();
   const subtotalRow = document.getElementById("subtotal-row");
+  const utensilsRow = document.getElementById("utensils-row");
+  const deliveryRow = document.getElementById("delivery-row");
   const discountRow = document.getElementById("discount-row");
   const totalLabel = document.getElementById("total-label");
   const totalsBox = document.querySelector(".totals-box");
 
-  document.getElementById("subtotal-amount").textContent = money(subtotal);
-  document.getElementById("discount-amount").textContent = money(discountAmount);
-  document.getElementById("total-amount").textContent = Number(finalTotal).toLocaleString(getLocale());
-  if (subtotalRow) subtotalRow.classList.toggle("is-hidden", !hasDiscount);
-  if (discountRow) discountRow.classList.toggle("is-hidden", !hasDiscount);
-  if (totalLabel) totalLabel.textContent = hasDiscount ? t("total") : t("totalFull");
-  if (totalsBox) totalsBox.classList.toggle("is-compact", !hasDiscount);
-  return { finalTotal };
+  document.getElementById("subtotal-amount").textContent = money(pricing.subtotal);
+  document.getElementById("utensils-fee-amount").textContent = money(pricing.utensilsAmount);
+  document.getElementById("delivery-fee-amount").textContent = money(pricing.deliveryAmount);
+  document.getElementById("discount-amount").textContent = money(pricing.discountAmount);
+  document.getElementById("total-amount").textContent = Number(pricing.finalTotal).toLocaleString(getLocale());
+
+  if (subtotalRow) subtotalRow.classList.toggle("is-hidden", !pricing.showSubtotalRow);
+  if (utensilsRow) utensilsRow.classList.toggle("is-hidden", !pricing.showUtensilsRow);
+  if (deliveryRow) deliveryRow.classList.toggle("is-hidden", !pricing.showDeliveryRow);
+  if (discountRow) discountRow.classList.toggle("is-hidden", !pricing.showDiscountRow);
+  if (totalLabel) totalLabel.textContent = pricing.hasBreakdown ? t("total") : t("totalFull");
+  if (totalsBox) totalsBox.classList.toggle("is-compact", !pricing.hasBreakdown);
+  return pricing;
 }
 
 function updateSearchClearVisibility() {
@@ -1663,42 +1834,39 @@ function renderMenu() {
 
 function renderCart() {
   const cartItems = document.getElementById("cart-items");
+  if (!cartItems) return;
 
   if (cart.length === 0) {
     cartItems.innerHTML = `<p class="status">${escapeHtml(t("cartEmpty"))}</p>`;
-    document.getElementById("subtotal-amount").textContent = money(0);
-    document.getElementById("discount-amount").textContent = money(0);
-    document.getElementById("total-amount").textContent = "0";
-    updateCartButton();
-    updateOrderAvailabilityUi();
-    return;
+  } else {
+    cartItems.innerHTML = cart
+      .map((item) => {
+        const menuItem = getItemByName(item.name);
+        const displayItem = menuItem ? getDisplayItem(menuItem) : { displayName: item.name };
+        const sum = Number(item.price || 0) * Number(item.qty || 0);
+        return `<div class="cart-item"><div class="cart-item-top"><span class="cart-item-name">${escapeHtml(displayItem.displayName || item.name)}</span><strong>${money(sum)}</strong></div><div class="cart-controls"><div class="qty-box"><button class="qty-btn" data-action="minus" data-name="${item.name}">-</button><span>${item.qty}</span><button class="qty-btn" data-action="plus" data-name="${item.name}">+</button></div><button class="remove-btn" data-action="remove" data-name="${item.name}">${escapeHtml(t("removeButton"))}</button></div></div>`;
+      })
+      .join("");
+
+    cartItems.querySelectorAll("button").forEach((btn) => {
+      const { action, name } = btn.dataset;
+      btn.addEventListener("click", () => {
+        if (action === "plus") changeQty(name, 1);
+        if (action === "minus") changeQty(name, -1);
+        if (action === "remove") removeFromCart(name);
+      });
+    });
   }
 
-  cartItems.innerHTML = cart
-    .map((item) => {
-      const menuItem = getItemByName(item.name);
-      const displayItem = menuItem ? getDisplayItem(menuItem) : { displayName: item.name };
-      const sum = item.price * item.qty;
-      return `<div class="cart-item"><div class="cart-item-top"><span class="cart-item-name">${escapeHtml(displayItem.displayName || item.name)}</span><strong>${money(sum)}</strong></div><div class="cart-controls"><div class="qty-box"><button class="qty-btn" data-action="minus" data-name="${item.name}">-</button><span>${item.qty}</span><button class="qty-btn" data-action="plus" data-name="${item.name}">+</button></div><button class="remove-btn" data-action="remove" data-name="${item.name}">${escapeHtml(t("removeButton"))}</button></div></div>`;
-    })
-    .join("");
-
-  cartItems.querySelectorAll("button").forEach((btn) => {
-    const { action, name } = btn.dataset;
-    btn.addEventListener("click", () => {
-      if (action === "plus") changeQty(name, 1);
-      if (action === "minus") changeQty(name, -1);
-      if (action === "remove") removeFromCart(name);
-    });
-  });
-
+  renderUtensilsControl();
   updateTotals();
   updateCartButton();
   updateOrderAvailabilityUi();
+  updatePromoBlockState();
 }
 
 function createWhatsAppMessage(userName, userPhone, userAddress, orderComment) {
-  const { finalTotal } = updateTotals();
+  const pricing = getCartPricing();
   const buildSection = (lang) => {
     const table = UI_TRANSLATIONS[lang] || UI_TRANSLATIONS.ru;
     const lines = cart.map((item) => {
@@ -1707,13 +1875,16 @@ function createWhatsAppMessage(userName, userPhone, userAddress, orderComment) {
         ? getDisplayItemForLanguage(menuItem, lang)
         : { displayName: item.name, displayWeight: getLocalizedWeight(item.weight, lang) };
       const weightText = displayItem.displayWeight ? ` (${displayItem.displayWeight})` : "";
-      return `- ${displayItem.displayName || item.name}${weightText} x${item.qty} - ${money(item.price * item.qty, lang)}`;
-    }).join("\n");
+      return `- ${displayItem.displayName || item.name}${weightText} x${item.qty} - ${money(Number(item.price || 0) * Number(item.qty || 0), lang)}`;
+    });
+
+    lines.push(`- ${extraOrderText("waUtensils", lang)}: ${pricing.utensilsQty} x ${money(pricing.utensilsUnitPrice, lang)} - ${money(pricing.utensilsAmount, lang)}`);
+    lines.push(`- ${extraOrderText("waDelivery", lang)}: ${money(pricing.deliveryAmount, lang)}`);
 
     const commentText = orderComment ? `\n${table.waComment}: ${orderComment}` : "";
     const promoText = promo.code ? `\n${table.waPromo}: ${promo.code}` : "";
 
-    return `${table.waGreeting}\n${table.waIntro}\n${table.waName}: ${userName}\n${table.waPhone}: ${userPhone}\n${table.waAddress}: ${userAddress}${commentText}${promoText}\n${table.waOrder}:\n${lines}\n\n${table.waTotal}: ${money(finalTotal, lang)}`;
+    return `${table.waGreeting}\n${table.waIntro}\n${table.waName}: ${userName}\n${table.waPhone}: ${userPhone}\n${table.waAddress}: ${userAddress}${commentText}${promoText}\n${table.waOrder}:\n${lines.join("\n")}\n\n${table.waTotal}: ${money(pricing.finalTotal, lang)}`;
   };
 
   if (currentLanguage === "kk") {
@@ -1728,11 +1899,20 @@ function createWhatsAppMessage(userName, userPhone, userAddress, orderComment) {
 }
 
 function createPendingOrderSnapshot(userName, userPhone, userAddress, orderComment) {
-  const { finalTotal } = updateTotals();
+  const pricing = getCartPricing();
   return {
     items: cart.map((item) => ({ ...item })),
     promo: { ...promo },
-    total: finalTotal,
+    extras: {
+      utensilsQty: pricing.utensilsQty,
+      utensilsUnitPrice: pricing.utensilsUnitPrice,
+      utensilsAmount: pricing.utensilsAmount,
+      deliveryPrice: parseMenuNumber(deliveryPrice),
+      deliveryAmount: pricing.deliveryAmount,
+      subtotal: pricing.subtotal,
+      discountAmount: pricing.discountAmount
+    },
+    total: pricing.finalTotal,
     customer: {
       name: userName,
       phone: userPhone,
@@ -1746,13 +1926,17 @@ function createPendingOrderSnapshot(userName, userPhone, userAddress, orderComme
 function resetOrderStateAfterSubmit() {
   cart = [];
   promo = { code: "", discount: 0 };
+  utensilsQty = 1;
+  isPromoExpanded = false;
   saveCart();
   savePromo();
+  saveUtensilsQty();
   renderCart();
   updateMenuControls();
   document.getElementById("promo-code").value = "";
   document.getElementById("promo-hint").textContent = "";
   document.getElementById("order-form").reset();
+  updatePromoBlockState();
 }
 
 function hasPendingOrder() {
@@ -1764,7 +1948,7 @@ function renderPendingOrderConfirmation() {
   const totalAmount = document.getElementById("order-confirm-total-amount");
   if (!itemsWrap || !totalAmount || !hasPendingOrder()) return;
 
-  itemsWrap.innerHTML = pendingOrder.items.map((item) => {
+  const itemCards = pendingOrder.items.map((item) => {
     const menuItem = getItemByName(item.name) || findItemByAnyName(item.name);
     const displayItem = menuItem
       ? getDisplayItemForLanguage(menuItem, currentLanguage)
@@ -1781,7 +1965,35 @@ function renderPendingOrderConfirmation() {
         <span>${escapeHtml(`x${item.qty}`)}</span>
       </div>
     </div>`;
-  }).join("");
+  });
+
+  const extras = pendingOrder.extras || {};
+  const extraCards = [];
+  if (Object.prototype.hasOwnProperty.call(extras, "utensilsQty")) {
+    const pendingUtensilsQty = Math.max(1, Number(extras.utensilsQty) || 1);
+    const pendingUtensilsAmount = Number(extras.utensilsAmount || 0);
+    extraCards.push(`<div class="cart-item">
+      <div class="cart-item-top">
+        <span class="cart-item-name">${escapeHtml(extraOrderText("utensilsFee"))}</span>
+        <strong>${money(pendingUtensilsAmount)}</strong>
+      </div>
+      <div class="cart-controls">
+        <span>${escapeHtml(`x${pendingUtensilsQty}`)}</span>
+      </div>
+    </div>`);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(extras, "deliveryAmount") || Object.prototype.hasOwnProperty.call(extras, "deliveryPrice")) {
+    const pendingDeliveryAmount = Number(extras.deliveryAmount ?? extras.deliveryPrice ?? 0);
+    extraCards.push(`<div class="cart-item">
+      <div class="cart-item-top">
+        <span class="cart-item-name">${escapeHtml(extraOrderText("deliveryFee"))}</span>
+        <strong>${money(pendingDeliveryAmount)}</strong>
+      </div>
+    </div>`);
+  }
+
+  itemsWrap.innerHTML = [...itemCards, ...extraCards].join("");
 
   totalAmount.textContent = Number(pendingOrder.total || 0).toLocaleString(getLocale());
 }
@@ -2160,10 +2372,14 @@ function applyStaticTranslations() {
 
   setText("#cart-modal-title", t("cartTitle"));
   setAriaLabel("#close-modal", t("closeAria"));
-  setText("#promo-code-label", t("promoLabel"));
+  setText("#promo-code-label-compact", extraOrderText("promoLabelCompact"));
+  setText("#promo-code-label-full", t("promoLabel"));
   setPlaceholder("#promo-code", t("promoPlaceholder"));
   setText("#promo-apply", t("promoApply"));
+  setText("#utensils-label", extraOrderText("utensilsTitle"));
   setText("#subtotal-label", t("subtotal"));
+  setText("#utensils-fee-label", extraOrderText("utensilsFee"));
+  setText("#delivery-fee-label", extraOrderText("deliveryFee"));
   setText("#discount-label", t("discount"));
   setText("#total-label", t("totalFull"));
   setText("#order-form-title", t("deliveryTitle"));
@@ -2199,6 +2415,10 @@ function applyStaticTranslations() {
     else if (promo.code === "SKIDKA10") promoHint.textContent = t("promoAppliedPercent");
     else if (promo.code === "FIRST200") promoHint.textContent = t("promoAppliedFixed");
   }
+
+  renderUtensilsControl();
+  updateTotals();
+  updatePromoBlockState();
 
   if (hasPendingOrder()) {
     restorePendingOrderDraft();
@@ -2243,8 +2463,10 @@ function rerenderMenuSurface() {
   renderCategories();
   renderMenu();
   renderCart();
+  renderUtensilsControl();
   updateTotals();
   updateCartButton();
+  updatePromoBlockState();
 
   const retryButton = document.getElementById("menu-retry-button");
   if (retryButton) retryButton.textContent = t("retryLoadButton");

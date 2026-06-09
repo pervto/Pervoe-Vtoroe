@@ -2543,16 +2543,27 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 .cart-item-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
 .cart-item-name { font-weight:800; font-size:18px; line-height:1.25; color:#111a2d; }
 .cart-item-top strong { font-size:20px; color:#111a2d; white-space:nowrap; }
-.cart-controls { margin-top:14px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.cart-controls {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 10px;
+}
 .qty-box {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
   display:inline-flex;
   align-items:center;
+  justify-content:space-between;
   gap:8px;
   padding:4px;
   border-radius:999px;
   background: rgba(17, 24, 39, 0.06);
 }
 .qty-box span {
+  flex: 1 1 auto;
   min-width:28px;
   text-align:center;
   font-size:16px;
@@ -2572,7 +2583,18 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
 }
 
+.qty-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .remove-btn {
+  min-height: 44px;
+  min-width: 108px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid rgba(224, 54, 59, .20);
   background: rgba(255, 255, 255, 0.72);
   color: #b12a2f;
@@ -2584,6 +2606,7 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   cursor: pointer;
 }
 
+.utensils-block,
 .promo-block,
 .totals-box {
   margin-top:14px;
@@ -2594,8 +2617,125 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
 }
 
-.promo-block label { font-size:14px; color:#3f4c70; font-weight:800; letter-spacing:0.02em; text-transform:uppercase; }
-.promo-row { display:flex; gap:8px; margin-top:8px; }
+.utensils-block-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.utensils-label {
+  color: #3f4c70;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.utensils-amount {
+  color: #111a2d;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.utensils-controls {
+  margin-top: 12px;
+}
+
+.qty-box--wide {
+  min-height: 48px;
+  border-radius: 18px;
+  padding: 6px;
+}
+
+.qty-box--wide .qty-btn {
+  width: 40px;
+  height: 40px;
+}
+
+.qty-box--wide span {
+  font-size: 18px;
+}
+
+.promo-block {
+  overflow: hidden;
+  max-height: 96px;
+  transition: max-height .32s ease, padding .32s ease, border-radius .32s ease, box-shadow .32s ease, background .32s ease;
+}
+
+.promo-block.is-expanded,
+.promo-block.has-hint {
+  max-height: 220px;
+}
+
+.promo-shell {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px 12px;
+}
+
+.promo-label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 44px;
+  color: #3f4c70;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.promo-label-compact,
+.promo-label-full {
+  transition: opacity .24s ease, transform .24s ease;
+}
+
+.promo-label-full {
+  position: absolute;
+  inset: 0 auto auto 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+}
+
+.promo-block.is-expanded .promo-shell,
+.promo-block.has-hint .promo-shell {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 10px;
+}
+
+.promo-block.is-expanded .promo-label,
+.promo-block.has-hint .promo-label {
+  min-height: auto;
+}
+
+.promo-block.is-expanded .promo-label-compact,
+.promo-block.has-hint .promo-label-compact {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+}
+
+.promo-block.is-expanded .promo-label-full,
+.promo-block.has-hint .promo-label-full {
+  position: relative;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.promo-row {
+  display:flex;
+  gap:8px;
+  min-width:0;
+}
+
 .promo-row input { flex:1; padding:13px 14px; border:1px solid rgba(17, 24, 39, 0.10); border-radius:14px; font-size:16px; background:#fff; }
 .promo-row button {
   flex: 0 0 auto;
@@ -2610,7 +2750,34 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   font-weight:800;
   white-space: nowrap;
 }
-.promo-hint { margin:8px 0 0; font-size:13px; color:#5d6885; min-height:14px; }
+
+.promo-block.is-collapsed .promo-row input {
+  padding: 11px 12px;
+  font-size: 15px;
+}
+
+.promo-block.is-collapsed .promo-row button {
+  min-height: 44px;
+  padding: 11px 14px;
+  font-size: 14px;
+}
+
+.promo-hint {
+  margin:0;
+  max-height:0;
+  opacity:0;
+  overflow:hidden;
+  font-size:13px;
+  color:#5d6885;
+  transition: max-height .24s ease, opacity .24s ease, margin-top .24s ease;
+}
+
+.promo-block.is-expanded .promo-hint,
+.promo-block.has-hint .promo-hint {
+  margin-top:8px;
+  max-height:48px;
+  opacity:1;
+}
 
 .totals-row { display:flex; justify-content:space-between; margin-bottom:8px; font-size:16px; color:#24304d; }
 .totals-row.is-hidden { display:none; }
@@ -2780,7 +2947,9 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 
 .order-confirm-items .cart-controls {
   margin-top: 8px;
+  display: flex;
   justify-content: flex-end;
+  grid-template-columns: none;
 }
 
 .order-confirm-items .cart-controls span {
@@ -3171,7 +3340,7 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
     margin-bottom: 7px;
   }
   .food-title {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
     line-height: 1.14;
     margin-bottom: 0;
@@ -3377,10 +3546,37 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   .modal-header h2 { font-size:24px; }
   .cart-item-name { font-size:17px; }
   .cart-item-top strong { font-size:16px; }
-  .cart-controls { align-items:flex-start; flex-direction:column; }
+  .cart-controls { grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
   .cart-total-value { font-size:28px; }
-  .promo-row { flex-direction:column; }
-  .promo-row button { width:100%; }
+  .utensils-amount { font-size:17px; }
+  .qty-box--wide { min-height: 44px; }
+  .qty-box--wide .qty-btn { width: 36px; height: 36px; }
+  .qty-box--wide span { font-size: 16px; }
+  .remove-btn { min-width: 96px; padding: 10px 12px; font-size: 13px; }
+  .promo-block { max-height: 88px; }
+  .promo-shell { grid-template-columns: auto minmax(0, 1fr); gap: 8px; }
+  .promo-label { min-height: 42px; font-size: 13px; }
+  .promo-block.is-collapsed .promo-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+  }
+  .promo-block.is-collapsed .promo-row button {
+    width: auto;
+    min-width: 96px;
+  }
+  .promo-block.is-expanded,
+  .promo-block.has-hint {
+    max-height: 260px;
+  }
+  .promo-block.is-expanded .promo-row,
+  .promo-block.has-hint .promo-row {
+    flex-direction: column;
+  }
+  .promo-block.is-expanded .promo-row button,
+  .promo-block.has-hint .promo-row button {
+    width: 100%;
+  }
   .order-form h3 { font-size:23px; }
   .btn-order { min-height:54px; }
   .footer-inner {
@@ -3910,6 +4106,7 @@ html[data-theme="dark"] .dish-modal-title,
 html[data-theme="dark"] .modal-header h2,
 html[data-theme="dark"] .cart-item-name,
 html[data-theme="dark"] .cart-item-top strong,
+html[data-theme="dark"] .utensils-amount,
 html[data-theme="dark"] .cart-total-value,
 html[data-theme="dark"] .order-form h3,
 html[data-theme="dark"] .thanks-card h3 {
@@ -3919,8 +4116,9 @@ html[data-theme="dark"] .thanks-card h3 {
 html[data-theme="dark"] .dish-modal-weight,
 html[data-theme="dark"] .dish-modal-copy-label,
 html[data-theme="dark"] .dish-modal-description.is-empty,
-html[data-theme="dark"] .promo-block label,
+html[data-theme="dark"] .promo-label,
 html[data-theme="dark"] .promo-hint,
+html[data-theme="dark"] .utensils-label,
 html[data-theme="dark"] .totals-row,
 html[data-theme="dark"] .cart-total-label,
 html[data-theme="dark"] .thanks-card p {
@@ -3930,6 +4128,7 @@ html[data-theme="dark"] .thanks-card p {
 html[data-theme="dark"] .dish-modal-tag,
 html[data-theme="dark"] .close,
 html[data-theme="dark"] .cart-item,
+html[data-theme="dark"] .utensils-block,
 html[data-theme="dark"] .promo-block,
 html[data-theme="dark"] .totals-box,
 html[data-theme="dark"] .dish-modal-copy {
