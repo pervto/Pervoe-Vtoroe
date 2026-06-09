@@ -2661,7 +2661,7 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 
 .promo-block {
   overflow: hidden;
-  max-height: 96px;
+  max-height: 78px;
   transition:
     max-height .38s cubic-bezier(.22, 1, .36, 1),
     border-color .28s ease,
@@ -2671,23 +2671,23 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 
 .promo-block.is-expanded,
 .promo-block.has-hint {
-  max-height: 228px;
+  max-height: 198px;
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.07);
 }
 
 .promo-shell {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 10px 12px;
-  transition: gap .28s ease;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
 }
 
 .promo-label {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  width: 100%;
   min-width: 0;
   min-height: 44px;
   color: #3f4c70;
@@ -2706,54 +2706,49 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 .promo-label-full {
   display: block;
   width: 100%;
-  overflow: hidden;
   transition:
     opacity .24s ease,
-    transform .24s ease,
-    max-height .24s ease;
+    transform .24s ease;
 }
 
 .promo-label-compact {
   opacity: 1;
-  max-height: 28px;
   transform: translateY(0);
 }
 
 .promo-label-full {
   opacity: 0;
-  max-height: 0;
   pointer-events: none;
   transform: translateY(-6px);
+  position: absolute;
 }
 
 .promo-block.is-expanded .promo-shell,
 .promo-block.has-hint .promo-shell {
-  grid-template-columns: minmax(0, 1fr);
-  align-items: stretch;
-  gap: 12px;
+  gap: 10px;
 }
 
 .promo-block.is-expanded .promo-label,
 .promo-block.has-hint .promo-label {
-  min-height: auto;
-  justify-content: center;
-  text-align: center;
+  min-height: 22px;
+  justify-content: flex-start;
+  text-align: left;
 }
 
 .promo-block.is-expanded .promo-label-compact,
 .promo-block.has-hint .promo-label-compact {
   opacity: 0;
-  max-height: 0;
   pointer-events: none;
   transform: translateY(6px);
+  position: absolute;
 }
 
 .promo-block.is-expanded .promo-label-full,
 .promo-block.has-hint .promo-label-full {
   opacity: 1;
-  max-height: 32px;
   pointer-events: auto;
   transform: translateY(0);
+  position: static;
 }
 
 .promo-row {
@@ -2762,7 +2757,16 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   align-items: center;
   gap: 8px;
   min-width: 0;
-  transition: gap .28s ease;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition:
+    max-height .28s ease,
+    opacity .22s ease,
+    transform .28s ease,
+    margin-top .28s ease;
 }
 
 .promo-row input { flex:1; padding:13px 14px; border:1px solid rgba(17, 24, 39, 0.10); border-radius:14px; font-size:16px; background:#fff; }
@@ -2780,15 +2784,14 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   white-space: nowrap;
 }
 
-.promo-block.is-collapsed .promo-row input {
-  padding: 11px 12px;
-  font-size: 15px;
-}
-
-.promo-block.is-collapsed .promo-row button {
-  min-height: 44px;
-  padding: 11px 14px;
-  font-size: 14px;
+.promo-block.is-expanded .promo-row,
+.promo-block.has-hint .promo-row {
+  max-height: 64px;
+  opacity: 1;
+  margin-top: 2px;
+  overflow: visible;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .promo-hint {
@@ -3583,26 +3586,18 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   .qty-box--wide .qty-btn { width: 36px; height: 36px; }
   .qty-box--wide span { font-size: 16px; }
   .remove-btn { min-width: 96px; padding: 10px 12px; font-size: 13px; }
-  .promo-block { max-height: 88px; }
-  .promo-shell { grid-template-columns: auto minmax(0, 1fr); gap: 8px; }
+  .promo-block { max-height: 78px; }
+  .promo-shell { gap: 0; }
   .promo-label { min-height: 42px; font-size: 13px; }
-  .promo-block.is-collapsed .promo-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 6px;
-  }
-  .promo-block.is-collapsed .promo-row button {
-    width: auto;
-    min-width: 96px;
-  }
   .promo-block.is-expanded,
   .promo-block.has-hint {
-    max-height: 286px;
+    max-height: 232px;
   }
   .promo-block.is-expanded .promo-row,
   .promo-block.has-hint .promo-row {
     grid-template-columns: minmax(0, 1fr);
     gap: 10px;
+    max-height: 128px;
   }
   .promo-block.is-expanded .promo-row button,
   .promo-block.has-hint .promo-row button {
