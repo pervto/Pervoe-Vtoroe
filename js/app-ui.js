@@ -502,6 +502,9 @@ function menuErrorText(key) {
 
 function extraOrderText(key, lang = currentLanguage) {
   const table = ORDER_EXTRA_TEXT[lang] || ORDER_EXTRA_TEXT.ru;
+  if (key === "promoLabelCompact") {
+    return table[key] || table.promoLabel || UI_TRANSLATIONS[lang]?.promoLabel || UI_TRANSLATIONS.ru?.promoLabel || "";
+  }
   return table[key] || ORDER_EXTRA_TEXT.ru[key] || "";
 }
 

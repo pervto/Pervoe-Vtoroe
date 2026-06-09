@@ -2661,7 +2661,7 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 
 .promo-block {
   overflow: hidden;
-  max-height: 78px;
+  max-height: 132px;
   transition:
     max-height .38s cubic-bezier(.22, 1, .36, 1),
     border-color .28s ease,
@@ -2757,11 +2757,12 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   align-items: center;
   gap: 8px;
   min-width: 0;
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  pointer-events: none;
-  transform: translateY(-6px);
+  max-height: 64px;
+  opacity: 1;
+  margin-top: 6px;
+  overflow: visible;
+  pointer-events: auto;
+  transform: translateY(0);
   transition:
     max-height .28s ease,
     opacity .22s ease,
@@ -3586,7 +3587,7 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   .qty-box--wide .qty-btn { width: 36px; height: 36px; }
   .qty-box--wide span { font-size: 16px; }
   .remove-btn { min-width: 96px; padding: 10px 12px; font-size: 13px; }
-  .promo-block { max-height: 78px; }
+  .promo-block { max-height: 132px; }
   .promo-shell { gap: 0; }
   .promo-label { min-height: 42px; font-size: 13px; }
   .promo-block.is-expanded,
