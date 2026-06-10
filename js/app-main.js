@@ -10,6 +10,14 @@ document.getElementById("order-confirm-modal").addEventListener("click", (e) => 
 });
 document.getElementById("close-modal").addEventListener("click", closeCart);
 document.getElementById("cart-modal").addEventListener("click", (e) => { if (e.target.id === "cart-modal") closeCart(); });
+document.getElementById("privacy-policy-link").addEventListener("click", (e) => {
+  e.preventDefault();
+  openPrivacyPolicy();
+});
+document.getElementById("privacy-policy-close").addEventListener("click", closePrivacyPolicy);
+document.getElementById("privacy-policy-modal").addEventListener("click", (e) => {
+  if (e.target.id === "privacy-policy-modal") closePrivacyPolicy();
+});
 document.getElementById("dish-modal-close").addEventListener("click", closeDishModal);
 document.getElementById("dish-modal").addEventListener("click", (e) => {
   if (e.target.id === "dish-modal") closeDishModal();
@@ -327,6 +335,7 @@ window.addEventListener("load", () => {
 window.addEventListener("keydown", (event) => {
   const dishModal = document.getElementById("dish-modal");
   const cartModal = document.getElementById("cart-modal");
+  const privacyPolicyModal = document.getElementById("privacy-policy-modal");
   const orderConfirmModal = document.getElementById("order-confirm-modal");
   const settingsPopover = document.getElementById("settings-popover");
   if (dishModal && dishModal.classList.contains("show") && event.key === "ArrowLeft") {
@@ -348,6 +357,10 @@ window.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
   if (settingsPopover && settingsPopover.classList.contains("show")) {
     closeSettingsPopover();
+    return;
+  }
+  if (privacyPolicyModal && privacyPolicyModal.classList.contains("show")) {
+    closePrivacyPolicy();
     return;
   }
   if (orderConfirmModal && orderConfirmModal.classList.contains("show")) {

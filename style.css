@@ -2874,6 +2874,22 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 
 .order-form textarea { min-height:100px; resize:vertical; }
 
+.order-consent {
+  margin: -2px 2px 0;
+  color: rgba(63, 76, 112, 0.68);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.order-consent a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
 .btn-order {
   border: 1px solid rgba(255,255,255,.28);
   border-radius: 999px;
@@ -2932,6 +2948,26 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 
 .wa-icon { width:26px; height:26px; display:inline-flex; flex: 0 0 26px; }
 .wa-icon svg { width:100%; height:100%; display:block; }
+
+.privacy-modal-content {
+  max-width: 760px;
+}
+
+.privacy-policy-shell {
+  overflow: hidden;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+}
+
+.privacy-policy-frame {
+  width: 100%;
+  height: min(72dvh, 720px);
+  display: block;
+  border: 0;
+  background: #ffffff;
+}
 
 .thanks-modal { display:none; position:fixed; inset:0; z-index:70; background:rgba(8,12,24,.4); padding:calc(16px + var(--safe-top-offset)) 16px 16px; }
 .thanks-modal.show { display:grid; place-items:center; animation:fadeIn .2s ease; }
@@ -3629,6 +3665,7 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
     width: 100%;
   }
   .order-form h3 { font-size:23px; }
+  .privacy-policy-frame { height: min(68dvh, 640px); }
   .btn-order { min-height:54px; }
   .footer-inner {
     flex-direction: column;
@@ -4174,6 +4211,7 @@ html[data-theme="dark"] .utensils-label,
 html[data-theme="dark"] .delivery-label,
 html[data-theme="dark"] .totals-row,
 html[data-theme="dark"] .cart-total-label,
+html[data-theme="dark"] .order-consent,
 html[data-theme="dark"] .thanks-card p {
   color: #96a3bf;
 }
@@ -4185,10 +4223,15 @@ html[data-theme="dark"] .utensils-block,
 html[data-theme="dark"] .delivery-block,
 html[data-theme="dark"] .promo-block,
 html[data-theme="dark"] .totals-box,
+html[data-theme="dark"] .privacy-policy-shell,
 html[data-theme="dark"] .dish-modal-copy {
   border-color: rgba(255,255,255,.08);
   background: rgba(255,255,255,.04);
   color: #eef3ff;
+}
+
+html[data-theme="dark"] .privacy-policy-frame {
+  background: #ffffff;
 }
 
 html[data-theme="dark"] .dish-modal-footer {

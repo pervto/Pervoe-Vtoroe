@@ -1206,6 +1206,7 @@ function setPageScrollLock(locked) {
 
 function syncOverlayState() {
   const cartModal = document.getElementById("cart-modal");
+  const privacyPolicyModal = document.getElementById("privacy-policy-modal");
   const dishModal = document.getElementById("dish-modal");
   const orderConfirmModal = document.getElementById("order-confirm-modal");
   const thanksModal = document.getElementById("thanks-modal");
@@ -1218,12 +1219,14 @@ function syncOverlayState() {
 
   const hasOverlayOpen = Boolean(
     isOverlayActive(cartModal) ||
+    isOverlayActive(privacyPolicyModal) ||
     isOverlayActive(dishModal) ||
     isOverlayActive(orderConfirmModal) ||
     isOverlayActive(thanksModal)
   );
   const hasVisibleOverlay = Boolean(
     isOverlayShown(cartModal) ||
+    isOverlayShown(privacyPolicyModal) ||
     isOverlayShown(dishModal) ||
     isOverlayShown(orderConfirmModal) ||
     isOverlayShown(thanksModal)
@@ -1278,6 +1281,14 @@ function openCart() {
 
 function closeCart() {
   closeOverlay(document.getElementById("cart-modal"));
+}
+
+function openPrivacyPolicy() {
+  openOverlay(document.getElementById("privacy-policy-modal"));
+}
+
+function closePrivacyPolicy() {
+  closeOverlay(document.getElementById("privacy-policy-modal"));
 }
 
 function showThanksModal() {

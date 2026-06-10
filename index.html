@@ -39,7 +39,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=127" />
+  <link rel="stylesheet" href="style.css?v=128" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -210,6 +210,10 @@
         <input id="user-phone" type="tel" placeholder="Ваш телефон" required />
         <input id="user-address" type="text" placeholder="Адрес доставки" required />
         <textarea id="order-comment" placeholder="Комментарий к заказу (необязательно)"></textarea>
+        <p class="order-consent">
+          Оформляя заказ, вы соглашаетесь с
+          <a id="privacy-policy-link" href="#privacy-policy-modal">политикой конфиденциальности</a>
+        </p>
         <button id="order-submit-button" class="btn-order" type="submit">
           <span class="wa-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" role="img" focusable="false">
@@ -221,6 +225,23 @@
         <div id="payment-note" class="payment-note">Оплата временно осуществляется только через удалённую оплату Kaspi. Приносим извинения за неудобства.</div>
         <div id="order-availability-note" class="order-availability-note" hidden></div>
       </form>
+    </div>
+  </div>
+
+  <div id="privacy-policy-modal" class="modal" aria-hidden="true">
+    <div class="modal-content privacy-modal-content">
+      <div class="modal-header">
+        <h2>Политика конфиденциальности</h2>
+        <button id="privacy-policy-close" class="close" type="button" aria-label="Закрыть">×</button>
+      </div>
+      <div class="privacy-policy-shell">
+        <iframe
+          id="privacy-policy-frame"
+          class="privacy-policy-frame"
+          title="Политика конфиденциальности"
+          src="https://docs.google.com/document/d/e/2PACX-1vTErDdnIAiTUUIv110rnRTzsewAFCRuPjciq4DIdA-q-Bp6GCNy8xTpiDb2f3aKaBd7edQXg3bufJ8t/pub?embedded=true"
+        ></iframe>
+      </div>
     </div>
   </div>
 
@@ -319,8 +340,8 @@
   <script src="config.js?v=32"></script>
   <script src="js/app-state.js?v=14"></script>
   <script src="js/app-hero.js?v=4"></script>
-  <script src="js/app-ui.js?v=53"></script>
-  <script src="js/app-main.js?v=23"></script>
+  <script src="js/app-ui.js?v=54"></script>
+  <script src="js/app-main.js?v=24"></script>
   <script>
     const siteLogo = document.querySelector("[data-logo-src-light]");
     if (siteLogo) {
