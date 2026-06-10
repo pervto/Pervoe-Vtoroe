@@ -2954,19 +2954,46 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 }
 
 .privacy-policy-shell {
-  overflow: hidden;
+  max-height: min(72dvh, 720px);
+  overflow: auto;
+  overscroll-behavior: contain;
   border: 1px solid rgba(17, 24, 39, 0.08);
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.96);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+  -webkit-overflow-scrolling: touch;
 }
 
-.privacy-policy-frame {
-  width: 100%;
-  height: min(72dvh, 720px);
-  display: block;
-  border: 0;
-  background: #ffffff;
+.privacy-policy-content {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px 18px 22px;
+}
+
+.privacy-policy-meta {
+  margin: 0 0 18px;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.privacy-policy-section + .privacy-policy-section {
+  margin-top: 18px;
+}
+
+.privacy-policy-section h3 {
+  margin: 0 0 8px;
+  color: #111a2d;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.privacy-policy-section p {
+  margin: 0;
+  color: #24304d;
+  font-size: 15px;
+  line-height: 1.62;
 }
 
 .thanks-modal { display:none; position:fixed; inset:0; z-index:70; background:rgba(8,12,24,.4); padding:calc(16px + var(--safe-top-offset)) 16px 16px; }
@@ -3665,7 +3692,11 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
     width: 100%;
   }
   .order-form h3 { font-size:23px; }
-  .privacy-policy-frame { height: min(68dvh, 640px); }
+  .privacy-policy-shell { max-height: min(68dvh, 640px); }
+  .privacy-policy-content { padding: 18px 16px 20px; }
+  .privacy-policy-meta { font-size: 13px; }
+  .privacy-policy-section h3 { font-size: 17px; }
+  .privacy-policy-section p { font-size: 14px; line-height: 1.58; }
   .btn-order { min-height:54px; }
   .footer-inner {
     flex-direction: column;
@@ -4230,8 +4261,16 @@ html[data-theme="dark"] .dish-modal-copy {
   color: #eef3ff;
 }
 
-html[data-theme="dark"] .privacy-policy-frame {
-  background: #ffffff;
+html[data-theme="dark"] .privacy-policy-meta {
+  color: #96a3bf;
+}
+
+html[data-theme="dark"] .privacy-policy-section h3 {
+  color: #f4f8ff;
+}
+
+html[data-theme="dark"] .privacy-policy-section p {
+  color: #d5dded;
 }
 
 html[data-theme="dark"] .dish-modal-footer {
