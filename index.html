@@ -39,7 +39,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=126" />
+  <link rel="stylesheet" href="style.css?v=127" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -176,7 +176,7 @@
         </div>
       </div>
 
-      <div id="promo-block" class="promo-block is-collapsed">
+      <div id="promo-block" class="promo-block is-collapsed" hidden aria-hidden="true">
         <div class="promo-shell">
           <label id="promo-code-label" class="promo-label" for="promo-code">
             <span id="promo-code-label-compact" class="promo-label-compact">Промокод</span>
@@ -188,6 +188,13 @@
           </div>
         </div>
         <p id="promo-hint" class="promo-hint"></p>
+      </div>
+
+      <div id="delivery-block" class="delivery-block">
+        <div class="delivery-block-top">
+          <span id="delivery-block-label" class="delivery-label">Цена доставки</span>
+          <strong id="delivery-block-amount" class="delivery-amount">0 ₸</strong>
+        </div>
       </div>
 
       <div class="totals-box">
@@ -312,7 +319,7 @@
   <script src="config.js?v=32"></script>
   <script src="js/app-state.js?v=14"></script>
   <script src="js/app-hero.js?v=4"></script>
-  <script src="js/app-ui.js?v=52"></script>
+  <script src="js/app-ui.js?v=53"></script>
   <script src="js/app-main.js?v=23"></script>
   <script>
     const siteLogo = document.querySelector("[data-logo-src-light]");

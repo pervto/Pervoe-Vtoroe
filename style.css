@@ -2607,6 +2607,7 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 }
 
 .utensils-block,
+.delivery-block,
 .promo-block,
 .totals-box {
   margin-top:14px;
@@ -2624,6 +2625,13 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   gap: 12px;
 }
 
+.delivery-block-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .utensils-label {
   color: #3f4c70;
   font-size: 14px;
@@ -2632,7 +2640,23 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   text-transform: uppercase;
 }
 
+.delivery-label {
+  color: #3f4c70;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
 .utensils-amount {
+  color: #111a2d;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.delivery-amount {
   color: #111a2d;
   font-size: 20px;
   font-weight: 900;
@@ -4134,6 +4158,7 @@ html[data-theme="dark"] .modal-header h2,
 html[data-theme="dark"] .cart-item-name,
 html[data-theme="dark"] .cart-item-top strong,
 html[data-theme="dark"] .utensils-amount,
+html[data-theme="dark"] .delivery-amount,
 html[data-theme="dark"] .cart-total-value,
 html[data-theme="dark"] .order-form h3,
 html[data-theme="dark"] .thanks-card h3 {
@@ -4146,6 +4171,7 @@ html[data-theme="dark"] .dish-modal-description.is-empty,
 html[data-theme="dark"] .promo-label,
 html[data-theme="dark"] .promo-hint,
 html[data-theme="dark"] .utensils-label,
+html[data-theme="dark"] .delivery-label,
 html[data-theme="dark"] .totals-row,
 html[data-theme="dark"] .cart-total-label,
 html[data-theme="dark"] .thanks-card p {
@@ -4156,6 +4182,7 @@ html[data-theme="dark"] .dish-modal-tag,
 html[data-theme="dark"] .close,
 html[data-theme="dark"] .cart-item,
 html[data-theme="dark"] .utensils-block,
+html[data-theme="dark"] .delivery-block,
 html[data-theme="dark"] .promo-block,
 html[data-theme="dark"] .totals-box,
 html[data-theme="dark"] .dish-modal-copy {

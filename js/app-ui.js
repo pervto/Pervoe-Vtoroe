@@ -985,14 +985,8 @@ function loadCart() {
 }
 function savePromo() { localStorage.setItem(PROMO_KEY, JSON.stringify(promo)); }
 function loadPromo() {
-  try {
-    const raw = localStorage.getItem(PROMO_KEY);
-    if (!raw) return;
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed.discount === "number") promo = parsed;
-  } catch {
-    promo = { code: "", discount: 0 };
-  }
+  promo = { code: "", discount: 0 };
+  localStorage.removeItem(PROMO_KEY);
 }
 
 function saveUtensilsQty() {
@@ -1057,10 +1051,7 @@ function getCartPricing() {
   const utensilsAmount = cart.length ? normalizedUtensilsQty * normalizedUtensilsUnitPrice : 0;
   const deliveryAmount = cart.length ? normalizedDeliveryPrice : 0;
 
-  let discountAmount = 0;
-  if (promo.discount > 0 && promo.discount < 100) discountAmount = Math.round(subtotal * promo.discount / 100);
-  else discountAmount = Number(promo.discount || 0);
-  discountAmount = Math.min(discountAmount, subtotal);
+  const discountAmount = 0;
 
   const showUtensilsRow = cart.length > 0;
   const showDeliveryRow = cart.length > 0;
@@ -1415,7 +1406,9 @@ function updateCartButton() {
 function updateTotals() {
   const pricing = getCartPricing();
   const totalLabel = document.getElementById("total-label");
+  const deliveryAmountEl = document.getElementById("delivery-block-amount");
   document.getElementById("total-amount").textContent = Number(pricing.finalTotal).toLocaleString(getLocale());
+  if (deliveryAmountEl) deliveryAmountEl.textContent = money(parseMenuNumber(deliveryPrice));
   if (totalLabel) totalLabel.textContent = t("totalFull");
   return pricing;
 }
@@ -1931,9 +1924,8 @@ function createWhatsAppMessage(userName, userPhone, userAddress, orderComment) {
     }
 
     const commentText = orderComment ? `\n${table.waComment}: ${orderComment}` : "";
-    const promoText = promo.code ? `\n${table.waPromo}: ${promo.code}` : "";
 
-    return `${table.waGreeting}\n${table.waIntro}\n${table.waName}: ${userName}\n${table.waPhone}: ${userPhone}\n${table.waAddress}: ${userAddress}${commentText}${promoText}\n${table.waOrder}:\n${lines.join("\n")}\n\n${table.waTotal}: ${money(pricing.finalTotal, lang)}`;
+    return `${table.waGreeting}\n${table.waIntro}\n${table.waName}: ${userName}\n${table.waPhone}: ${userPhone}\n${table.waAddress}: ${userAddress}${commentText}\n${table.waOrder}:\n${lines.join("\n")}\n\n${table.waTotal}: ${money(pricing.finalTotal, lang)}`;
   };
 
   if (currentLanguage === "kk") {
@@ -1982,8 +1974,10 @@ function resetOrderStateAfterSubmit() {
   saveUtensilsQty();
   renderCart();
   updateMenuControls();
-  document.getElementById("promo-code").value = "";
-  document.getElementById("promo-hint").textContent = "";
+  const promoCodeInput = document.getElementById("promo-code");
+  const promoHint = document.getElementById("promo-hint");
+  if (promoCodeInput) promoCodeInput.value = "";
+  if (promoHint) promoHint.textContent = "";
   document.getElementById("order-form").reset();
   updatePromoBlockState();
 }
@@ -2428,6 +2422,7 @@ function applyStaticTranslations() {
   setPlaceholder("#promo-code", t("promoPlaceholder"));
   setText("#promo-apply", t("promoApply"));
   setText("#utensils-label", extraOrderText("utensilsTitle"));
+  setText("#delivery-block-label", extraOrderText("deliveryFee"));
   setText("#total-label", t("totalFull"));
   setText("#order-form-title", t("deliveryTitle"));
   setPlaceholder("#user-name", t("namePlaceholder"));
