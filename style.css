@@ -1739,15 +1739,13 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 }
 
 .status-card--menu-error {
-  place-self: stretch;
-  width: 100vw;
-  max-width: none;
+  place-self: center;
+  width: min(100%, 980px);
+  max-width: 100%;
   min-height: auto;
-  margin-left: calc(50% - 50vw);
+  margin: 0 auto;
   padding: clamp(24px, 4vw, 34px) clamp(18px, 4vw, 36px) clamp(28px, 4vw, 38px);
-  border-left: none;
-  border-right: none;
-  border-radius: 0;
+  border-radius: 28px;
   background:
     linear-gradient(135deg, rgba(255, 248, 248, 0.985), rgba(255, 242, 243, 0.985)),
     linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248, 250, 255, 0.98));
@@ -1757,8 +1755,9 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 }
 
 .status-card-menu-error-shell {
-  width: min(100%, 980px);
-  margin: 0 auto;
+  width: 100%;
+  max-width: 720px;
+  margin: 0;
   display: grid;
   justify-items: start;
   gap: 14px;
@@ -1804,11 +1803,13 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 
 .status-card-title {
   margin: 0;
+  max-width: 100%;
   color: #111a2d;
   font-size: clamp(24px, 3.2vw, 32px);
   line-height: 1.08;
   letter-spacing: -0.03em;
   font-weight: 800;
+  overflow-wrap: anywhere;
 }
 
 .status-card .status {
@@ -1819,22 +1820,29 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
 
 .status-card-copy {
   margin: 0;
-  max-width: min(100%, 60ch);
+  max-width: 100%;
   color: #29354f;
   font-size: 16px;
   line-height: 1.62;
+  overflow-wrap: anywhere;
 }
 
 .status-card-hint {
   margin: -2px 0 2px;
-  max-width: min(100%, 64ch);
+  max-width: 100%;
   color: #68748d;
   font-size: 14px;
   line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.status-card-hint:empty {
+  display: none;
 }
 
 .status-retry-btn {
-  min-width: min(100%, 320px);
+  width: min(100%, 320px);
+  min-width: 0;
   min-height: 58px;
   padding: 14px 26px;
   border: none;
@@ -3213,12 +3221,31 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
     content-visibility: visible;
     contain-intrinsic-size: auto;
   }
+  .status-card--menu-error {
+    width: 100%;
+    padding: 22px 16px 24px;
+    border-radius: 24px;
+  }
   .status-card-menu-error-shell {
     justify-items: center;
     text-align: center;
+    max-width: 100%;
+    gap: 12px;
   }
   .status-card-badge-row {
     justify-content: center;
+  }
+  .status-card-title {
+    font-size: 22px;
+    line-height: 1.12;
+  }
+  .status-card-copy {
+    font-size: 15px;
+    line-height: 1.52;
+  }
+  .status-retry-btn {
+    width: 100%;
+    min-height: 56px;
   }
   body.search-input-active .menu-dock {
     position: fixed;

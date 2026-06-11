@@ -500,6 +500,13 @@ function menuErrorText(key) {
   return table[key] || MENU_ERROR_COPY.ru[key] || "";
 }
 
+MENU_ERROR_COPY.ru.description = "Попробуйте нажать кнопку снизу или обновить страницу сайта.";
+MENU_ERROR_COPY.ru.retryHint = "";
+MENU_ERROR_COPY.kk.description = "Төмендегі батырманы басып көріңіз немесе сайт бетін қайта жаңартыңыз.";
+MENU_ERROR_COPY.kk.retryHint = "";
+MENU_ERROR_COPY.en.description = "Try pressing the button below or refresh the site page.";
+MENU_ERROR_COPY.en.retryHint = "";
+
 function extraOrderText(key, lang = currentLanguage) {
   const table = ORDER_EXTRA_TEXT[lang] || ORDER_EXTRA_TEXT.ru;
   if (key === "promoLabelCompact") {
