@@ -1,11 +1,11 @@
-const SITE_VERSION = "1.49";
+const SITE_VERSION = "1.50";
 const APP_CACHE = `pervoe-vtoroe-app-v${SITE_VERSION}`;
 const DATA_CACHE = "pervoe-vtoroe-data-v2";
 const PHOTO_CACHE = "pervoe-vtoroe-photo-v1";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./style.css?v=133",
+  "./style.css?v=134",
   "./config.js?v=34",
   "./js/app-state.js?v=15",
   "./js/app-hero.js?v=4",
