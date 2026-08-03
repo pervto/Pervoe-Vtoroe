@@ -2978,6 +2978,16 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   padding: 20px 18px 22px;
 }
 
+.privacy-policy-loader {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: #4f5f7b;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
 .privacy-policy-meta {
   margin: 0 0 18px;
   color: #6b7280;
@@ -2997,11 +3007,38 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   line-height: 1.25;
 }
 
-.privacy-policy-section p {
+.privacy-policy-section p,
+.privacy-policy-section ul,
+.privacy-policy-section ol {
   margin: 0;
   color: #24304d;
   font-size: 15px;
   line-height: 1.62;
+}
+
+.privacy-policy-section p {
+  white-space: normal;
+}
+
+.privacy-policy-section p + p,
+.privacy-policy-section p + ul,
+.privacy-policy-section p + ol,
+.privacy-policy-section ul + p,
+.privacy-policy-section ol + p,
+.privacy-policy-section ul + ul,
+.privacy-policy-section ol + ol,
+.privacy-policy-section ul + ol,
+.privacy-policy-section ol + ul {
+  margin-top: 10px;
+}
+
+.privacy-policy-section ul,
+.privacy-policy-section ol {
+  padding-left: 20px;
+}
+
+.privacy-policy-section li + li {
+  margin-top: 6px;
 }
 
 .thanks-modal { display:none; position:fixed; inset:0; z-index:70; background:rgba(8,12,24,.4); padding:calc(16px + var(--safe-top-offset)) 16px 16px; }
@@ -3726,9 +3763,12 @@ body.tomato-over-header:not(.settings-popover-open) .menu-dock {
   }
   .privacy-policy-shell { max-height: min(68dvh, 640px); }
   .privacy-policy-content { padding: 18px 16px 20px; }
+  .privacy-policy-loader { min-height: 160px; font-size: 14px; }
   .privacy-policy-meta { font-size: 13px; }
   .privacy-policy-section h3 { font-size: 17px; }
-  .privacy-policy-section p { font-size: 14px; line-height: 1.58; }
+  .privacy-policy-section p,
+  .privacy-policy-section ul,
+  .privacy-policy-section ol { font-size: 14px; line-height: 1.58; }
   .btn-order { min-height:54px; }
   .footer-inner {
     flex-direction: column;
@@ -4301,7 +4341,10 @@ html[data-theme="dark"] .privacy-policy-section h3 {
   color: #f4f8ff;
 }
 
-html[data-theme="dark"] .privacy-policy-section p {
+html[data-theme="dark"] .privacy-policy-loader,
+html[data-theme="dark"] .privacy-policy-section p,
+html[data-theme="dark"] .privacy-policy-section ul,
+html[data-theme="dark"] .privacy-policy-section ol {
   color: #d5dded;
 }
 

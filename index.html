@@ -39,7 +39,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=131" />
+  <link rel="stylesheet" href="style.css?v=132" />
 </head>
 <body>
   <header id="site-header" class="header">
@@ -235,10 +235,13 @@
         <button id="privacy-policy-close" class="close" type="button" aria-label="Закрыть">×</button>
       </div>
       <div class="privacy-policy-shell">
-        <div class="privacy-policy-content">
+        <div id="privacy-policy-content" class="privacy-policy-content" aria-live="polite">
+          <div class="privacy-policy-loader">Загружаем актуальный текст...</div>
+        </div>
+        <template id="privacy-policy-fallback-template">
           <p class="privacy-policy-meta">
-            Сайт: pervto.github.io/Pervoe-Vtoroe<br />
-            Последнее обновление: июнь 2026 г.
+            Сайт: 1-2.kz<br />
+            Последнее обновление: август 2026 г.
           </p>
 
           <section class="privacy-policy-section">
@@ -270,7 +273,7 @@
             <h3>6. Контакты</h3>
             <p>__________________________________________ (наименование ИП/ТОО)<br />г. Петропавловск, ул. Интернациональная, 67<br />WhatsApp: [ваш номер телефона]</p>
           </section>
-        </div>
+        </template>
       </div>
     </div>
   </div>
@@ -367,11 +370,11 @@
     </div>
   </div>
 
-  <script src="config.js?v=32"></script>
+  <script src="config.js?v=34"></script>
   <script src="js/app-state.js?v=14"></script>
   <script src="js/app-hero.js?v=4"></script>
-  <script src="js/app-ui.js?v=55"></script>
-  <script src="js/app-main.js?v=24"></script>
+  <script src="js/app-ui.js?v=56"></script>
+  <script src="js/app-main.js?v=25"></script>
   <script>
     const siteLogo = document.querySelector("[data-logo-src-light]");
     if (siteLogo) {

@@ -371,6 +371,16 @@ const MENU_SYNC = {
   retryDelayMs: 900
 };
 
+const PRIVACY_POLICY_SYNC = {
+  intervalMs: 30000,
+  focusThrottleMs: 4000,
+  cacheBucketMs: 5000,
+  requestTimeoutMs: 12000,
+  retryAttempts: 3,
+  retryDelayMs: 700
+};
+const PRIVACY_POLICY_CACHE_KEY = "pervoe-vtoroe-privacy-policy-cache-v1";
+
 const MENU_ERROR_COPY = {
   ru: {
     description: "Мы временно не можем получить данные из меню. Обычно помогает повторная загрузка через несколько секунд.",
@@ -472,6 +482,12 @@ let menuLastFullLoadAt = 0;
 let menuLastCsvSnapshot = "";
 let menuLastAvailabilitySnapshot = "";
 const menuFetchInFlight = new Map();
+let privacyPolicySyncTimer = null;
+let privacyPolicyMonitoringStarted = false;
+let privacyPolicyLoadPromise = null;
+let privacyPolicyLastLoadedAt = 0;
+let privacyPolicyCurrentHtml = "";
+let privacyPolicyInitialized = false;
 let backgroundTranslationToken = 0;
 let menuRenderToken = 0;
 let menuRenderItems = [];
@@ -740,6 +756,503 @@ function buildMenuRequestKey(url) {
   } catch {
     return String(url || "").replace(/([?&])_menuSync=[^&]*/g, "$1").replace(/[?&]$/, "");
   }
+}
+
+function getPrivacyPolicyContainer() {
+  return document.getElementById("privacy-policy-content");
+}
+
+function getPrivacyPolicyFallbackTemplate() {
+  return document.getElementById("privacy-policy-fallback-template");
+}
+
+function getPrivacyPolicyFallbackHtml() {
+  const template = getPrivacyPolicyFallbackTemplate();
+  if (!template) return "";
+  return String(template.innerHTML || "").trim();
+}
+
+function getPrivacyPolicyLoadingText() {
+  if (currentLanguage === "kk") return "Kasietti matin janartylyp jatyr...";
+  if (currentLanguage === "en") return "Loading the latest text...";
+  return "\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043c \u0430\u043a\u0442\u0443\u0430\u043b\u044c\u043d\u044b\u0439 \u0442\u0435\u043a\u0441\u0442...";
+}
+
+function getConfiguredPrivacyPolicyUrl() {
+  return String(CONFIG?.privacyPolicyUrl || "").trim();
+}
+
+function buildFreshPrivacyPolicyRequestUrl(url) {
+  try {
+    const nextUrl = new URL(url, window.location.href);
+    nextUrl.searchParams.set("_privacySync", String(Math.floor(Date.now() / PRIVACY_POLICY_SYNC.cacheBucketMs)));
+    return nextUrl.toString();
+  } catch {
+    const separator = String(url).includes("?") ? "&" : "?";
+    return `${url}${separator}_privacySync=${Math.floor(Date.now() / PRIVACY_POLICY_SYNC.cacheBucketMs)}`;
+  }
+}
+
+function getPrivacyPolicyRequestUrls() {
+  const rawUrl = getConfiguredPrivacyPolicyUrl();
+  if (!rawUrl) return [];
+
+  const urls = [];
+
+  try {
+    const parsed = new URL(rawUrl, window.location.href);
+    const host = String(parsed.hostname || "").toLowerCase();
+    const path = String(parsed.pathname || "");
+    const format = String(parsed.searchParams.get("format") || "").toLowerCase();
+    const output = String(parsed.searchParams.get("output") || "").toLowerCase();
+    const isGoogleDoc = host.includes("docs.google.com") && path.includes("/document/");
+    const publishedMatch = path.match(/\/document\/d\/e\/([^/]+)\/pub/i);
+    const docMatch = path.match(/\/document\/d\/([^/]+)/i);
+
+    if (format === "txt" || output === "txt" || format === "html" || output === "html") {
+      urls.push(parsed.toString());
+    }
+
+    if (publishedMatch && publishedMatch[1]) {
+      urls.push(`https://docs.google.com/document/d/e/${publishedMatch[1]}/pub?output=txt`);
+      urls.push(`https://docs.google.com/document/d/e/${publishedMatch[1]}/pub?output=html`);
+    }
+
+    if (docMatch && docMatch[1] && !(publishedMatch && publishedMatch[1])) {
+      urls.push(`https://docs.google.com/document/d/${docMatch[1]}/export?format=txt`);
+      urls.push(`https://docs.google.com/document/d/${docMatch[1]}/export?format=html`);
+    }
+
+    if (!isGoogleDoc) {
+      urls.push(parsed.toString());
+    }
+  } catch {
+    urls.push(rawUrl);
+  }
+
+  return [...new Set(urls.filter(Boolean))];
+}
+
+function loadSavedPrivacyPolicyCache() {
+  try {
+    const configuredUrl = getConfiguredPrivacyPolicyUrl();
+    if (!configuredUrl) return null;
+
+    const raw = localStorage.getItem(PRIVACY_POLICY_CACHE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed.html !== "string" || !parsed.html.trim()) return null;
+
+    const cachedUrl = String(parsed.sourceUrl || "").trim();
+    if (configuredUrl && cachedUrl && cachedUrl !== configuredUrl) return null;
+
+    return {
+      html: parsed.html,
+      loadedAt: Number(parsed.loadedAt) || 0
+    };
+  } catch {
+    return null;
+  }
+}
+
+function savePrivacyPolicyCache(html) {
+  if (!html) return;
+
+  try {
+    localStorage.setItem(PRIVACY_POLICY_CACHE_KEY, JSON.stringify({
+      html,
+      loadedAt: Date.now(),
+      sourceUrl: getConfiguredPrivacyPolicyUrl()
+    }));
+  } catch {}
+}
+
+function renderPrivacyPolicyHtml(html) {
+  const container = getPrivacyPolicyContainer();
+  if (!container) return;
+
+  const nextHtml = String(html || "").trim() || getPrivacyPolicyFallbackHtml();
+  container.innerHTML = nextHtml;
+  privacyPolicyCurrentHtml = container.innerHTML.trim();
+}
+
+function renderPrivacyPolicyLoadingState() {
+  const container = getPrivacyPolicyContainer();
+  if (!container || privacyPolicyCurrentHtml) return;
+
+  container.innerHTML = `<div class="privacy-policy-loader">${escapeHtml(getPrivacyPolicyLoadingText())}</div>`;
+}
+
+function initializePrivacyPolicyContent() {
+  if (privacyPolicyInitialized) return;
+  privacyPolicyInitialized = true;
+
+  const cached = loadSavedPrivacyPolicyCache();
+  if (cached?.html) {
+    privacyPolicyLastLoadedAt = cached.loadedAt;
+    renderPrivacyPolicyHtml(cached.html);
+    return;
+  }
+
+  renderPrivacyPolicyHtml(getPrivacyPolicyFallbackHtml());
+}
+
+function createPrivacyPolicyLoadError(code, message, extra = {}) {
+  const error = new Error(message);
+  error.code = code;
+  Object.assign(error, extra);
+  return error;
+}
+
+function shouldRetryPrivacyPolicyLoad(error) {
+  const code = String(error?.code || "");
+  return code === "timeout" || code === "network" || code === "empty_response" || code === "http_429" || code.startsWith("http_5");
+}
+
+function isPrivacyPolicyHtmlResponse(url, contentType) {
+  const normalizedUrl = String(url || "").toLowerCase();
+  const normalizedType = String(contentType || "").toLowerCase();
+
+  return normalizedType.includes("text/html") ||
+    normalizedUrl.includes("format=html") ||
+    normalizedUrl.includes("output=html");
+}
+
+function collectPrivacyPolicyNodeText(node) {
+  if (!node) return "";
+
+  if (node.nodeType === Node.TEXT_NODE) {
+    return node.textContent || "";
+  }
+
+  if (node.nodeType !== Node.ELEMENT_NODE) {
+    return "";
+  }
+
+  if (node.tagName === "BR") {
+    return "\n";
+  }
+
+  let text = "";
+  node.childNodes.forEach((childNode) => {
+    text += collectPrivacyPolicyNodeText(childNode);
+  });
+
+  return text;
+}
+
+function extractPrivacyPolicyTextFromHtmlDocument(markup) {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(markup, "text/html");
+    const root = doc.body;
+    if (!root) return "";
+
+    root.querySelectorAll("script, style, noscript").forEach((node) => node.remove());
+
+    const blocks = [];
+    root.querySelectorAll("h1, h2, h3, h4, h5, h6, p, li").forEach((node) => {
+      const text = normalizePrivacyPolicyText(collectPrivacyPolicyNodeText(node));
+      if (text) blocks.push(text);
+    });
+
+    if (blocks.length) {
+      return blocks.join("\n\n");
+    }
+
+    return normalizePrivacyPolicyText(root.innerText || root.textContent || "");
+  } catch {
+    return "";
+  }
+}
+
+async function fetchPrivacyPolicyTextFromUrl(url) {
+  const controller = typeof AbortController === "function" ? new AbortController() : null;
+  const timeoutId = controller
+    ? setTimeout(() => controller.abort(), PRIVACY_POLICY_SYNC.requestTimeoutMs)
+    : null;
+
+  try {
+    const response = await fetch(buildFreshPrivacyPolicyRequestUrl(url), {
+      cache: "no-store",
+      signal: controller?.signal
+    });
+
+    if (!response.ok) {
+      throw createPrivacyPolicyLoadError(`http_${response.status}`, `Privacy policy request failed with status ${response.status}`, {
+        status: response.status,
+        url
+      });
+    }
+
+    const rawText = await response.text();
+    const contentType = response.headers.get("content-type") || "";
+    const nextText = isPrivacyPolicyHtmlResponse(response.url || url, contentType)
+      ? extractPrivacyPolicyTextFromHtmlDocument(rawText)
+      : rawText;
+    const normalizedText = normalizePrivacyPolicyText(nextText);
+
+    if (!normalizedText) {
+      throw createPrivacyPolicyLoadError("empty_response", "Privacy policy response is empty", { url });
+    }
+
+    return normalizedText;
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw createPrivacyPolicyLoadError("timeout", "Privacy policy request timed out", { url });
+    }
+
+    if (error?.code) {
+      throw error;
+    }
+
+    throw createPrivacyPolicyLoadError("network", "Privacy policy request failed", {
+      cause: error,
+      url
+    });
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+}
+
+async function fetchPrivacyPolicyText() {
+  const urls = getPrivacyPolicyRequestUrls();
+  if (!urls.length) {
+    throw createPrivacyPolicyLoadError("missing_url", "Privacy policy url is not configured");
+  }
+
+  let lastError = null;
+
+  for (const url of urls) {
+    for (let attempt = 1; attempt <= PRIVACY_POLICY_SYNC.retryAttempts; attempt += 1) {
+      try {
+        return await fetchPrivacyPolicyTextFromUrl(url);
+      } catch (error) {
+        lastError = error;
+
+        if (attempt >= PRIVACY_POLICY_SYNC.retryAttempts || !shouldRetryPrivacyPolicyLoad(error)) {
+          break;
+        }
+
+        await wait(PRIVACY_POLICY_SYNC.retryDelayMs * attempt);
+      }
+    }
+  }
+
+  throw lastError || createPrivacyPolicyLoadError("network", "Privacy policy request failed");
+}
+
+function normalizePrivacyPolicyText(text) {
+  return String(text || "")
+    .replace(/\uFEFF/g, "")
+    .replace(/\r\n?/g, "\n")
+    .replace(/\u00A0/g, " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function splitPrivacyPolicyBlocks(text) {
+  return normalizePrivacyPolicyText(text)
+    .split(/\n{2,}/)
+    .map((block) => block.split("\n").map((line) => line.trim()).join("\n").trim())
+    .filter(Boolean);
+}
+
+function isPrivacyPolicyTitleBlock(block) {
+  const normalized = normalizeMenuHeader(block).replace(/[.!?]+$/g, "");
+  return normalized === "политика конфиденциальности" || normalized === "privacy policy";
+}
+
+function shouldTreatPrivacyPolicyBlockAsMeta(block) {
+  const lines = String(block || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (!lines.length || lines.length > 4) return false;
+
+  return lines.some((line) => /^(сайт|site|последнее обновление|last updated|updated)\s*:/i.test(line));
+}
+
+function isPrivacyPolicyHeading(block) {
+  const line = String(block || "").trim();
+  if (!line || line.includes("\n") || line.length > 140) return false;
+
+  return /^\d+([.)]\d+)*[.)]?\s+\S+/.test(line) || /:$/.test(line);
+}
+
+function buildPrivacyPolicyLinesHtml(text) {
+  return String(text || "")
+    .split("\n")
+    .map((line) => escapeHtml(line))
+    .join("<br />");
+}
+
+function buildPrivacyPolicyBlockHtml(block) {
+  const lines = String(block || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (!lines.length) return "";
+
+  const isBulletList = lines.length > 1 && lines.every((line) => /^[-*•]\s+/.test(line));
+  if (isBulletList) {
+    return `<ul>${lines.map((line) => `<li>${escapeHtml(line.replace(/^[-*•]\s+/, ""))}</li>`).join("")}</ul>`;
+  }
+
+  const isOrderedList = lines.length > 1 && lines.every((line) => /^\d+[.)]\s+/.test(line));
+  if (isOrderedList) {
+    return `<ol>${lines.map((line) => `<li>${escapeHtml(line.replace(/^\d+[.)]\s+/, ""))}</li>`).join("")}</ol>`;
+  }
+
+  return `<p>${buildPrivacyPolicyLinesHtml(block)}</p>`;
+}
+
+function buildPrivacyPolicyHtmlFromText(text) {
+  const blocks = splitPrivacyPolicyBlocks(text);
+  if (!blocks.length) {
+    return getPrivacyPolicyFallbackHtml();
+  }
+
+  const workingBlocks = blocks.slice();
+  if (isPrivacyPolicyTitleBlock(workingBlocks[0])) {
+    workingBlocks.shift();
+  }
+
+  let metaHtml = "";
+  if (workingBlocks.length && shouldTreatPrivacyPolicyBlockAsMeta(workingBlocks[0])) {
+    metaHtml = `<p class="privacy-policy-meta">${buildPrivacyPolicyLinesHtml(workingBlocks.shift())}</p>`;
+  }
+
+  const sections = [];
+  let currentSection = null;
+
+  workingBlocks.forEach((block) => {
+    if (isPrivacyPolicyHeading(block)) {
+      if (currentSection) sections.push(currentSection);
+      currentSection = {
+        title: block.trim(),
+        blocks: []
+      };
+      return;
+    }
+
+    if (!currentSection) {
+      currentSection = {
+        title: "",
+        blocks: []
+      };
+    }
+
+    currentSection.blocks.push(block);
+  });
+
+  if (currentSection) {
+    sections.push(currentSection);
+  }
+
+  const sectionsHtml = sections
+    .map((section) => {
+      const titleHtml = section.title ? `<h3>${escapeHtml(section.title)}</h3>` : "";
+      const blocksHtml = section.blocks.map((block) => buildPrivacyPolicyBlockHtml(block)).join("");
+
+      if (!titleHtml && !blocksHtml) return "";
+      return `<section class="privacy-policy-section">${titleHtml}${blocksHtml}</section>`;
+    })
+    .filter(Boolean)
+    .join("");
+
+  if (!sectionsHtml) {
+    const plainHtml = workingBlocks.map((block) => buildPrivacyPolicyBlockHtml(block)).join("");
+    return `${metaHtml}<section class="privacy-policy-section">${plainHtml}</section>`;
+  }
+
+  return `${metaHtml}${sectionsHtml}`;
+}
+
+async function refreshPrivacyPolicy(options = {}) {
+  initializePrivacyPolicyContent();
+
+  const configuredUrl = getConfiguredPrivacyPolicyUrl();
+  if (!configuredUrl) {
+    if (!privacyPolicyCurrentHtml) {
+      renderPrivacyPolicyHtml(getPrivacyPolicyFallbackHtml());
+    }
+    return false;
+  }
+
+  const force = options.force === true;
+  const now = Date.now();
+
+  if (!force && privacyPolicyLastLoadedAt && now - privacyPolicyLastLoadedAt < PRIVACY_POLICY_SYNC.focusThrottleMs) {
+    return true;
+  }
+
+  if (privacyPolicyLoadPromise) {
+    return privacyPolicyLoadPromise;
+  }
+
+  if (!privacyPolicyCurrentHtml) {
+    renderPrivacyPolicyLoadingState();
+  }
+
+  privacyPolicyLoadPromise = (async () => {
+    try {
+      const text = await fetchPrivacyPolicyText();
+      const html = buildPrivacyPolicyHtmlFromText(text);
+
+      renderPrivacyPolicyHtml(html);
+      savePrivacyPolicyCache(html);
+      privacyPolicyLastLoadedAt = Date.now();
+      return true;
+    } catch {
+      if (!privacyPolicyCurrentHtml) {
+        renderPrivacyPolicyHtml(getPrivacyPolicyFallbackHtml());
+      }
+      return false;
+    } finally {
+      privacyPolicyLoadPromise = null;
+    }
+  })();
+
+  return privacyPolicyLoadPromise;
+}
+
+function handlePrivacyPolicyRefreshTrigger(force = false) {
+  if (!getConfiguredPrivacyPolicyUrl()) return;
+  if (document.visibilityState === "hidden") return;
+
+  refreshPrivacyPolicy({ force }).catch(() => {});
+}
+
+function startPrivacyPolicySyncMonitoring() {
+  if (privacyPolicyMonitoringStarted) return;
+  privacyPolicyMonitoringStarted = true;
+
+  if (privacyPolicySyncTimer) {
+    clearInterval(privacyPolicySyncTimer);
+  }
+
+  privacyPolicySyncTimer = setInterval(() => {
+    handlePrivacyPolicyRefreshTrigger(false);
+  }, PRIVACY_POLICY_SYNC.intervalMs);
+
+  window.addEventListener("focus", () => {
+    handlePrivacyPolicyRefreshTrigger(false);
+  });
+
+  window.addEventListener("pageshow", () => {
+    handlePrivacyPolicyRefreshTrigger(false);
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      handlePrivacyPolicyRefreshTrigger(false);
+    }
+  });
 }
 
 function wait(ms) {
@@ -1291,7 +1804,9 @@ function closeCart() {
 }
 
 function openPrivacyPolicy() {
+  initializePrivacyPolicyContent();
   openOverlay(document.getElementById("privacy-policy-modal"));
+  refreshPrivacyPolicy({ force: true }).catch(() => {});
 }
 
 function closePrivacyPolicy() {

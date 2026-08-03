@@ -2,6 +2,12 @@
   // Номер WhatsApp без символа +
   whatsappNumber: "77785574506",
 
+  // Ссылка на Google Документ с текстом политики конфиденциальности.
+  // Документ должен открываться по ссылке без запроса доступа.
+  // Пример:
+  // https://docs.google.com/document/d/ВАШ_ID/edit?usp=sharing
+  privacyPolicyUrl: "https://docs.google.com/document/d/e/2PACX-1vTErDdnIAiTUUIv110rnRTzsewAFCRuPjciq4DIdA-q-Bp6GCNy8xTpiDb2f3aKaBd7edQXg3bufJ8t/pub",
+
   // Публичная CSV-ссылка из Google Sheets
   // Пример:
   // https://docs.google.com/spreadsheets/d/e/ВАШ_ID/pub?output=csv
