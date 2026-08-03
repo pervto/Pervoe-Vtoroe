@@ -2942,6 +2942,8 @@ function applyStaticTranslations() {
   setAriaLabel("#search-clear", t("searchClearAria"));
   setText("#menu-loading-text", t("loadingMenu"));
 
+  setText("#footer-delivery-note", t("footerDeliveryNote"));
+  setText("#footer-delivery-time", t("footerDeliveryHours"));
   setText("#address-link", t("address"));
   setText("#review-link-text", t("footerReview"));
   setText("#thanks-review-text", t("footerReview"));
